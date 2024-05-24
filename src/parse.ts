@@ -2,7 +2,7 @@ import { METHODS } from "http";
 import { URL } from "url";
 import querystring, { ParsedUrlQuery } from "querystring";
 import * as Router from "find-my-way-ts";
-import { Model } from "./spec";
+import { Model } from "./es_spec";
 
 type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
