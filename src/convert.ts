@@ -1,8 +1,7 @@
 type ConvertOptions = {
-  source: string,
-  outputFormat: string,
-  checkOnly?: string,
-  
+  source: string;
+  outputFormat: string;
+  checkOnly?: string;
 };
 
 export function convertRequest(options: ConvertOptions): boolean | string {
@@ -10,5 +9,5 @@ export function convertRequest(options: ConvertOptions): boolean | string {
     return true;
   }
 
-  return 'converted request'
+  return "converted request";
 }
