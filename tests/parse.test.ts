@@ -12,10 +12,12 @@ describe("parse", () => {
   });
 
   it("parses search GET request", async () => {
-    const req = await parseRequest("GET /my-index/_search?size=5&expand_wildcards");
+    const req = await parseRequest(
+      "GET /my-index/_search?size=5&expand_wildcards",
+    );
     expect(req).toEqual({
       api: "search",
-      params: {index: 'my-index'},
+      params: { index: "my-index" },
       method: "GET",
       url: "/my-index/_search",
       query: { size: "5", expand_wildcards: "true" },
@@ -30,7 +32,7 @@ describe("parse", () => {
 `);
     expect(req).toEqual({
       api: "search",
-      params: {index: 'my-index'},
+      params: { index: "my-index" },
       method: "POST",
       url: "/my-index/_search",
       body: { size: 5 },
@@ -80,39 +82,39 @@ POST _nodes/reload_secure_settings\n{\n  "reload_secure_settings": "s3cr3t" <1>\
 GET my_index/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Foxes."\n}
 
 POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n{\n  "description": "Snapshot 1",\n  "retain": true\n}
-`)
+`);
     expect(reqs.length).toEqual(12);
     expect(reqs[0]).toEqual({
       api: "index",
-      params: {index: 'customer', id: '1'},
+      params: { index: "customer", id: "1" },
       method: "PUT",
       url: "/customer/_doc/1",
-      query: {foo: "bar"},
-      body: {name: "John Doe"},
+      query: { foo: "bar" },
+      body: { name: "John Doe" },
     });
     expect(reqs[1]).toEqual({
       api: "get",
-      params: {index: 'customer', id: '1'},
-      method: 'GET',
+      params: { index: "customer", id: "1" },
+      method: "GET",
       url: "/customer/_doc/1",
     });
     expect(reqs[2]).toEqual({
       api: "get",
-      params: {index: "customer", id: "1"},
+      params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
-      query: {foo: "bar", "v": "true"},
+      query: { foo: "bar", v: "true" },
     });
     expect(reqs[3]).toEqual({
       api: "index",
-      params: {index: "customer", id: "1"},
+      params: { index: "customer", id: "1" },
       method: "PUT",
       url: "/customer/_doc/1",
-      body: {foo: {bar: "GET{POST}"}},
+      body: { foo: { bar: "GET{POST}" } },
     });
     expect(reqs[4]).toEqual({
       api: "get",
-      params: {index: "customer", id: "1"},
+      params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
     });
@@ -121,19 +123,15 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       params: {},
       method: "POST",
       url: "/_bulk",
-      query: {foo: "bar"},
-      body: [
-        {name: "John Doe"},
-        {name: "John Doe"},
-        {name: "John Doe"},
-      ],
+      query: { foo: "bar" },
+      body: [{ name: "John Doe" }, { name: "John Doe" }, { name: "John Doe" }],
     });
     expect(reqs[6]).toEqual({
       api: "bulk",
       params: {},
       method: "POST",
       url: "/_bulk",
-      query: {foo: "bar"},
+      query: { foo: "bar" },
       body: '\n{ "name": "John\nDoe" }\n{ "name": "John\nDoe" }\n{ "name": "John\nDoe" }',
     });
     expect(reqs[7]).toEqual({
@@ -141,16 +139,16 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       params: {},
       method: "POST",
       url: "/_bulk",
-      query: {foo: "bar"},
+      query: { foo: "bar" },
       body: [
-        {name: "John\nDoe"},
-        {name: "John\nDoe"},
-        {name: "John\nDoe"},
+        { name: "John\nDoe" },
+        { name: "John\nDoe" },
+        { name: "John\nDoe" },
       ],
     });
     expect(reqs[8]).toEqual({
       api: "get",
-      params: {index: "customer", id: "1"},
+      params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
     });
@@ -159,33 +157,35 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       params: {},
       method: "POST",
       url: "/_nodes/reload_secure_settings",
-      body: {reload_secure_settings: "s3cr3t"},
+      body: { reload_secure_settings: "s3cr3t" },
     });
     expect(reqs[10]).toEqual({
       api: "indices.analyze",
-      params: {index: "my_index"},
+      params: { index: "my_index" },
       method: "GET",
       url: "/my_index/_analyze",
-      body: {field: "text", text: "The quick Brown Foxes."},
+      body: { field: "text", text: "The quick Brown Foxes." },
     });
     expect(reqs[11]).toEqual({
       api: "ml.update_model_snapshot",
-      params: {job_id: "it_ops_new_logs", snapshot_id: "1491852978"},
+      params: { job_id: "it_ops_new_logs", snapshot_id: "1491852978" },
       method: "POST",
       url: "/_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
-      body: {description: "Snapshot 1", retain: true},
+      body: { description: "Snapshot 1", retain: true },
     });
   });
 
-  it('parses bodies with triple quotes', async () => {
+  it("parses bodies with triple quotes", async () => {
     const req = await parseRequest(`POST /_search
 {
   "foo": """{"bar": "baz"}"""
 }`);
-    expect(req.body).toEqual({foo: "{\"bar\": \"baz\"}"});
+    expect(req.body).toEqual({ foo: '{"bar": "baz"}' });
   });
 
-  it('errors with unknown URLs', async () => {
-    expect(async () => await parseRequest(`GET /my-index/invalid`)).rejects.toThrowError('There is no handler');
+  it("errors with unknown URLs", async () => {
+    expect(
+      async () => await parseRequest(`GET /my-index/invalid`),
+    ).rejects.toThrowError("There is no handler");
   });
 });

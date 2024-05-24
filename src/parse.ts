@@ -2,7 +2,7 @@ import { METHODS } from "http";
 import { URL } from "url";
 import querystring, { ParsedUrlQuery } from "querystring";
 import * as Router from "find-my-way-ts";
-import { Model } from './metamodel';
+import { Model } from "./spec";
 
 type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
@@ -19,7 +19,8 @@ export type ParsedRequest = {
   body?: JSONObject | JSONObject[] | string;
 };
 
-const SPEC_URL = "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json";
+const SPEC_URL =
+  "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json";
 const router = Router.make<string>({
   ignoreTrailingSlash: true,
   maxParamLength: 1000,
@@ -185,8 +186,11 @@ function parseCommand(source: string) {
 }
 
 // use a router to figure out the API name
-async function getAPI(method: string, url: string): Promise<Router.FindResult<string>> {
-  if (!router.has('GET', '/')) {
+async function getAPI(
+  method: string,
+  url: string,
+): Promise<Router.FindResult<string>> {
+  if (!router.has("GET", "/")) {
     // download the Elasticsearch spec
     const r = await fetch(SPEC_URL);
     const spec = (await r.json()) as Model;
@@ -194,16 +198,16 @@ async function getAPI(method: string, url: string): Promise<Router.FindResult<st
       for (const url of endpoint.urls) {
         const { path, methods } = url;
         let formattedPath = path
-          .split('/')
-          .map(p => p.startsWith('{') ? `:${p.slice(1, -1)}` : p)
-          .join('/')
+          .split("/")
+          .map((p) => (p.startsWith("{") ? `:${p.slice(1, -1)}` : p))
+          .join("/");
         /* istanbul ignore next */
-        if (!formattedPath.startsWith('/')) {
-          formattedPath = '/' + formattedPath
+        if (!formattedPath.startsWith("/")) {
+          formattedPath = "/" + formattedPath;
         }
 
         try {
-          router.on(methods, formattedPath as Router.PathInput, endpoint.name)
+          router.on(methods, formattedPath as Router.PathInput, endpoint.name);
         } catch (err) {
           // in some cases there are routes that have the same url but different
           // dynamic parameters, which causes find-my-way to fail
@@ -223,7 +227,9 @@ async function getAPI(method: string, url: string): Promise<Router.FindResult<st
   const route = router.find(method, formattedUrl);
   if (!route) {
     /* istanbul ignore next */
-    throw new Error(`There is no handler method '${method}' and url '${formattedUrl}'`);
+    throw new Error(
+      `There is no handler method '${method}' and url '${formattedUrl}'`,
+    );
   }
   return route;
 }
@@ -241,5 +247,5 @@ export async function parseRequest(source: string): Promise<ParsedRequest> {
 
 export async function parseRequests(source: string): Promise<ParsedRequest[]> {
   const sources = splitter(source);
-  return await Promise.all(sources.map(source => parseRequest(source)));
+  return await Promise.all(sources.map((source) => parseRequest(source)));
 }

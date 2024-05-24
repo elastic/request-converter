@@ -6,10 +6,10 @@
   "license": "Apache-2.0",
   "type": "commonjs",
   "scripts": {
-    "test": "npm run build && npm run lint && npm run prettier && jest --coverage",
     "build": "tsc",
     "lint": "eslint src tests",
     "prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --list-different",
+    "test": "jest --coverage",
     "fix": "npm run fix:lint && npm run fix:prettier",
     "fix:lint": "eslint src tests --fix",
     "fix:prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --write",
