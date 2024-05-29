@@ -13,7 +13,8 @@ GET /my-index/_search?from=40&size=20
 
 describe("convert", () => {
   it("checks for python", async () => {
-    expect(await convertRequests(devConsoleScript, "python", {
+    expect(
+      await convertRequests(devConsoleScript, "python", {
         checkOnly: true,
       }),
     ).toBeTruthy();
@@ -34,14 +35,16 @@ resp1 = client.search(
     },
 )
 
-`
+`,
     );
   });
 
   it("converts to python and prints the response", async () => {
-    expect(await convertRequests(devConsoleScript, "python", {
-      printResponse: true,
-    })).toEqual(
+    expect(
+      await convertRequests(devConsoleScript, "python", {
+        printResponse: true,
+      }),
+    ).toEqual(
       `resp = client.info()
 print(resp)
 
@@ -57,12 +60,13 @@ resp1 = client.search(
 )
 print(resp1)
 
-`
+`,
     );
   });
 
   it("converts to a complete python script", async () => {
-    expect(await convertRequests(devConsoleScript, "python", {
+    expect(
+      await convertRequests(devConsoleScript, "python", {
         complete: true,
         elasticsearchUrl: "https://localhost:9999",
       }),
@@ -87,7 +91,7 @@ resp1 = client.search(
     },
 )
 
-`
+`,
     );
   });
 });
