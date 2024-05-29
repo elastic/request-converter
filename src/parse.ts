@@ -228,7 +228,7 @@ async function getAPI(
   if (!route) {
     /* istanbul ignore next */
     throw new Error(
-      `There is no handler method '${method}' and url '${formattedUrl}'`,
+      `There is no handler for method '${method}' and url '${formattedUrl}'`,
     );
   }
   return route;

@@ -1,2 +1,2 @@
-export { convertRequest } from "./convert";
+export { convertRequests } from "./convert";
 export { ParsedRequest, parseRequest } from "./parse";
