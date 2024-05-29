@@ -10,6 +10,7 @@ export class JavaScriptExporter implements FormatExporter {
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
+    console.log(requests, options);
     return "foojs";
   }
 }
