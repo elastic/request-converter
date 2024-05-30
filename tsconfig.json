@@ -1,12 +1,13 @@
 {
   "compilerOptions": {
     "module": "commonjs",
-    "target": "es2019",
+    "target": "es2021",
     "moduleResolution": "node",
     "declaration": true,
     "esModuleInterop": true,
+    "strictPropertyInitialization": false,
     "strict": true,
-    "rootDir": "src",
+    "rootDir": "./src",
     "outDir": "./dist"
   },
   "include": [

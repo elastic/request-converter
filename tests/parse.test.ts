@@ -3,7 +3,7 @@ import { parseRequest, parseRequests } from "../src/parse";
 describe("parse", () => {
   it("parses info GET request", async () => {
     const req = await parseRequest("GET /");
-    expect(req).toEqual({
+    expect(req).toMatchObject({
       api: "info",
       params: {},
       method: "GET",
@@ -15,7 +15,7 @@ describe("parse", () => {
     const req = await parseRequest(
       "GET /my-index/_search?size=5&expand_wildcards",
     );
-    expect(req).toEqual({
+    expect(req).toMatchObject({
       api: "search",
       params: { index: "my-index" },
       method: "GET",
@@ -30,7 +30,7 @@ describe("parse", () => {
   "size": 5
 }
 `);
-    expect(req).toEqual({
+    expect(req).toMatchObject({
       api: "search",
       params: { index: "my-index" },
       method: "POST",
@@ -84,7 +84,7 @@ GET my_index/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Fox
 POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n{\n  "description": "Snapshot 1",\n  "retain": true\n}
 `);
     expect(reqs.length).toEqual(12);
-    expect(reqs[0]).toEqual({
+    expect(reqs[0]).toMatchObject({
       api: "index",
       params: { index: "customer", id: "1" },
       method: "PUT",
@@ -92,33 +92,33 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       query: { foo: "bar" },
       body: { name: "John Doe" },
     });
-    expect(reqs[1]).toEqual({
+    expect(reqs[1]).toMatchObject({
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
     });
-    expect(reqs[2]).toEqual({
+    expect(reqs[2]).toMatchObject({
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
       query: { foo: "bar", v: "true" },
     });
-    expect(reqs[3]).toEqual({
+    expect(reqs[3]).toMatchObject({
       api: "index",
       params: { index: "customer", id: "1" },
       method: "PUT",
       url: "/customer/_doc/1",
       body: { foo: { bar: "GET{POST}" } },
     });
-    expect(reqs[4]).toEqual({
+    expect(reqs[4]).toMatchObject({
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
     });
-    expect(reqs[5]).toEqual({
+    expect(reqs[5]).toMatchObject({
       api: "bulk",
       params: {},
       method: "POST",
@@ -126,7 +126,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       query: { foo: "bar" },
       body: [{ name: "John Doe" }, { name: "John Doe" }, { name: "John Doe" }],
     });
-    expect(reqs[6]).toEqual({
+    expect(reqs[6]).toMatchObject({
       api: "bulk",
       params: {},
       method: "POST",
@@ -134,7 +134,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       query: { foo: "bar" },
       body: '\n{ "name": "John\nDoe" }\n{ "name": "John\nDoe" }\n{ "name": "John\nDoe" }',
     });
-    expect(reqs[7]).toEqual({
+    expect(reqs[7]).toMatchObject({
       api: "bulk",
       params: {},
       method: "POST",
@@ -146,27 +146,27 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
         { name: "John\nDoe" },
       ],
     });
-    expect(reqs[8]).toEqual({
+    expect(reqs[8]).toMatchObject({
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
     });
-    expect(reqs[9]).toEqual({
+    expect(reqs[9]).toMatchObject({
       api: "nodes.reload_secure_settings",
       params: {},
       method: "POST",
       url: "/_nodes/reload_secure_settings",
       body: { reload_secure_settings: "s3cr3t" },
     });
-    expect(reqs[10]).toEqual({
+    expect(reqs[10]).toMatchObject({
       api: "indices.analyze",
       params: { index: "my_index" },
       method: "GET",
       url: "/my_index/_analyze",
       body: { field: "text", text: "The quick Brown Foxes." },
     });
-    expect(reqs[11]).toEqual({
+    expect(reqs[11]).toMatchObject({
       api: "ml.update_model_snapshot",
       params: { job_id: "it_ops_new_logs", snapshot_id: "1491852978" },
       method: "POST",
@@ -180,7 +180,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
 {
   "foo": """{"bar": "baz"}"""
 }`);
-    expect(req.body).toEqual({ foo: '{"bar": "baz"}' });
+    expect(req.body).toMatchObject({ foo: '{"bar": "baz"}' });
   });
 
   it("errors with unknown URLs", async () => {

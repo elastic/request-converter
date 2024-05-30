@@ -2,9 +2,9 @@ import { METHODS } from "http";
 import { URL } from "url";
 import querystring, { ParsedUrlQuery } from "querystring";
 import * as Router from "find-my-way-ts";
-import { Model } from "./es_spec";
+import { Model, Request, Body } from "./metamodel"; //"./es_spec";
 
-type JSONValue = string | number | boolean | JSONArray | JSONObject;
+export type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
 interface JSONObject {
   [x: string]: JSONValue;
@@ -12,6 +12,7 @@ interface JSONObject {
 
 export type ParsedRequest = {
   api?: string;
+  request?: Body;
   params: { [x: string]: string | undefined };
   method: string;
   url: string;
@@ -19,15 +20,20 @@ export type ParsedRequest = {
   body?: JSONObject | JSONObject[] | string;
 };
 
+type ESRoute = {
+  name: string;
+  body: Body;
+};
+
 const SPEC_URL =
   "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json";
-const router = Router.make<string>({
+const router = Router.make<ESRoute>({
   ignoreTrailingSlash: true,
   maxParamLength: 1000,
 });
 
 // split Dev Console source code into individual commands
-function splitter(source: string): string[] {
+export function splitSource(source: string): string[] {
   source = source.replace(/^#.*$/gm, "\n"); // remove comments
   source = source.trim();
   const len = source.length;
@@ -120,7 +126,8 @@ function parseCommand(source: string) {
   const url = new URL(
     `http://localhost${urlPart[0] != "/" ? "/" + urlPart : urlPart}`,
   );
-  data.url = url.pathname;
+  data.url =
+    url.pathname != "/" ? url.pathname.replace(/\/$/, "") : url.pathname;
 
   if (url.search.length) {
     data.query = querystring.parse(url.search.slice(1));
@@ -129,6 +136,13 @@ function parseCommand(source: string) {
         data.query[q] = "true";
       }
     }
+  }
+
+  // TODO: this should be an issue in the docs,
+  // the correct url is `<index/_mapping`
+  /* istanbul ignore next */
+  if (data.url.endsWith("_mappings")) {
+    data.url = data.url.slice(0, -1);
   }
 
   // identify the body
@@ -189,7 +203,7 @@ function parseCommand(source: string) {
 async function getAPI(
   method: string,
   url: string,
-): Promise<Router.FindResult<string>> {
+): Promise<Router.FindResult<ESRoute>> {
   if (!router.has("GET", "/")) {
     // download the Elasticsearch spec
     const r = await fetch(SPEC_URL);
@@ -207,7 +221,24 @@ async function getAPI(
         }
 
         try {
-          router.on(methods, formattedPath as Router.PathInput, endpoint.name);
+          let body: Body | undefined;
+          for (const type of spec.types) {
+            if (
+              type.name.namespace == endpoint.request?.namespace &&
+              type.name.name == endpoint.request?.name
+            ) {
+              if (type.kind != "request") {
+                console.log("warning!");
+              }
+              body = (type as Request).body;
+              break;
+            }
+          }
+          const r = {
+            name: endpoint.name,
+            body: body as Body,
+          };
+          router.on(methods, formattedPath as Router.PathInput, r);
         } catch (err) {
           // in some cases there are routes that have the same url but different
           // dynamic parameters, which causes find-my-way to fail
@@ -217,12 +248,6 @@ async function getAPI(
     }
   }
 
-  // TODO: this should be an issue in the docs,
-  // the correct url is `<index/_mapping`
-  /* istanbul ignore next */
-  if (url.endsWith("_mappings")) {
-    url = url.slice(0, -1);
-  }
   const formattedUrl = url.startsWith("/") ? url : `/${url}`;
   const route = router.find(method, formattedUrl);
   if (!route) {
@@ -238,7 +263,8 @@ export async function parseRequest(source: string): Promise<ParsedRequest> {
   source = source.replace(/^\s+|\s+$/g, ""); // trim whitespace
   const req = parseCommand(source);
   const route = await getAPI(req.method, req.url);
-  req.api = route.handler;
+  req.api = route.handler.name;
+  req.request = route.handler.body;
   if (Object.keys(route.params).length > 0) {
     req.params = route.params;
   }
@@ -246,6 +272,6 @@ export async function parseRequest(source: string): Promise<ParsedRequest> {
 }
 
 export async function parseRequests(source: string): Promise<ParsedRequest[]> {
-  const sources = splitter(source);
+  const sources = splitSource(source);
   return await Promise.all(sources.map((source) => parseRequest(source)));
 }

@@ -4,6 +4,15 @@ import Handlebars from "handlebars";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 
+const PYCONSTANTS: Record<string, string> = {
+  true: "True",
+  false: "False",
+  null: "None",
+  '"true"': "True",
+  '"false"': "False",
+  '"null"': "None",
+};
+
 export class PythonExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
 
@@ -20,13 +29,26 @@ export class PythonExporter implements FormatExporter {
 
   async getTemplate(): Promise<Handlebars.TemplateDelegate> {
     if (!this.template) {
-      // custom JSON-style renderer
-      Handlebars.registerHelper("json", (context) => {
+      // custom data renderer for Python
+      Handlebars.registerHelper("pyprint", (context) => {
         const lines = JSON.stringify(context, null, 4).split(/\r?\n/);
         for (let i = 1; i < lines.length; i++) {
           lines[i] = "    " + lines[i];
         }
-        return lines.join("\n");
+        if (lines.length > 1) {
+          return lines
+            .join("\n")
+            .replaceAll("null,\n", "None,\n")
+            .replaceAll("null\n", "None\n")
+            .replaceAll("true,\n", "True,\n")
+            .replaceAll("true\n", "True\n")
+            .replaceAll("false,\n", "False,\n")
+            .replaceAll("false\n", "False\n");
+        } else if (PYCONSTANTS[lines[0]]) {
+          return PYCONSTANTS[lines[0]];
+        } else {
+          return lines[0];
+        }
       });
 
       // custom aliased word renderer
@@ -46,19 +68,34 @@ export class PythonExporter implements FormatExporter {
         return context;
       });
 
-      // custom conditional for reguests without any arguments
-      Handlebars.registerHelper("hasArgs", (context, options) => {
-        if (
-          Object.keys(context.params ?? {}).length +
-            Object.keys(context.query ?? {}).length +
-            Object.keys(context.body ?? {}).length >
-          0
-        ) {
-          return options.fn(context);
-        } else {
-          return options.inverse(context);
-        }
-      });
+      // custom conditional for requests without any arguments
+      Handlebars.registerHelper(
+        "hasArgs",
+        function (this: ParsedRequest, options) {
+          if (
+            Object.keys(this.params ?? {}).length +
+              Object.keys(this.query ?? {}).length +
+              Object.keys(this.body ?? {}).length >
+            0
+          ) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
+        },
+      );
+
+      // custom condition to check for request body kind
+      Handlebars.registerHelper(
+        "requestKind",
+        function (this: ParsedRequest, kind: string, options) {
+          if (this.request?.kind == kind) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
+        },
+      );
 
       const t = await readFile(path.join(__dirname, "./python.tpl"), {
         encoding: "utf-8",

@@ -71,7 +71,8 @@ print(resp1)
         elasticsearchUrl: "https://localhost:9999",
       }),
     ).toEqual(
-      `from elasticsearch import Elasticsearch
+      `import os
+from elasticsearch import Elasticsearch
 
 client = Elasticsearch(
     hosts=["https://localhost:9999"],
