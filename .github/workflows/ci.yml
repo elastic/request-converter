@@ -45,6 +45,9 @@ jobs:
       - name: Build
         run: |
           npm run build
+      - name: Download examples
+        run: |
+          npm run download-examples
       - name: Test
         run: |
           npm run test
