@@ -20,7 +20,7 @@ afterAll(async () => {
 describe("convert", () => {
   const examples: { digest: string; lang: string; source: string }[] =
     JSON.parse(readFileSync(".examples.json", { encoding: "utf-8" }));
-  let cases: { digest: string; source: string }[] = [];
+  const cases: { digest: string; source: string }[] = [];
   for (const example of examples) {
     if (process.env.ONLY_EXAMPLE && example.digest != process.env.ONLY_EXAMPLE) {
       continue;
@@ -32,14 +32,13 @@ describe("convert", () => {
       }
     }
   }
-  //console.log(cases.length);
-  //cases = cases.slice(0, 1000); //[cases[7]];
+  /*
+  const from = 0;
+  const to = 100;
+  cases.splice(to);
+  cases.splice(0, from);
+  */
 
-  //   cases = [`
-  // POST books/_doc
-  // {"name": "Snow Crash", "author": "Neal Stephenson", "release_date": "1992-06-01", "page_count": 470}
-  // `]
-  //
   test.each(cases)(
     "converts the request to python successfully",
     async ({ digest, source }) => {
