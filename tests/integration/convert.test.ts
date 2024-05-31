@@ -8,7 +8,7 @@ import { startServer, stopServer } from "./testserver";
 import { skip } from "./skip";
 
 const TEST_FORMATS: Record<string, string> = {
-  "python": "py",
+  python: "py",
   //"javascript": "js",
 };
 
@@ -28,7 +28,10 @@ describe("convert", () => {
     JSON.parse(readFileSync(".examples.json", { encoding: "utf-8" }));
   const cases: { digest: string; source: string }[] = [];
   for (const example of examples) {
-    if (process.env.ONLY_EXAMPLE && example.digest != process.env.ONLY_EXAMPLE) {
+    if (
+      process.env.ONLY_EXAMPLE &&
+      example.digest != process.env.ONLY_EXAMPLE
+    ) {
       continue;
     }
     if (example.lang == "console") {
@@ -46,15 +49,18 @@ describe("convert", () => {
   //*/
 
   for (const c of cases) {
-    const {digest, source} = c;
+    const { digest, source } = c;
     for (const format of Object.keys(TEST_FORMATS)) {
       if (skip[digest] && (skip[digest].formats ?? [format]).includes(format)) {
         test.todo(`${digest} ${skip[digest].reason}`);
-      }
-      else {
+      } else {
         test.each([[digest, format, source]])(
-          `convert %s to %s`, 
-          async (digest: string, format: string, source: string): Promise<void> => {
+          `convert %s to %s`,
+          async (
+            digest: string,
+            format: string,
+            source: string,
+          ): Promise<void> => {
             const code = await convertRequests(source, "python", {
               complete: true,
               elasticsearchUrl: "http://localhost:9876",
@@ -64,7 +70,9 @@ describe("convert", () => {
             let parsedRequest: ParsedRequest | undefined;
             await writeFile(`.tmp.request.${ext}`, code as string);
             try {
-              await exec(path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`));
+              await exec(
+                path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`),
+              );
               parsedRequest = await parseRequest(source);
             } catch (err) {
               // force an assertion to have a reference to the failing test
@@ -83,7 +91,10 @@ describe("convert", () => {
               // here we check for this case and move arguments to the query if
               // the example has them there
               for (const q of Object.keys(parsedRequest?.query ?? {})) {
-                if (capturedRequest.query[q] == undefined && capturedRequest.body[q] != undefined) {
+                if (
+                  capturedRequest.query[q] == undefined &&
+                  capturedRequest.body[q] != undefined
+                ) {
                   capturedRequest.query[q] = capturedRequest.body[q].toString();
                   delete capturedRequest.body[q];
                 }
@@ -91,7 +102,9 @@ describe("convert", () => {
             }
 
             if (parsedRequest?.method != capturedRequest.method) {
-              console.log(`Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`);
+              console.log(
+                `Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`,
+              );
             }
 
             expect({ result: capturedRequest.path, source }).toEqual({

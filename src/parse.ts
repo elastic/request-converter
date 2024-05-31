@@ -159,7 +159,7 @@ function parseCommand(source: string) {
         data.body = ndbody.map((b) => JSON.parse(b));
       } catch (err) {
         console.log(body);
-        throw new Error('body cannot be parsed');
+        throw new Error("body cannot be parsed");
       }
     }
   }
@@ -229,7 +229,9 @@ async function getAPI(
               type.name.name == endpoint.request?.name
             ) {
               if (type.kind != "request") {
-                throw new Error(`Unexpected request type ${type.kind} for URL ${url}`);
+                throw new Error(
+                  `Unexpected request type ${type.kind} for URL ${url}`,
+                );
               }
               req = type as Request;
               break;
