@@ -128,6 +128,7 @@ function parseCommand(source: string) {
   );
   data.url =
     url.pathname != "/" ? url.pathname.replace(/\/$/, "") : url.pathname;
+  data.url = decodeURIComponent(data.url)
 
   if (url.search.length) {
     data.query = querystring.parse(url.search.slice(1));
@@ -158,7 +159,6 @@ function parseCommand(source: string) {
         const ndbody = body.split("\n").filter(Boolean) as string[];
         data.body = ndbody.map((b) => JSON.parse(b));
       } catch (err) {
-        console.log(body);
         throw new Error("body cannot be parsed");
       }
     }
