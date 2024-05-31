@@ -41,12 +41,12 @@ describe("convert", () => {
       }
     }
   }
-  ///*
+  /*
   const from = 0;
-  const to = 10;
+  const to = 100;
   cases.splice(to);
   cases.splice(0, from);
-  //*/
+  */
 
   for (const c of cases) {
     const { digest, source } = c;
@@ -101,11 +101,13 @@ describe("convert", () => {
               }
             }
 
+            /* this is useful for debugging, but too noisy otherwise
             if (parsedRequest?.method != capturedRequest.method) {
               console.log(
                 `Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`,
               );
             }
+            */
 
             expect({ result: capturedRequest.path, source }).toEqual({
               result: parsedRequest?.url,
