@@ -12,18 +12,18 @@ client = Elasticsearch(
 {{#hasArgs}}
 resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
     {{#each this.params}}
-    {{alias @key}}="{{this}}",
+    {{alias @key ../this.request.path}}="{{{this}}}",
     {{/each}}
     {{#each this.query}}
-    {{alias @key}}={{{pyprint this}}},
+    {{alias @key ../this.request.query}}={{{pyprint this}}},
     {{/each}}
-    {{#requestKind "properties"}}
+    {{#ifRequestKind "properties"}}
     {{#each this.body}}
-    {{alias @key}}={{{pyprint this}}},
+    {{alias @key ../this.request.body.properties}}={{{pyprint this}}},
     {{/each}}
-    {{else requestKind "value"}}
+    {{else ifRequestKind "value"}}
     {{this.request.codegenName}}={{{pyprint this.body}}},
-    {{/requestKind}}
+    {{/ifRequestKind}}
 )
 {{else}}
 resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()

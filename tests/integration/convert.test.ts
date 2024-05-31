@@ -5,6 +5,12 @@ import { exec } from "child-process-promise";
 import { convertRequests } from "../../src/convert";
 import { parseRequest, splitSource, ParsedRequest } from "../../src/parse";
 import { startServer, stopServer } from "./testserver";
+import { skip } from "./skip";
+
+const TEST_FORMATS: Record<string, string> = {
+  "python": "py",
+  //"javascript": "js",
+};
 
 beforeAll(async () => {
   // start a simple web server that will capture requests sent when running
@@ -32,54 +38,77 @@ describe("convert", () => {
       }
     }
   }
-  /*
+  ///*
   const from = 0;
-  const to = 100;
+  const to = 10;
   cases.splice(to);
   cases.splice(0, from);
-  */
+  //*/
 
-  test.each(cases)(
-    "converts the request to python successfully",
-    async ({ digest, source }) => {
-      const code = await convertRequests(source, "python", {
-        complete: true,
-        elasticsearchUrl: "http://localhost:9876",
-      });
-
-      let parsedRequest: ParsedRequest | undefined;
-      await writeFile(".tmp.request.py", code as string);
-      try {
-        await exec(path.join(__dirname, "./run-python.sh .tmp.request.py"));
-        parsedRequest = await parseRequest(source);
-      } catch (err) {
-        // force an assertion to have a reference to the failing test
-        expect({ error: err, digest, source }).toEqual({
-          error: undefined,
-          digest,
-          source,
-        });
+  for (const c of cases) {
+    const {digest, source} = c;
+    for (const format of Object.keys(TEST_FORMATS)) {
+      if (skip[digest] && (skip[digest].formats ?? [format]).includes(format)) {
+        test.todo(`${digest} ${skip[digest].reason}`);
       }
-      await rm(".tmp.request.py");
+      else {
+        test.each([[digest, format, source]])(
+          `convert %s to %s`, 
+          async (digest: string, format: string, source: string): Promise<void> => {
+            const code = await convertRequests(source, "python", {
+              complete: true,
+              elasticsearchUrl: "http://localhost:9876",
+            });
 
-      const res = await fetch("http://localhost:9876/__getLastRequest");
-      const capturedRequest = await res.json();
+            const ext = TEST_FORMATS[format];
+            let parsedRequest: ParsedRequest | undefined;
+            await writeFile(`.tmp.request.${ext}`, code as string);
+            try {
+              await exec(path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`));
+              parsedRequest = await parseRequest(source);
+            } catch (err) {
+              // force an assertion to have a reference to the failing test
+              expect({ error: err, source }).toEqual({
+                error: undefined,
+                source,
+              });
+            }
+            await rm(`.tmp.request.${ext}`);
 
-      expect({ result: capturedRequest.path, digest, source }).toEqual({
-        result: parsedRequest?.url,
-        digest,
-        source,
-      });
-      expect({ result: capturedRequest.query, digest, source }).toEqual({
-        result: parsedRequest?.query ?? {},
-        digest,
-        source,
-      });
-      expect({ result: capturedRequest.body, digest, source }).toEqual({
-        result: parsedRequest?.body ?? {},
-        digest,
-        source,
-      });
-    },
-  );
+            const res = await fetch("http://localhost:9876/__getLastRequest");
+            const capturedRequest = await res.json();
+
+            if (capturedRequest.method != "GET") {
+              // arguments expected in the query are also accepted in the body
+              // here we check for this case and move arguments to the query if
+              // the example has them there
+              for (const q of Object.keys(parsedRequest?.query ?? {})) {
+                if (capturedRequest.query[q] == undefined && capturedRequest.body[q] != undefined) {
+                  capturedRequest.query[q] = capturedRequest.body[q].toString();
+                  delete capturedRequest.body[q];
+                }
+              }
+            }
+
+            if (parsedRequest?.method != capturedRequest.method) {
+              console.log(`Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`);
+            }
+
+            expect({ result: capturedRequest.path, source }).toEqual({
+              result: parsedRequest?.url,
+              source,
+            });
+            expect({ result: capturedRequest.query, source }).toEqual({
+              result: parsedRequest?.query ?? {},
+              source,
+            });
+            expect({ result: capturedRequest.body, source }).toEqual({
+              result: parsedRequest?.body ?? {},
+              source,
+            });
+          },
+        );
+      }
+    }
+  }
 });

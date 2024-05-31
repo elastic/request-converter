@@ -51,23 +51,6 @@ export class PythonExporter implements FormatExporter {
         }
       });
 
-      // custom aliased word renderer
-      Handlebars.registerHelper("alias", (context) => {
-        const aliases: Record<string, string> = {
-          from: "from_",
-          _meta: "meta",
-          _field_names: "field_names",
-          _routing: "routing",
-          _source: "source",
-          _source_excludes: "source_excludes",
-          _source_includes: "source_includes",
-        };
-        if (aliases[context]) {
-          return aliases[context];
-        }
-        return context;
-      });
-
       // custom conditional for requests without any arguments
       Handlebars.registerHelper(
         "hasArgs",
@@ -85,11 +68,39 @@ export class PythonExporter implements FormatExporter {
         },
       );
 
-      // custom condition to check for request body kind
+      // attribute name renderer that considers aliases and code-specific names
+      // arguments:
+      //   name: the name of the attribute
+      //   props: the list of schema properties this attribute belongs to
+      Handlebars.registerHelper("alias", (name, props) => {
+        const aliases: Record<string, string> = {
+          from: "from_",
+          _meta: "meta",
+          _field_names: "field_names",
+          _routing: "routing",
+          _source: "source",
+          _source_excludes: "source_excludes",
+          _source_includes: "source_includes",
+        };
+        if (aliases[name]) {
+          return aliases[name];
+        }
+        if (props) {
+          for (const prop of props) {
+            if (prop.name == name && prop.codegenName != undefined) {
+              return prop.codegenName;
+            }
+          }
+        }
+        return name;
+      });
+
+      // custom conditional to check for request body kind
+      // the argument can be "properties" or "value"
       Handlebars.registerHelper(
-        "requestKind",
+        "ifRequestKind",
         function (this: ParsedRequest, kind: string, options) {
-          if (this.request?.kind == kind) {
+          if (this.request?.body?.kind == kind) {
             return options.fn(this);
           } else {
             return options.inverse(this);

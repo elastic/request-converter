@@ -6,4 +6,6 @@ if [[ ! -d $SCRIPT_DIR/.venv ]]; then
     $SCRIPT_DIR/.venv/bin/pip install git+https://github.com/elastic/elasticsearch-py
 fi
 
-$SCRIPT_DIR/.venv/bin/python $1
+if [[ "$1" != "" ]]; then
+    $SCRIPT_DIR/.venv/bin/python $1
+fi

@@ -2,7 +2,7 @@ import { METHODS } from "http";
 import { URL } from "url";
 import querystring, { ParsedUrlQuery } from "querystring";
 import * as Router from "find-my-way-ts";
-import { Model, Request, Body } from "./metamodel"; //"./es_spec";
+import { Model, Request } from "./metamodel";
 
 export type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
@@ -12,7 +12,7 @@ interface JSONObject {
 
 export type ParsedRequest = {
   api?: string;
-  request?: Body;
+  request?: Request;
   params: { [x: string]: string | undefined };
   method: string;
   url: string;
@@ -22,7 +22,7 @@ export type ParsedRequest = {
 
 type ESRoute = {
   name: string;
-  body: Body;
+  request: Request;
 };
 
 const SPEC_URL =
@@ -158,8 +158,8 @@ function parseCommand(source: string) {
         const ndbody = body.split("\n").filter(Boolean) as string[];
         data.body = ndbody.map((b) => JSON.parse(b));
       } catch (err) {
-        // generic string or json body that cannot be parsed
-        data.body = body;
+        console.log(body);
+        throw new Error('body cannot be parsed');
       }
     }
   }
@@ -220,29 +220,29 @@ async function getAPI(
           formattedPath = "/" + formattedPath;
         }
 
+        // find the request in the spec
         try {
-          let body: Body | undefined;
+          let req: Request | undefined;
           for (const type of spec.types) {
             if (
               type.name.namespace == endpoint.request?.namespace &&
               type.name.name == endpoint.request?.name
             ) {
               if (type.kind != "request") {
-                console.log("warning!");
+                throw new Error(`Unexpected request type ${type.kind} for URL ${url}`);
               }
-              body = (type as Request).body;
+              req = type as Request;
               break;
             }
           }
           const r = {
             name: endpoint.name,
-            body: body as Body,
+            request: req as Request,
           };
           router.on(methods, formattedPath as Router.PathInput, r);
         } catch (err) {
           // in some cases there are routes that have the same url but different
           // dynamic parameters, which causes find-my-way to fail
-          // console.log(route)
         }
       }
     }
@@ -264,7 +264,7 @@ export async function parseRequest(source: string): Promise<ParsedRequest> {
   const req = parseCommand(source);
   const route = await getAPI(req.method, req.url);
   req.api = route.handler.name;
-  req.request = route.handler.body;
+  req.request = route.handler.request;
   if (Object.keys(route.params).length > 0) {
     req.params = route.params;
   }

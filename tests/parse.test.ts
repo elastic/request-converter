@@ -65,11 +65,6 @@ POST /_bulk?foo=bar
 
 
 POST /_bulk?foo=bar
-{ "name": "John\nDoe" }
-{ "name": "John\nDoe" }
-{ "name": "John\nDoe" }
-
-POST /_bulk?foo=bar
 { "name": "John\\nDoe" }
 { "name": "John\\nDoe" }
 { "name": "John\\nDoe" }
@@ -83,7 +78,7 @@ GET my_index/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Fox
 
 POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n{\n  "description": "Snapshot 1",\n  "retain": true\n}
 `);
-    expect(reqs.length).toEqual(12);
+    expect(reqs.length).toEqual(11);
     expect(reqs[0]).toMatchObject({
       api: "index",
       params: { index: "customer", id: "1" },
@@ -132,41 +127,33 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "POST",
       url: "/_bulk",
       query: { foo: "bar" },
-      body: '\n{ "name": "John\nDoe" }\n{ "name": "John\nDoe" }\n{ "name": "John\nDoe" }',
-    });
-    expect(reqs[7]).toMatchObject({
-      api: "bulk",
-      params: {},
-      method: "POST",
-      url: "/_bulk",
-      query: { foo: "bar" },
       body: [
         { name: "John\nDoe" },
         { name: "John\nDoe" },
         { name: "John\nDoe" },
       ],
     });
-    expect(reqs[8]).toMatchObject({
+    expect(reqs[7]).toMatchObject({
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
       url: "/customer/_doc/1",
     });
-    expect(reqs[9]).toMatchObject({
+    expect(reqs[8]).toMatchObject({
       api: "nodes.reload_secure_settings",
       params: {},
       method: "POST",
       url: "/_nodes/reload_secure_settings",
       body: { reload_secure_settings: "s3cr3t" },
     });
-    expect(reqs[10]).toMatchObject({
+    expect(reqs[9]).toMatchObject({
       api: "indices.analyze",
       params: { index: "my_index" },
       method: "GET",
       url: "/my_index/_analyze",
       body: { field: "text", text: "The quick Brown Foxes." },
     });
-    expect(reqs[11]).toMatchObject({
+    expect(reqs[10]).toMatchObject({
       api: "ml.update_model_snapshot",
       params: { job_id: "it_ops_new_logs", snapshot_id: "1491852978" },
       method: "POST",
