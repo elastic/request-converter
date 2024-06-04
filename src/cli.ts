@@ -12,6 +12,7 @@ async function main() {
         .makeOptionMandatory(),
     )
     .option("--complete", "output complete code", false)
+    .option("--debug", "output information useful when debugging", false)
     .option("--print-response", "add code to print response", false);
 
   program.parse();
@@ -24,6 +25,7 @@ async function main() {
 
   const code = (await convertRequests(data, opts.format, {
     complete: opts.complete,
+    debug: opts.debug,
     printResponse: opts.printResponse,
   })) as string;
   process.stdout.write(code);

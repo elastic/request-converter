@@ -160,10 +160,8 @@ function parseCommand(source: string) {
   if (body != "") {
     try {
       // json body
-      console.log(body);
       data.body = JSON.parse(body) as JSONObject;
     } catch (err) {
-      console.log(err);
       try {
         // ndjson body
         const ndbody = body.split("\n").filter(Boolean) as string[];

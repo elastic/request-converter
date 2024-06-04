@@ -9,8 +9,8 @@ client = Elasticsearch(
 
 {{/if}}
 {{#each requests}}
-{{#hasArgs}}
 {{#supportedApi}}
+{{#hasArgs}}
 resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
     {{#each this.params}}
     {{alias @key ../this.request.path}}="{{{this}}}",
@@ -27,17 +27,18 @@ resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
     {{/ifRequestKind}}
 )
 {{else}}
+resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()
+{{/hasArgs}}
+{{else}}
 resp{{#if @index}}{{@index}}{{/if}} = client.perform_request(
     "{{this.method}}",
     "{{this.url}}",
     {{#if this.body}}
+    headers={"Content-Type": "application/json"},
     body={{{pyprint this.body}}},
     {{/if}}
 )
 {{/supportedApi}}
-{{else}}
-resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()
-{{/hasArgs}}
 {{#if ../printResponse}}
 print(resp{{#if @index}}{{@index}}{{/if}})
 {{/if}}

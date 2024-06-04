@@ -10,6 +10,8 @@ export type ConvertOptions = {
    * the instatiation of the Elasticsearch client. When `false`, only the
    * request(s) will be generated */
   complete?: boolean;
+  /** When `true`, log information that is useful when debugging. */
+  debug?: boolean;
   /** Converters may have their own custom options. */
   [x: string]: unknown; // exporter specific options
 };
@@ -45,6 +47,9 @@ export async function convertRequests(
 ): Promise<boolean | string> {
   const requests = await parseRequests(source);
   const exporter = EXPORTERS[outputFormat];
+  if (options.debug) {
+    console.log(JSON.stringify(requests));
+  }
   if (options.checkOnly) {
     return await exporter.check();
   }
