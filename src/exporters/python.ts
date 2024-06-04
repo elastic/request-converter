@@ -4,6 +4,11 @@ import Handlebars from "handlebars";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 
+// this regex should match the list of APIs that do not have specific handlers
+// in the Python client. APIs in this list are rendered with a perform_request()
+// call
+const UNSUPPORTED_APIS = new RegExp(/^connector.*$/);
+
 const PYCONSTANTS: Record<string, string> = {
   true: "True",
   false: "False",
@@ -61,6 +66,18 @@ export class PythonExporter implements FormatExporter {
               Object.keys(this.body ?? {}).length >
             0
           ) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
+        },
+      );
+
+      // custom conditional to separate supported vs unsupported APIs
+      Handlebars.registerHelper(
+        "supportedApi",
+        function (this: ParsedRequest, options) {
+          if (!UNSUPPORTED_APIS.test(this.api as string)) {
             return options.fn(this);
           } else {
             return options.inverse(this);
