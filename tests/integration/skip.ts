@@ -70,23 +70,23 @@ export const skip: Record<string, SkippedTest> = {
     reason:
       "example references a non-existant `include_named_queries_score` query attribute",
   },
-  "e39d51202913bf6d861e9e721570cdb8": {
+  e39d51202913bf6d861e9e721570cdb8: {
     reason: "example has bad request syntax",
   },
-  "c06b96352e15f0161705fee0b5925776": {
+  c06b96352e15f0161705fee0b5925776: {
     reason: "example has bad request syntax",
   },
-  "a78e06cdbcae75962db627f5015ed2f6": {
+  a78e06cdbcae75962db627f5015ed2f6: {
     reason: "client does not implement `sub_searches` body attribute",
     formats: ["python"],
   },
   "5203560189ccab7122c03500147701ef": {
     reason: "example has bad request syntax",
   },
-  "a84ffbaa4ffa68b22f6fe42d3b4f8dd5": {
+  a84ffbaa4ffa68b22f6fe42d3b4f8dd5: {
     reason: "example has bad request syntax",
   },
-  "ba59a3b9a0a2694704b2bf9c6ad4a8cf": {
+  ba59a3b9a0a2694704b2bf9c6ad4a8cf: {
     reason: "example has bad request syntax",
   },
   "1ceaa211756e2db3d48c6bc4b1a861b0": {

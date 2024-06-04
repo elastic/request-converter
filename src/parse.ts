@@ -11,12 +11,20 @@ interface JSONObject {
 }
 
 export type ParsedRequest = {
+  /** The name of the Elasticsearch API this request refers to. */
   api?: string;
+  /** The request definition from the Elasticsearch specification that applies to this request. */
   request?: Request;
+  /** The dynamic parameters that are part of the request's URL. */
   params: { [x: string]: string | undefined };
+  /** The request method. */
   method: string;
+  /** The request URL. */
   url: string;
+  /** An object with the arguments passed in the query string of the request. */
   query?: ParsedUrlQuery;
+  /** The body of the request, given as an object for a JSON body, or an array of
+   * objects for the ndjson bodies used in bulk requests. */
   body?: JSONObject | JSONObject[] | string;
 };
 
@@ -128,7 +136,7 @@ function parseCommand(source: string) {
   );
   data.url =
     url.pathname != "/" ? url.pathname.replace(/\/$/, "") : url.pathname;
-  data.url = decodeURIComponent(data.url)
+  data.url = decodeURIComponent(data.url);
 
   if (url.search.length) {
     data.query = querystring.parse(url.search.slice(1));
@@ -273,6 +281,16 @@ export async function parseRequest(source: string): Promise<ParsedRequest> {
   return req;
 }
 
+/** Parse a Dev Console script.
+ *
+ * This function is used internally by the `convertRequests()` function, so in
+ * general it does not need to be called directly.
+ *
+ * @param source The source code to parse in Dev Console syntax. Multiple requests
+ *   can be separated with an empty line.
+ * @returns The function returns an array of `ParsedRequest` objects, each describing
+ *   a request.
+ */
 export async function parseRequests(source: string): Promise<ParsedRequest[]> {
   const sources = splitSource(source);
   return await Promise.all(sources.map((source) => parseRequest(source)));

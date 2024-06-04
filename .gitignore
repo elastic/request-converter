@@ -49,5 +49,6 @@ jspm_packages
 .idea
 
 package-lock.json
+docs
 dist
 .venv
