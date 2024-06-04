@@ -104,4 +104,20 @@ export const skip: Record<string, SkippedTest> = {
   "50096ee0ca53fe8a88450ebb2a50f285": {
     reason: "example references a non-existant `delimiter` query attribute",
   },
+  "32b8a5152b47930f2e16c40c8615c7bb": {
+    reason: "example has bad request syntax",
+  },
+  "6b6fd0a5942dfb9762ad2790cf421a80": {
+    reason: "example has bad request syntax",
+  },
+  "16634cfa7916cf4e8048a1d70e6240f2": {
+    reason: "example has bad request syntax",
+  },
+  "c9c21191ae15a49955bffde0ac749a49": {
+    reason: "example has bad request syntax",
+  },
+  "ba70b92f745a1765f1eb62e3457a86c3": {
+    reason: "example has bad request syntax",
+  },
+  
 };

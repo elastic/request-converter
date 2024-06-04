@@ -102,7 +102,7 @@ function parseCommand(source: string) {
     // removes comments tags, such as `<1>`
     .replace(/<([\S\s])>/g, "")
     // removes comments, such as `// optional`
-    .replace(/\/\/\s\w+/g, "");
+    .replace(/\/\/\s.+/g, "");
 
   const data: ParsedRequest = {
     params: {},
@@ -160,8 +160,10 @@ function parseCommand(source: string) {
   if (body != "") {
     try {
       // json body
+      console.log(body);
       data.body = JSON.parse(body) as JSONObject;
     } catch (err) {
+      console.log(err);
       try {
         // ndjson body
         const ndbody = body.split("\n").filter(Boolean) as string[];
