@@ -1,0 +1,2 @@
+npm run fix:lint
+npm run fix:prettier

@@ -9,9 +9,9 @@ import { ParsedRequest } from "../parse";
 // call
 const UNSUPPORTED_APIS = new RegExp(
   "^connector.*$" +
-  "|^snapshot.repository_analyze$" +
-  "|^watcher.get_settings$" +
-  "|^watcher.update_settings"
+    "|^snapshot.repository_analyze$" +
+    "|^watcher.get_settings$" +
+    "|^watcher.update_settings",
 );
 
 const PYCONSTANTS: Record<string, string> = {

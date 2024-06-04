@@ -265,13 +265,13 @@ export const skip: Record<string, SkippedTest> = {
   "615dc36f0978c676624fb7d1144b4899": {
     reason: "example uses unknown URL",
   },
-  "af91019991bee136df5460e2fd4ac72a": {
+  af91019991bee136df5460e2fd4ac72a: {
     reason: "example uses unknown `lazy` query attribute",
   },
   "0a46cc8fe93e372909660a63dc52ae3b": {
     reason: "invalid request syntax",
   },
-  "b1ee1b0b5f7af596e5f81743cfd3755f": {
+  b1ee1b0b5f7af596e5f81743cfd3755f: {
     reason: "invalid request syntax",
   },
   "83b94f9e7b3a9abca8e165ea56927714": {
@@ -283,7 +283,7 @@ export const skip: Record<string, SkippedTest> = {
   "19c00c6b29bc7dbc5e92b3668da2da93": {
     reason: "example uses unknown URL",
   },
-  "bcdfaa4487747249699a86a0dcd22f5e": {
+  bcdfaa4487747249699a86a0dcd22f5e: {
     reason: "example uses unknown URL",
   },
   "5bbccf103107e505c17ae59863753efd": {
@@ -308,19 +308,19 @@ export const skip: Record<string, SkippedTest> = {
   "61a528b86d38c2f17a172326edf6b53b": {
     reason: "example uses unknown URL",
   },
-  "dd71b0c9f9197684ff29c61062c55660": {
+  dd71b0c9f9197684ff29c61062c55660: {
     reason: "example uses unknown URL",
   },
-  "b22559a7c319f90bc63a41cac1c39b4c": {
+  b22559a7c319f90bc63a41cac1c39b4c: {
     reason: "example passes boolean as string",
   },
-  "cfad3631be0634ee49c424f9ccec62d9": {
+  cfad3631be0634ee49c424f9ccec62d9: {
     reason: "example passes boolean as string",
   },
   "57dc15e5ad663c342fd5c1d86fcd1b29": {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
   },
-  "d35c8cf7a98b3f112e1de8797ec6689d": {
+  d35c8cf7a98b3f112e1de8797ec6689d: {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
   },
   "88a283dfccc481f1afba79d9b3c61f51": {
@@ -329,13 +329,13 @@ export const skip: Record<string, SkippedTest> = {
   "340b027449ca37d2e778e747974af9ff": {
     reason: "example uses unknown URL",
   },
-  "f20692e35a61b98746e926549030702b": {
+  f20692e35a61b98746e926549030702b: {
     reason: "example uses unknown URL",
   },
   "80dd7f5882c59b9c1c90e8351937441f": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
   },
-  "c580990a70028bb49cca8a6bde86bbf6": {
+  c580990a70028bb49cca8a6bde86bbf6: {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
   },
   "6f3b723bf6179b96c3413597ed7f49e1": {
