@@ -33,6 +33,9 @@ resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()
 resp{{#if @index}}{{@index}}{{/if}} = client.perform_request(
     "{{this.method}}",
     "{{this.url}}",
+    {{#if this.query}}
+    params={{{pyprint this.query}}},
+    {{/if}}
     {{#if this.body}}
     headers={"Content-Type": "application/json"},
     body={{{pyprint this.body}}},
