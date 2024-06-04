@@ -256,4 +256,99 @@ export const skip: Record<string, SkippedTest> = {
   "6539a04aac4d43e6ce4a769fe8cdf2d8": {
     reason: "example uses unknown URL",
   },
+  "8bf1e7a6d529547906ba8b1d6501fa0c": {
+    reason: "example uses undefined method for endpoint",
+  },
+  "90083d93e46fad2524755b8d4d1306fc": {
+    reason: "example uses undefined method for endpoint",
+  },
+  "615dc36f0978c676624fb7d1144b4899": {
+    reason: "example uses unknown URL",
+  },
+  "af91019991bee136df5460e2fd4ac72a": {
+    reason: "example uses unknown `lazy` query attribute",
+  },
+  "0a46cc8fe93e372909660a63dc52ae3b": {
+    reason: "invalid request syntax",
+  },
+  "b1ee1b0b5f7af596e5f81743cfd3755f": {
+    reason: "invalid request syntax",
+  },
+  "83b94f9e7b3a9abca8e165ea56927714": {
+    reason: "invalid request syntax",
+  },
+  "7c8f207e43115ea8f20d2298be5aaebc": {
+    reason: "example uses unknown URL",
+  },
+  "19c00c6b29bc7dbc5e92b3668da2da93": {
+    reason: "example uses unknown URL",
+  },
+  "bcdfaa4487747249699a86a0dcd22f5e": {
+    reason: "example uses unknown URL",
+  },
+  "5bbccf103107e505c17ae59863753efd": {
+    reason: "example uses GET request with body",
+  },
+  "2d633b7f346b828d01f923ce9dbf6ad5": {
+    reason: "invalid request syntax",
+  },
+  "3fdc1269aaedea61248e39c70997fed8": {
+    reason: "client does not implement `sub_searches` body attribute",
+    formats: ["python"],
+  },
+  "0dfde6a9d953822fd4b3aa0121ddd8fb": {
+    reason: "example uses undefined `render_query` attribute.",
+  },
+  "4b113c7f475cfe484a150ddbb8e6c5c7": {
+    reason: "example references a non-existant `remote_indices` body attribute",
+  },
+  "174b93c323aa8e9cc8ee2a3df5736810": {
+    reason: "example uses unknown URL",
+  },
+  "61a528b86d38c2f17a172326edf6b53b": {
+    reason: "example uses unknown URL",
+  },
+  "dd71b0c9f9197684ff29c61062c55660": {
+    reason: "example uses unknown URL",
+  },
+  "b22559a7c319f90bc63a41cac1c39b4c": {
+    reason: "example passes boolean as string",
+  },
+  "cfad3631be0634ee49c424f9ccec62d9": {
+    reason: "example passes boolean as string",
+  },
+  "57dc15e5ad663c342fd5c1d86fcd1b29": {
+    reason: "example uses undefined `oidc_prepare_authentication` attribute",
+  },
+  "d35c8cf7a98b3f112e1de8797ec6689d": {
+    reason: "example uses undefined `oidc_prepare_authentication` attribute",
+  },
+  "88a283dfccc481f1afba79d9b3c61f51": {
+    reason: "example uses unknown URL",
+  },
+  "340b027449ca37d2e778e747974af9ff": {
+    reason: "example uses unknown URL",
+  },
+  "f20692e35a61b98746e926549030702b": {
+    reason: "example uses unknown URL",
+  },
+  "80dd7f5882c59b9c1c90e8351937441f": {
+    reason: "example uses unknown `bulk_update_api_keys` attribute",
+  },
+  "c580990a70028bb49cca8a6bde86bbf6": {
+    reason: "example uses unknown `bulk_update_api_keys` attribute",
+  },
+  "6f3b723bf6179b96c3413597ed7f49e1": {
+    reason: "example uses unknown `bulk_update_api_keys` attribute",
+  },
+  "0ab002c6618af75e1041a23c692327ad": {
+    reason: "example uses unknown URL",
+  },
+  "841d8b766902c8e3ae85c228a31383ac": {
+    reason: "example uses unknown `format` attribute",
+  },
+  "3ed79871d956bfb2d6d2721d7272520c": {
+    reason: "client does not implement this endpoint variant",
+    formats: ["python"],
+  },
 };

@@ -7,7 +7,12 @@ import { ParsedRequest } from "../parse";
 // this regex should match the list of APIs that do not have specific handlers
 // in the Python client. APIs in this list are rendered with a perform_request()
 // call
-const UNSUPPORTED_APIS = new RegExp(/^connector.*$/);
+const UNSUPPORTED_APIS = new RegExp(
+  "^connector.*$" +
+  "|^snapshot.repository_analyze$" +
+  "|^watcher.get_settings$" +
+  "|^watcher.update_settings"
+);
 
 const PYCONSTANTS: Record<string, string> = {
   true: "True",
