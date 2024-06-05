@@ -18,13 +18,13 @@ resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
     {{#each this.query}}
     {{alias @key ../this.request.query}}={{{pyprint this}}},
     {{/each}}
-    {{#ifRequestKind "properties"}}
+    {{#ifRequestBodyKind "properties"}}
     {{#each this.body}}
     {{alias @key ../this.request.body.properties}}={{{pyprint this}}},
     {{/each}}
-    {{else ifRequestKind "value"}}
-    {{this.request.body.codegenName}}={{{pyprint this.body}}},
-    {{/ifRequestKind}}
+    {{else ifRequestBodyKind "value"}}
+    {{#if this.request.body.codegenName}}{{this.request.body.codegenName}}{{else}}body{{/if}}={{{pyprint this.body}}},
+    {{/ifRequestBodyKind}}
 )
 {{else}}
 resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()

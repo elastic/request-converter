@@ -22,10 +22,13 @@ const PYCONSTANTS: Record<string, string> = {
   true: "True",
   false: "False",
   null: "None",
-  '"true"': "True",
-  '"false"': "False",
-  '"null"': "None",
 };
+
+// const PYCONSTANTS_QUOTED: Record<string, string> = {
+//   '"true"': "True",
+//   '"false"': "False",
+//   '"null"': "None",
+// };
 
 export class PythonExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
@@ -58,6 +61,8 @@ export class PythonExporter implements FormatExporter {
           return result;
         } else if (PYCONSTANTS[lines[0]]) {
           return PYCONSTANTS[lines[0]];
+          //} else if (PYCONSTANTS_QUOTED[lines[0]]) {
+          //  return PYCONSTANTS_QUOTED[lines[0]];
         } else {
           return lines[0];
         }
@@ -122,9 +127,17 @@ export class PythonExporter implements FormatExporter {
       // custom conditional to check for request body kind
       // the argument can be "properties" or "value"
       Handlebars.registerHelper(
-        "ifRequestKind",
+        "ifRequestBodyKind",
         function (this: ParsedRequest, kind: string, options) {
-          if (this.request?.body?.kind == kind) {
+          let bodyKind = this.request?.body?.kind;
+          if (this.api == "search" && "sub_searches" in (this.body ?? {})) {
+            // Change the kind of any search requests that use sub-searches to
+            // "value", so that the template renders a single body argument
+            // instead of expanding the kwargs. This is needed because the
+            // Python client does not support "sub_searches" as a kwarg yet.
+            bodyKind = "value";
+          }
+          if (bodyKind == kind) {
             return options.fn(this);
           } else {
             return options.inverse(this);

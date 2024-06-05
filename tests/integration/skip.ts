@@ -62,10 +62,6 @@ export const skip: Record<string, SkippedTest> = {
   "3e6db3d80439c2c176dbd1bb1296b6cf": {
     reason: "example puts `id` path attribute in body",
   },
-  "73e75aa4bd24754909e48ee62c2702dc": {
-    reason: "client does not implement `sub_searches` body attribute",
-    formats: ["python"],
-  },
   "39ce44333d28ed2b833722d3e3cb06f3": {
     reason:
       "example references a non-existant `include_named_queries_score` query attribute",
@@ -75,10 +71,6 @@ export const skip: Record<string, SkippedTest> = {
   },
   c06b96352e15f0161705fee0b5925776: {
     reason: "example has bad request syntax",
-  },
-  a78e06cdbcae75962db627f5015ed2f6: {
-    reason: "client does not implement `sub_searches` body attribute",
-    formats: ["python"],
   },
   "5203560189ccab7122c03500147701ef": {
     reason: "example has bad request syntax",
@@ -103,15 +95,6 @@ export const skip: Record<string, SkippedTest> = {
   },
   "50096ee0ca53fe8a88450ebb2a50f285": {
     reason: "example references a non-existant `delimiter` query attribute",
-  },
-  "32b8a5152b47930f2e16c40c8615c7bb": {
-    reason: "example has bad request syntax",
-  },
-  "6b6fd0a5942dfb9762ad2790cf421a80": {
-    reason: "example has bad request syntax",
-  },
-  "16634cfa7916cf4e8048a1d70e6240f2": {
-    reason: "example has bad request syntax",
   },
   c9c21191ae15a49955bffde0ac749a49: {
     reason: "example has bad request syntax",
@@ -172,9 +155,6 @@ export const skip: Record<string, SkippedTest> = {
     reason: "client does not implement this endpoint variant",
     formats: ["python"],
   },
-  "3c4d7ef8422d2db423a8f23effcddaa1": {
-    reason: "TODO",
-  },
   ef9c29759459904fef162acd223462c4: {
     reason: "client does not implement this endpoint variant",
     formats: ["python"],
@@ -182,9 +162,6 @@ export const skip: Record<string, SkippedTest> = {
   f160561efab38e40c2feebf5a2542ab5: {
     reason: "client does not implement this endpoint variant",
     formats: ["python"],
-  },
-  "166bcfc6d5d39defec7ad6aa44d0914b": {
-    reason: "example uses undefined `nodes` query attribute",
   },
   "0470d7101637568b9d3d1239f06325a7": {
     reason: "example uses invalid URL",
@@ -197,9 +174,6 @@ export const skip: Record<string, SkippedTest> = {
   },
   "365256ebdfa47b449780771d9beba8d9": {
     reason: "example uses undefined method for endpoint",
-  },
-  cb0f3eea39612a694d47a57aee93956f: {
-    reason: "example uses unknown URL",
   },
   e9ae959608d128202921b174f4faa7a8: {
     reason: "invalid request syntax",
@@ -271,10 +245,6 @@ export const skip: Record<string, SkippedTest> = {
   "2d633b7f346b828d01f923ce9dbf6ad5": {
     reason: "invalid request syntax",
   },
-  "3fdc1269aaedea61248e39c70997fed8": {
-    reason: "client does not implement `sub_searches` body attribute",
-    formats: ["python"],
-  },
   "0dfde6a9d953822fd4b3aa0121ddd8fb": {
     reason: "example uses undefined `render_query` attribute.",
   },
@@ -289,12 +259,6 @@ export const skip: Record<string, SkippedTest> = {
   },
   dd71b0c9f9197684ff29c61062c55660: {
     reason: "example uses unknown URL",
-  },
-  b22559a7c319f90bc63a41cac1c39b4c: {
-    reason: "example passes boolean as string",
-  },
-  cfad3631be0634ee49c424f9ccec62d9: {
-    reason: "example passes boolean as string",
   },
   "57dc15e5ad663c342fd5c1d86fcd1b29": {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
@@ -329,5 +293,11 @@ export const skip: Record<string, SkippedTest> = {
   "3ed79871d956bfb2d6d2721d7272520c": {
     reason: "client does not implement this endpoint variant",
     formats: ["python"],
+  },
+  "3c4d7ef8422d2db423a8f23effcddaa1": {
+    reason: "example uses unknown URL",
+  },
+  "166bcfc6d5d39defec7ad6aa44d0914b": {
+    reason: "example uses undefined `nodes` query attribute",
   },
 };
