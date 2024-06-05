@@ -95,4 +95,20 @@ resp1 = client.search(
 `,
     );
   });
+
+  it("converts an unsupported API to python", async () => {
+    expect(
+      await convertRequests("GET /_internal/desired_balance", "python", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `resp = client.perform_request(
+    "GET",
+    "/_internal/desired_balance",
+)
+
+`,
+    );
+  });
 });

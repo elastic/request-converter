@@ -175,9 +175,6 @@ export const skip: Record<string, SkippedTest> = {
   "3c4d7ef8422d2db423a8f23effcddaa1": {
     reason: "TODO",
   },
-  e35abc9403e4aef7d538ab29ccc363b3: {
-    reason: "example uses private /_internal endpoint",
-  },
   ef9c29759459904fef162acd223462c4: {
     reason: "client does not implement this endpoint variant",
     formats: ["python"],
@@ -190,25 +187,7 @@ export const skip: Record<string, SkippedTest> = {
     reason: "example uses undefined `nodes` query attribute",
   },
   "0470d7101637568b9d3d1239f06325a7": {
-    reason: "example uses private /_internal endpoint",
-  },
-  "10796a4efa3c2a5e9e50b6bdeb08bbb9": {
-    reason: "example uses private /_internal endpoint",
-  },
-  dfcdcd3ea6753dcc391a4a52cf640527: {
-    reason: "example uses private /_internal endpoint",
-  },
-  cf8ca470156698dbf47fdc822d0a714f: {
-    reason: "example uses private /_internal endpoint",
-  },
-  ddf375e4b6175d830fa4097ea0b41536: {
-    reason: "example uses private /_internal endpoint",
-  },
-  "97a3216af3d4b4d805d467d9c715cb3e": {
-    reason: "example uses private /_internal endpoint",
-  },
-  b3756e700d0f6c7e8919003bdf26bc8f: {
-    reason: "example uses private /_internal endpoint",
+    reason: "example uses invalid URL",
   },
   ba10b644a4e9a2e7d78744ca607355d0: {
     reason: "example uses undefined `data_stream_name` attribute",

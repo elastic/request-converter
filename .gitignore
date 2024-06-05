@@ -52,3 +52,4 @@ package-lock.json
 docs
 dist
 .venv
+.examples.json

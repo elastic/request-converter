@@ -9,6 +9,7 @@ import { ParsedRequest } from "../parse";
 // call
 const UNSUPPORTED_APIS = new RegExp(
   "^connector.*$" +
+    "|^_internal.*$" +
     "|^security.create_cross_cluster_api_key$" +
     "|^security.update_cross_cluster_api_key$" +
     "|^security.update_settings$" +
@@ -49,14 +50,12 @@ export class PythonExporter implements FormatExporter {
           lines[i] = "    " + lines[i];
         }
         if (lines.length > 1) {
-          return lines
-            .join("\n")
-            .replaceAll("null,\n", "None,\n")
-            .replaceAll("null\n", "None\n")
-            .replaceAll("true,\n", "True,\n")
-            .replaceAll("true\n", "True\n")
-            .replaceAll("false,\n", "False,\n")
-            .replaceAll("false\n", "False\n");
+          let result = lines.join("\n");
+          for (const k of Object.keys(PYCONSTANTS)) {
+            result = result.replaceAll(`${k},\n`, `${PYCONSTANTS[k]},\n`);
+            result = result.replaceAll(`${k}\n`, `${PYCONSTANTS[k]}\n`);
+          }
+          return result;
         } else if (PYCONSTANTS[lines[0]]) {
           return PYCONSTANTS[lines[0]];
         } else {

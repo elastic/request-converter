@@ -19,13 +19,15 @@ export type ParsedRequest = {
   params: { [x: string]: string | undefined };
   /** The request method. */
   method: string;
-  /** The request URL. */
+  /** The complete request URL, including query string. */
   url: string;
+  /** The path portion of the request URL. */
+  path: string;
   /** An object with the arguments passed in the query string of the request. */
   query?: ParsedUrlQuery;
   /** The body of the request, given as an object for a JSON body, or an array of
    * objects for the ndjson bodies used in bulk requests. */
-  body?: JSONObject | JSONObject[] | string;
+  body?: JSONObject | JSONObject[];
 };
 
 type ESRoute = {
@@ -108,6 +110,7 @@ function parseCommand(source: string) {
     params: {},
     method: "",
     url: "",
+    path: "",
   };
 
   const len = source.length;
@@ -130,16 +133,19 @@ function parseCommand(source: string) {
   const urlStart = index;
   until("{", "\n");
 
-  const urlPart = source.slice(urlStart, index);
-  const url = new URL(
-    `http://localhost${urlPart[0] != "/" ? "/" + urlPart : urlPart}`,
-  );
-  data.url =
-    url.pathname != "/" ? url.pathname.replace(/\/$/, "") : url.pathname;
-  data.url = decodeURIComponent(data.url);
+  data.url = source.slice(urlStart, index).trim();
+  if (data.url[0] != "/") {
+    data.url = "/" + data.url;
+  }
+  const parsedUrl = new URL(`http://localhost${data.url}`);
+  data.path =
+    parsedUrl.pathname != "/"
+      ? parsedUrl.pathname.replace(/\/$/, "")
+      : parsedUrl.pathname;
+  data.path = decodeURIComponent(data.path);
 
-  if (url.search.length) {
-    data.query = querystring.parse(url.search.slice(1));
+  if (parsedUrl.search.length) {
+    data.query = querystring.parse(parsedUrl.search.slice(1));
     for (const q in data.query) {
       if (data.query[q] == "") {
         data.query[q] = "true";
@@ -150,8 +156,8 @@ function parseCommand(source: string) {
   // TODO: this should be an issue in the docs,
   // the correct url is `<index/_mapping`
   /* istanbul ignore next */
-  if (data.url.endsWith("_mappings")) {
-    data.url = data.url.slice(0, -1);
+  if (data.path.endsWith("_mappings")) {
+    data.path = data.path.slice(0, -1);
   }
 
   // identify the body
@@ -210,7 +216,7 @@ function parseCommand(source: string) {
 // use a router to figure out the API name
 async function getAPI(
   method: string,
-  url: string,
+  path: string,
 ): Promise<Router.FindResult<ESRoute>> {
   if (!router.has("GET", "/")) {
     // download the Elasticsearch spec
@@ -237,6 +243,7 @@ async function getAPI(
               type.name.name == endpoint.request?.name
             ) {
               if (type.kind != "request") {
+                /* istanbul ignore next */
                 throw new Error(
                   `Unexpected request type ${type.kind} for URL ${url}`,
                 );
@@ -258,12 +265,12 @@ async function getAPI(
     }
   }
 
-  const formattedUrl = url.startsWith("/") ? url : `/${url}`;
-  const route = router.find(method, formattedUrl);
+  const formattedPath = path.startsWith("/") ? path : `/${path}`;
+  const route = router.find(method, formattedPath);
   if (!route) {
     /* istanbul ignore next */
     throw new Error(
-      `There is no handler for method '${method}' and url '${formattedUrl}'`,
+      `There is no handler for method '${method}' and url '${formattedPath}'`,
     );
   }
   return route;
@@ -272,7 +279,7 @@ async function getAPI(
 export async function parseRequest(source: string): Promise<ParsedRequest> {
   source = source.replace(/^\s+|\s+$/g, ""); // trim whitespace
   const req = parseCommand(source);
-  const route = await getAPI(req.method, req.url);
+  const route = await getAPI(req.method, req.path);
   req.api = route.handler.name;
   req.request = route.handler.request;
   if (Object.keys(route.params).length > 0) {

@@ -48,6 +48,7 @@ export async function convertRequests(
   const requests = await parseRequests(source);
   const exporter = EXPORTERS[outputFormat];
   if (options.debug) {
+    /* istanbul ignore next */
     console.log(JSON.stringify(requests));
   }
   if (options.checkOnly) {

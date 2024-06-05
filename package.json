@@ -15,7 +15,7 @@
     "docs": "typedoc src/index.ts",
     "lint": "eslint src tests",
     "prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --list-different",
-    "test": "jest --coverage --test-path-ignore-patterns integration",
+    "test": "jest --test-path-ignore-patterns integration --coverage",
     "test:setup": "node scripts/download-examples.mjs && ./tests/integration/run-python.sh",
     "test:integration": "jest tests/integration",
     "test:example": "./scripts/test-example.sh",
@@ -23,7 +23,7 @@
     "fix:lint": "eslint src tests --fix",
     "fix:prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --write",
     "watch:build": "tsc -w",
-    "watch:test": "jest --coverage --test-path-ignore-patterns integration --watch",
+    "watch:test": "jest --test-path-ignore-patterns integration --coverage --watch",
     "prepare": "husky"
   },
   "main": "dist/index.js",

@@ -32,7 +32,7 @@ resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()
 {{else}}
 resp{{#if @index}}{{@index}}{{/if}} = client.perform_request(
     "{{this.method}}",
-    "{{this.url}}",
+    "{{this.path}}",
     {{#if this.query}}
     params={{{pyprint this.query}}},
     {{/if}}
