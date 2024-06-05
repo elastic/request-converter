@@ -1,2 +1,2 @@
-npm run fix:lint
-npm run fix:prettier
+npm run lint
+npm run prettier
