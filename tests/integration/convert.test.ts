@@ -51,79 +51,87 @@ describe("convert", () => {
   for (const c of cases) {
     const { digest, source } = c;
     for (const format of Object.keys(TEST_FORMATS)) {
+      let testOrFail = test;
       if (skip[digest] && (skip[digest].formats ?? [format]).includes(format)) {
-        test.todo(`${digest} ${skip[digest].reason}`);
-      } else {
-        test.each([[digest, format, source]])(
-          `convert %s to %s`,
-          async (
-            digest: string,
-            format: string,
-            source: string,
-          ): Promise<void> => {
-            const code = await convertRequests(source, "python", {
-              complete: true,
-              elasticsearchUrl: "http://localhost:9876",
+        testOrFail = test.failing;
+      }
+      testOrFail.each([
+        [
+          digest,
+          format,
+          skip[digest] ? ` (FAIL: ${skip[digest].reason})` : "",
+          source,
+        ],
+      ])(
+        `convert %s to %s%s`,
+        async (
+          digest: string,
+          format: string,
+          skipReason: string,
+          source: string,
+        ): Promise<void> => {
+          const code = await convertRequests(source, "python", {
+            complete: true,
+            elasticsearchUrl: "http://localhost:9876",
+          });
+
+          const ext = TEST_FORMATS[format];
+          let parsedRequest: ParsedRequest | undefined;
+          await writeFile(`.tmp.request.${ext}`, code as string);
+          try {
+            await exec(
+              path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`),
+            );
+            parsedRequest = await parseRequest(source);
+          } catch (err) {
+            // force an assertion to have a reference to the failing test
+            expect({ error: err, source }).toEqual({
+              error: undefined,
+              source,
             });
+          }
+          await rm(`.tmp.request.${ext}`);
 
-            const ext = TEST_FORMATS[format];
-            let parsedRequest: ParsedRequest | undefined;
-            await writeFile(`.tmp.request.${ext}`, code as string);
-            try {
-              await exec(
-                path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`),
-              );
-              parsedRequest = await parseRequest(source);
-            } catch (err) {
-              // force an assertion to have a reference to the failing test
-              expect({ error: err, source }).toEqual({
-                error: undefined,
-                source,
-              });
-            }
-            await rm(`.tmp.request.${ext}`);
+          const res = await fetch("http://localhost:9876/__getLastRequest");
+          const capturedRequest = await res.json();
 
-            const res = await fetch("http://localhost:9876/__getLastRequest");
-            const capturedRequest = await res.json();
-
-            if (capturedRequest.method != "GET") {
-              // arguments expected in the query are also accepted in the body
-              // here we check for this case and move arguments to the query if
-              // the example has them there
-              for (const q of Object.keys(parsedRequest?.query ?? {})) {
-                if (
-                  capturedRequest.query[q] == undefined &&
-                  capturedRequest.body[q] != undefined
-                ) {
-                  capturedRequest.query[q] = capturedRequest.body[q].toString();
-                  delete capturedRequest.body[q];
-                }
+          if (capturedRequest.method != "GET") {
+            // arguments expected in the query are also accepted in the body
+            // here we check for this case and move arguments to the query if
+            // the example has them there
+            for (const q of Object.keys(parsedRequest?.query ?? {})) {
+              if (
+                capturedRequest.query[q] == undefined &&
+                capturedRequest.body[q] != undefined
+              ) {
+                capturedRequest.query[q] = capturedRequest.body[q].toString();
+                delete capturedRequest.body[q];
               }
             }
+          }
 
-            /* this is useful for debugging, but too noisy otherwise
-            if (parsedRequest?.method != capturedRequest.method) {
-              console.log(
-                `Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`,
-              );
-            }
-            */
+          /* this is useful for debugging, but too noisy otherwise
+          if (parsedRequest?.method != capturedRequest.method) {
+            console.log(
+              `Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`,
+            );
+          }
+          */
 
-            expect({ result: capturedRequest.path, source }).toEqual({
-              result: parsedRequest?.url,
-              source,
-            });
-            expect({ result: capturedRequest.query, source }).toEqual({
-              result: parsedRequest?.query ?? {},
-              source,
-            });
-            expect({ result: capturedRequest.body, source }).toEqual({
-              result: parsedRequest?.body ?? {},
-              source,
-            });
-          },
-        );
-      }
+          expect({ result: capturedRequest.path, source }).toEqual({
+            result: parsedRequest?.path,
+            source,
+          });
+          expect({ result: capturedRequest.query, source }).toEqual({
+            result: parsedRequest?.query ?? {},
+            source,
+          });
+          expect({ result: capturedRequest.body, source }).toEqual({
+            result: parsedRequest?.body ?? {},
+            source,
+          });
+        },
+      );
     }
   }
 });
