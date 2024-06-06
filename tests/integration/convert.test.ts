@@ -5,7 +5,7 @@ import { exec } from "child-process-promise";
 import { convertRequests } from "../../src/convert";
 import { parseRequest, splitSource, ParsedRequest } from "../../src/parse";
 import { startServer, stopServer } from "./testserver";
-import { skip } from "./skip";
+import { shouldBeSkipped } from "./skip";
 
 const TEST_FORMATS: Record<string, string> = {
   python: "py",
@@ -36,8 +36,12 @@ describe("convert", () => {
     }
     if (example.lang == "console") {
       const sources = splitSource(example.source);
-      for (const source of sources) {
-        cases.push({ digest: example.digest, source: source });
+      if (sources.length == 1) {
+        cases.push({ digest: example.digest, source: example.source });
+      } else {
+        for (let i = 0; i < sources.length; i++) {
+          cases.push({ digest: `${example.digest}[${i}]`, source: sources[i] });
+        }
       }
     }
   }
@@ -51,17 +55,10 @@ describe("convert", () => {
   for (const c of cases) {
     const { digest, source } = c;
     for (const format of Object.keys(TEST_FORMATS)) {
-      let testOrFail = test;
-      if (skip[digest] && (skip[digest].formats ?? [format]).includes(format)) {
-        testOrFail = test.failing;
-      }
+      const reason = shouldBeSkipped(digest, format);
+      const testOrFail = !reason ? test : test.failing;
       testOrFail.each([
-        [
-          digest,
-          format,
-          skip[digest] ? ` (FAIL: ${skip[digest].reason})` : "",
-          source,
-        ],
+        [digest, format, reason ? ` (FAIL: ${reason})` : "", source],
       ])(
         `convert %s to %s%s`,
         async (

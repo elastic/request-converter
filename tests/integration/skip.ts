@@ -3,7 +3,7 @@ type SkippedTest = {
   formats?: string[];
 };
 
-export const skip: Record<string, SkippedTest> = {
+const skip: Record<string, SkippedTest> = {
   fd7eeadab6251d9113c4380a7fbe2572: {
     reason: "example references a non-existant `remote_indices` body attribute",
   },
@@ -245,7 +245,13 @@ export const skip: Record<string, SkippedTest> = {
   "2d633b7f346b828d01f923ce9dbf6ad5": {
     reason: "invalid request syntax",
   },
+  b0bddf2ffaa83049b195829c06b875cd: {
+    reason: "example uses undefined `render_query` attribute.",
+  },
   "0dfde6a9d953822fd4b3aa0121ddd8fb": {
+    reason: "example uses undefined `render_query` attribute.",
+  },
+  a162eb50853331c80596f5994e9d1c38: {
     reason: "example uses undefined `render_query` attribute.",
   },
   "4b113c7f475cfe484a150ddbb8e6c5c7": {
@@ -257,7 +263,13 @@ export const skip: Record<string, SkippedTest> = {
   "61a528b86d38c2f17a172326edf6b53b": {
     reason: "example uses unknown URL",
   },
+  "77518e8c6198acfe77c0934fd2fe65cb": {
+    reason: "example uses unknown URL",
+  },
   dd71b0c9f9197684ff29c61062c55660: {
+    reason: "example uses unknown URL",
+  },
+  "b62eaa20c4e0e48134a6d1d1b3c30b26[1]": {
     reason: "example uses unknown URL",
   },
   "57dc15e5ad663c342fd5c1d86fcd1b29": {
@@ -294,10 +306,24 @@ export const skip: Record<string, SkippedTest> = {
     reason: "client does not implement this endpoint variant",
     formats: ["python"],
   },
-  "3c4d7ef8422d2db423a8f23effcddaa1": {
+  "3c4d7ef8422d2db423a8f23effcddaa1[3]": {
     reason: "example uses unknown URL",
   },
-  "166bcfc6d5d39defec7ad6aa44d0914b": {
+  "166bcfc6d5d39defec7ad6aa44d0914b[1]": {
+    reason: "example uses undefined `nodes` query attribute",
+  },
+  "166bcfc6d5d39defec7ad6aa44d0914b[2]": {
     reason: "example uses undefined `nodes` query attribute",
   },
 };
+
+export function shouldBeSkipped(
+  digest: string,
+  format: string,
+): string | false {
+  const s = skip[digest] ?? skip[digest.split("[", 1)[0]];
+  if (s && (s.formats ?? [format]).includes(format)) {
+    return s.reason;
+  }
+  return false;
+}
