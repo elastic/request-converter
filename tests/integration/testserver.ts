@@ -28,10 +28,17 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url as string, true);
     capturedRequest = {
       method: req.method as string,
-      path: decodeURIComponent(parsedUrl.pathname as string),
+      path: decodeURIComponent(parsedUrl.pathname as string).replace(/\/$/, ""),
       query: parsedUrl.query,
       body: {},
     };
+
+    // fix query string options that are empty to true
+    for (const key in capturedRequest.query) {
+      if (capturedRequest.query[key] == "") {
+        capturedRequest.query[key] = "true";
+      }
+    }
 
     const body: string[] = [];
     req.on("data", (chunk) => body.push(chunk));
