@@ -1,6 +1,7 @@
 import { parseRequests, ParsedRequest } from "./parse";
 import { PythonExporter } from "./exporters/python";
-import { JavaScriptExporter } from "./exporters/javascript";
+import { CurlExporter } from "./exporters/curl";
+//import { JavaScriptExporter } from "./exporters/javascript";
 
 export type ConvertOptions = {
   /** When `true`, the converter will only check if the conversion can be carried
@@ -10,6 +11,8 @@ export type ConvertOptions = {
    * the instatiation of the Elasticsearch client. When `false`, only the
    * request(s) will be generated */
   complete?: boolean;
+  /** When `complete` is `true`, this is the endpoint URL to connect to. */
+  elasticsearchUrl?: string;
   /** When `true`, log information that is useful when debugging. */
   debug?: boolean;
   /** Converters may have their own custom options. */
@@ -23,8 +26,19 @@ export interface FormatExporter {
 
 const EXPORTERS: Record<string, FormatExporter> = {
   python: new PythonExporter(),
-  javascript: new JavaScriptExporter(),
+  curl: new CurlExporter(),
+  //javascript: new JavaScriptExporter(),
 };
+
+/**
+ * Return the list of available export formats.
+ *
+ * @returs An array of strings with the names of the formats that are available
+ *   to use in the `convertRequests()` function.
+ */
+export function listFormats(): string[] {
+  return Object.keys(EXPORTERS);
+}
 
 /**
  * Convert Elasticsearch requests in Dev Console syntax to other formats.

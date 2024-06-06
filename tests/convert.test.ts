@@ -1,4 +1,4 @@
-import { convertRequests } from "../src/convert";
+import { convertRequests, listFormats } from "../src/convert";
 
 const devConsoleScript = `GET /
 
@@ -110,5 +110,9 @@ resp1 = client.search(
 
 `,
     );
+  });
+
+  it("returns the list of available formats", () => {
+    expect(listFormats()).toContain("python");
   });
 });

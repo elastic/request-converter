@@ -10,6 +10,7 @@ import { shouldBeSkipped } from "./skip";
 const TEST_FORMATS: Record<string, string> = {
   python: "py",
   //"javascript": "js",
+  curl: "sh",
 };
 
 beforeAll(async () => {
@@ -67,7 +68,7 @@ describe("convert", () => {
           skipReason: string,
           source: string,
         ): Promise<void> => {
-          const code = await convertRequests(source, "python", {
+          const code = await convertRequests(source, format, {
             complete: true,
             elasticsearchUrl: "http://localhost:9876",
           });

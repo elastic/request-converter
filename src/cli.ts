@@ -8,10 +8,15 @@ async function main() {
     .description("Convert Elasticsearch Dev Console scripts to other languages")
     .addOption(
       new Option("-f, --format <format>", "export format")
-        .choices(["python", "javascript"])
+        .choices(["python", "javascript", "curl"])
         .makeOptionMandatory(),
     )
     .option("--complete", "output complete code", false)
+    .option(
+      "--elasticsearch-url",
+      "Elasticsearch endpoint URL",
+      "http://localhost:9200",
+    )
     .option("--debug", "output information useful when debugging", false)
     .option("--print-response", "add code to print response", false);
 
@@ -25,6 +30,7 @@ async function main() {
 
   const code = (await convertRequests(data, opts.format, {
     complete: opts.complete,
+    elasticsearchUrl: opts.elasticsearchUrl,
     debug: opts.debug,
     printResponse: opts.printResponse,
   })) as string;
