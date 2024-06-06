@@ -1,5 +1,5 @@
 import { Command, Option } from "commander";
-import { convertRequests } from "./convert";
+import { convertRequests, listFormats } from "./convert";
 
 async function main() {
   const program = new Command();
@@ -8,17 +8,21 @@ async function main() {
     .description("Convert Elasticsearch Dev Console scripts to other languages")
     .addOption(
       new Option("-f, --format <format>", "export format")
-        .choices(["python", "javascript", "curl"])
+        .choices(listFormats())
         .makeOptionMandatory(),
     )
-    .option("--complete", "output complete code", false)
+    .option(
+      "--complete",
+      "output complete code that includes the creation of the client",
+      false,
+    )
     .option(
       "--elasticsearch-url",
-      "Elasticsearch endpoint URL",
+      "Elasticsearch endpoint URL. Only needed when --complete is given.",
       "http://localhost:9200",
     )
-    .option("--debug", "output information useful when debugging", false)
-    .option("--print-response", "add code to print response", false);
+    .option("--print-response", "add code to print the response(s)", false)
+    .option("--debug", "output information useful when debugging", false);
 
   program.parse();
   const opts = program.opts();

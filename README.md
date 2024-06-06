@@ -25,6 +25,7 @@ const devConsoleScript = `GET /my-index-000001/_search?from=40&size=20
 async function main() {
   const code = await convertRequests(devConsoleScript, "python", {
     checkOnly: false,
+    printResponse: true,
     complete: true,
     elasticsearchUrl: "http://localhost:9200",
   });
@@ -32,6 +33,15 @@ async function main() {
 }
 
 main();
+```
+
+The list of available formats that can be passed in the second argument can be
+obtained as follows:
+
+```typescript
+import { listFormats } from "@elastic/request-converter";
+
+const formats = listFormats();
 ```
 
 The ouput code in the example above would look like this:
@@ -57,12 +67,12 @@ resp = client.search(
 )
 ```
 
-When using Node and JavaScript, you can import the `convertRequests` function as
+When using Node and JavaScript, you can import the functions in this library as
 follows:
 
 
 ```typescript
-const { convertRequests } = require("@elastic/request-converter");
+const { convertRequests, listFormats } = require("@elastic/request-converter");
 ```
 
 ## Command-Line Interface

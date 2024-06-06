@@ -9,9 +9,13 @@ export type ConvertOptions = {
   checkOnly?: boolean;
   /** When `true`, the generated code will generate a complete script that includes
    * the instatiation of the Elasticsearch client. When `false`, only the
-   * request(s) will be generated */
+   * request(s) will be generated. */
   complete?: boolean;
   /** When `complete` is `true`, this is the endpoint URL to connect to. */
+  printResponse?: boolean;
+  /** When `true`, the generated code will print the response. When `false`,
+   * the response will not be printed. Note that not all formats may honor this
+   * option. */
   elasticsearchUrl?: string;
   /** When `true`, log information that is useful when debugging. */
   debug?: boolean;
