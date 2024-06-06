@@ -10,6 +10,9 @@ const skip: Record<string, SkippedTest> = {
   d69bd36335774c8ae1286cee21310241: {
     reason: "example references a non-existant `remote_indices` body attribute",
   },
+  "0b8fa90bc9aeeadb420ad785bd0b9953": {
+    reason: "example references a non-existant `remote_indices` body attribute",
+  },
   b24a374c0ad264abbcacb5686f5ed61c: {
     reason: "example puts attributes in body, spec says they go in query",
     formats: ["python"],
@@ -314,6 +317,33 @@ const skip: Record<string, SkippedTest> = {
   },
   "166bcfc6d5d39defec7ad6aa44d0914b[2]": {
     reason: "example uses undefined `nodes` query attribute",
+  },
+  "9b68748c061b768c0153c1f2508ce207": {
+    reason: "example uses bad format for comments",
+  },
+  a3464bd6f0a61623562162859566b078: {
+    reason: "example uses bad format for comments",
+  },
+  "902cfd5aeec2f65b3adf55f5e38b21f0": {
+    reason: "example uses bad format for comments",
+  },
+  f749efe8f11ebd43ef83db91922c736e: {
+    reason: "example uses bad format for comments",
+  },
+  c79b284fa7a5d7421c6daae62bc697f9: {
+    reason: "example uses bad format for comments",
+  },
+  "691fe20d467324ed43a36fd15852c492": {
+    reason: "example uses bad format for comments",
+  },
+  "8d6631b622f9bfb8fa70154f6fb8b153": {
+    reason: "example uses bad format for comments",
+  },
+  "0a3003fa5af850e415634b50b1029859": {
+    reason: "example uses bad format for comments",
+  },
+  "083e514297c09e91211f0d168aef1b0b": {
+    reason: "example uses bad format for comments",
   },
 };
 
