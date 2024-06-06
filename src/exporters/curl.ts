@@ -21,7 +21,7 @@ export class CurlExporter implements FormatExporter {
         headers = ' -H "Content-Type: application/json"';
         body = " -d '" + JSON.stringify(request.body) + "'";
       }
-      output += `curl -X ${request.method}${headers}${body} ${endpoint}${request.url}\n`;
+      output += `curl -X ${request.method}${headers}${body} "${endpoint}${request.url}"\n`;
     }
     return output;
   }
