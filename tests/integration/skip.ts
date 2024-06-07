@@ -6,12 +6,15 @@ type SkippedTest = {
 const skip: Record<string, SkippedTest> = {
   fd7eeadab6251d9113c4380a7fbe2572: {
     reason: "example references a non-existant `remote_indices` body attribute",
+    formats: ["python"],
   },
   d69bd36335774c8ae1286cee21310241: {
     reason: "example references a non-existant `remote_indices` body attribute",
+    formats: ["python"],
   },
   "0b8fa90bc9aeeadb420ad785bd0b9953": {
     reason: "example references a non-existant `remote_indices` body attribute",
+    formats: ["python"],
   },
   b24a374c0ad264abbcacb5686f5ed61c: {
     reason: "example puts attributes in body, spec says they go in query",
@@ -19,9 +22,11 @@ const skip: Record<string, SkippedTest> = {
   },
   "42ba7c1d13aee91fe6f0a8a42c30eb74": {
     reason: "example references a non-existent `lazy` query attribute",
+    formats: ["python"],
   },
   "96ea0e80323d6d2d99964625c004a44d": {
     reason: "example references a non-existant `enabled` body attribute",
+    formats: ["python"],
   },
   d0c03847106d23ad632ceb624d647c37: {
     reason: "example has invalid body",
@@ -38,9 +43,11 @@ const skip: Record<string, SkippedTest> = {
   ed12eeadb4e530b53c4975dadaa06054: {
     reason:
       "example references non-existant `ecs_compatibility` query attribute",
+    formats: ["python"],
   },
   dd1a25d821d0c8deaeaa9c8083152a54: {
     reason: "example references non-existant `s` query attribute",
+    formats: ["python"],
   },
   c2c21e2824fbf6b7198ede30419da82b: {
     reason: "client does not implement this endpoint variant",
@@ -52,22 +59,28 @@ const skip: Record<string, SkippedTest> = {
   },
   ad92a1a8bb1b0f26d1536fe8ba4ffd17: {
     reason: "example puts `id` path attribute in body",
+    formats: ["python"],
   },
   "29953082744b7a36e437b392a6391c81": {
     reason: "example puts `id` path attribute in body",
+    formats: ["python"],
   },
   "3182f26c61fbe5cf89400804533d5ed2": {
     reason: "example puts `id` path attribute in body",
+    formats: ["python"],
   },
   "48d9697a14dfe131325521f48a7adc84": {
     reason: "example puts `id` path attribute in body",
+    formats: ["python"],
   },
   "3e6db3d80439c2c176dbd1bb1296b6cf": {
     reason: "example puts `id` path attribute in body",
+    formats: ["python"],
   },
   "39ce44333d28ed2b833722d3e3cb06f3": {
     reason:
       "example references a non-existant `include_named_queries_score` query attribute",
+    formats: ["python"],
   },
   e39d51202913bf6d861e9e721570cdb8: {
     reason: "example has bad request syntax",
@@ -85,7 +98,8 @@ const skip: Record<string, SkippedTest> = {
     reason: "example has bad request syntax",
   },
   "1ceaa211756e2db3d48c6bc4b1a861b0": {
-    reason: "example has bad request syntax",
+    reason: "example has bad URL syntax",
+    formats: ["python"],
   },
   "3f1fe5f5f99b98d0891f38003e10b636": {
     reason: "endpoint URL is not in the spec",
@@ -98,6 +112,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "50096ee0ca53fe8a88450ebb2a50f285": {
     reason: "example references a non-existant `delimiter` query attribute",
+    formats: ["python"],
   },
   c9c21191ae15a49955bffde0ac749a49: {
     reason: "example has bad request syntax",
@@ -131,15 +146,19 @@ const skip: Record<string, SkippedTest> = {
   },
   a71154ea11a5214f409ecfd118e9b5e3: {
     reason: "invalid `query` attribute in body",
+    formats: ["python"],
   },
   e3019fd5f23458ae49ad9854c97d321c: {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
+    formats: ["python"],
   },
   "9c01db07c9ac395b6370e3b33965c21f": {
     reason: "example uses undefined `oidc_authentication` attribute",
+    formats: ["python"],
   },
   "2a1eece9a59ac1773edcf0a932c26de0": {
     reason: "example uses undefined `oidc_logout` attribute",
+    formats: ["python"],
   },
   "734e2b1d1ca84a305240a449738f0eba": {
     reason: "client does not implement this endpoint variant",
@@ -151,8 +170,9 @@ const skip: Record<string, SkippedTest> = {
   a34d70d7022eb4ba48909d440c80390f: {
     reason: "url cannot be parsed",
   },
-  "9afa0844883b7471883aa378a8dd10b4": {
-    reason: "TODO",
+  x9afa0844883b7471883aa378a8dd10b4: {
+    reason: "client does not implement this endpoint",
+    formats: ["python"],
   },
   e0bbfb368eae307e9508ab8d6e9cf23c: {
     reason: "client does not implement this endpoint variant",
@@ -168,12 +188,15 @@ const skip: Record<string, SkippedTest> = {
   },
   "0470d7101637568b9d3d1239f06325a7": {
     reason: "example uses invalid URL",
+    formats: ["python"],
   },
   ba10b644a4e9a2e7d78744ca607355d0: {
     reason: "example uses undefined `data_stream_name` attribute",
+    formats: ["python"],
   },
   "1b3762712c14a19e8c2956b4f530d327": {
     reason: "example uses undefined `settings` attribute",
+    formats: ["python"],
   },
   "365256ebdfa47b449780771d9beba8d9": {
     reason: "example uses undefined method for endpoint",
@@ -202,9 +225,11 @@ const skip: Record<string, SkippedTest> = {
   },
   f0c3235d8fce641d6ff8ce90ab7b7b8b: {
     reason: "example uses undefined `parameters` attribute",
+    formats: ["python"],
   },
   "88cecae3f0363fc186d955dd8616b5d4": {
     reason: "example uses undefined `keep_alive` attribute",
+    formats: ["python"],
   },
   "405511f7c1f12cc0a227b4563fe7b2e2": {
     reason: "example uses unknown URL",
@@ -223,6 +248,7 @@ const skip: Record<string, SkippedTest> = {
   },
   af91019991bee136df5460e2fd4ac72a: {
     reason: "example uses unknown `lazy` query attribute",
+    formats: ["python"],
   },
   "0a46cc8fe93e372909660a63dc52ae3b": {
     reason: "invalid request syntax",
@@ -244,21 +270,26 @@ const skip: Record<string, SkippedTest> = {
   },
   "5bbccf103107e505c17ae59863753efd": {
     reason: "example uses GET request with body",
+    formats: ["python"],
   },
   "2d633b7f346b828d01f923ce9dbf6ad5": {
     reason: "invalid request syntax",
   },
   b0bddf2ffaa83049b195829c06b875cd: {
     reason: "example uses undefined `render_query` attribute.",
+    formats: ["python"],
   },
   "0dfde6a9d953822fd4b3aa0121ddd8fb": {
     reason: "example uses undefined `render_query` attribute.",
+    formats: ["python"],
   },
   a162eb50853331c80596f5994e9d1c38: {
     reason: "example uses undefined `render_query` attribute.",
+    formats: ["python"],
   },
   "4b113c7f475cfe484a150ddbb8e6c5c7": {
     reason: "example references a non-existant `remote_indices` body attribute",
+    formats: ["python"],
   },
   "174b93c323aa8e9cc8ee2a3df5736810": {
     reason: "example uses unknown URL",
@@ -271,15 +302,18 @@ const skip: Record<string, SkippedTest> = {
   },
   dd71b0c9f9197684ff29c61062c55660: {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "b62eaa20c4e0e48134a6d1d1b3c30b26[1]": {
     reason: "example uses unknown URL",
   },
   "57dc15e5ad663c342fd5c1d86fcd1b29": {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
+    formats: ["python"],
   },
   d35c8cf7a98b3f112e1de8797ec6689d: {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
+    formats: ["python"],
   },
   "88a283dfccc481f1afba79d9b3c61f51": {
     reason: "example uses unknown URL",
@@ -292,18 +326,22 @@ const skip: Record<string, SkippedTest> = {
   },
   "80dd7f5882c59b9c1c90e8351937441f": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
+    formats: ["python"],
   },
   c580990a70028bb49cca8a6bde86bbf6: {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
+    formats: ["python"],
   },
   "6f3b723bf6179b96c3413597ed7f49e1": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
+    formats: ["python"],
   },
   "0ab002c6618af75e1041a23c692327ad": {
     reason: "example uses unknown URL",
   },
   "841d8b766902c8e3ae85c228a31383ac": {
     reason: "example uses unknown `format` attribute",
+    formats: ["python"],
   },
   "3ed79871d956bfb2d6d2721d7272520c": {
     reason: "client does not implement this endpoint variant",
@@ -314,9 +352,11 @@ const skip: Record<string, SkippedTest> = {
   },
   "166bcfc6d5d39defec7ad6aa44d0914b[1]": {
     reason: "example uses undefined `nodes` query attribute",
+    formats: ["python"],
   },
   "166bcfc6d5d39defec7ad6aa44d0914b[2]": {
     reason: "example uses undefined `nodes` query attribute",
+    formats: ["python"],
   },
   "9b68748c061b768c0153c1f2508ce207": {
     reason: "example uses bad format for comments",

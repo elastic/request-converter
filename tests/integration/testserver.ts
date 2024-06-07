@@ -28,7 +28,10 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url as string, true);
     capturedRequest = {
       method: req.method as string,
-      path: decodeURIComponent(parsedUrl.pathname as string).replace(/\/$/, ""),
+      path: decodeURIComponent(parsedUrl.pathname as string).replace(
+        /(.)\/$/,
+        "$1",
+      ),
       query: parsedUrl.query,
       body: {},
     };
