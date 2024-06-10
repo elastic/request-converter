@@ -153,10 +153,9 @@ resp1 = client.search(
       async check(requests: ParsedRequest[]): Promise<boolean> {
         return true;
       }
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async convert(
         requests: ParsedRequest[],
-        options: ConvertOptions,
+        options: ConvertOptions, // eslint-disable-line @typescript-eslint/no-unused-vars
       ): Promise<string> {
         return requests.map((req) => req.api).join("\n");
       }
