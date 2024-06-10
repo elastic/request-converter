@@ -75,6 +75,35 @@ follows:
 const { convertRequests, listFormats } = require("@elastic/request-converter");
 ```
 
+## Available Formats
+
+At this time the converter supports `curl` and `python`. Work is currently in
+progress to add support for `javascript`, `ruby` and `php`.
+
+### curl
+
+The curl exporter generates commands for the terminal using the
+[curl](https://curl.se/) command line HTTP client.
+
+Supported options:
+
+| Option name | Type | Required | Description |
+| ----------- | ---- | -------- | ----------- |
+| `elasticsearchUrl` | `string` | yes | The Elasticsearch endpoint to use in the generated commands. |
+| `windows` | `boolean` | no | If `true`, use PowerShell escaping rules for quotes. If `false`, use bash/zsh escaping rules. The default is `false`. |
+
+### python
+
+The Python exporter generates code for the Elasticsearch Python client.
+
+Supported options:
+
+| Option name | Type | Required | Description |
+| ----------- | ---- | -------- | ----------- |
+| `printResponse` | `boolean` | no | If `true`, add code to print the response. The default is `false`. |
+| `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
+| `elasticsearchUrl` | `string` | only if `complete` is `true` | The Elasticsearch endpoint to use. |
+
 ## Command-Line Interface
 
 For convenience, a CLI that wraps the `convertRequests` function is also available.
