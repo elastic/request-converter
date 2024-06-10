@@ -1,23 +1,58 @@
-import { convertRequests, listFormats } from "../src/convert";
+import {
+  convertRequests,
+  listFormats,
+  FormatExporter,
+  ConvertOptions,
+} from "../src/convert";
+import { ParsedRequest } from "../src/parse";
 
 const devConsoleScript = `GET /
 
-GET /my-index/_search?from=40&size=20
+POST /my-index/_search?from=40&size=20
 {
   "query": {
     "term": {
-      "user.id": "kimchy"
+      "user.id": "kimchy's"
     }
   }
 }`;
 
 describe("convert", () => {
+  it("checks for curl", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "curl", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+  });
+
   it("checks for python", async () => {
     expect(
       await convertRequests(devConsoleScript, "python", {
         checkOnly: true,
       }),
     ).toBeTruthy();
+  });
+
+  it("converts to curl", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "curl", {
+        elasticsearchUrl: "http://localhost:9876",
+      }),
+    ).toEqual(
+      'curl -X GET "http://localhost:9876/"\ncurl -X POST -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'"\'"\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
+    );
+  });
+
+  it("converts to curl", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "curl", {
+        elasticsearchUrl: "http://localhost:9876",
+        windows: true,
+      }),
+    ).toEqual(
+      'curl -X GET "http://localhost:9876/"\ncurl -X POST -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
+    );
   });
 
   it("converts to python", async () => {
@@ -30,7 +65,7 @@ resp1 = client.search(
     size="20",
     query={
         "term": {
-            "user.id": "kimchy"
+            "user.id": "kimchy's"
         }
     },
 )
@@ -54,7 +89,7 @@ resp1 = client.search(
     size="20",
     query={
         "term": {
-            "user.id": "kimchy"
+            "user.id": "kimchy's"
         }
     },
 )
@@ -87,7 +122,7 @@ resp1 = client.search(
     size="20",
     query={
         "term": {
-            "user.id": "kimchy"
+            "user.id": "kimchy's"
         }
     },
 )
@@ -110,6 +145,30 @@ resp1 = client.search(
 
 `,
     );
+  });
+
+  it("supports a custom exporter", async () => {
+    class MyExporter implements FormatExporter {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      async check(requests: ParsedRequest[]): Promise<boolean> {
+        return true;
+      }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      async convert(
+        requests: ParsedRequest[],
+        options: ConvertOptions,
+      ): Promise<string> {
+        return requests.map((req) => req.api).join("\n");
+      }
+    }
+
+    expect(
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        new MyExporter(),
+        {},
+      ),
+    ).toEqual("search\ninfo");
   });
 
   it("returns the list of available formats", () => {

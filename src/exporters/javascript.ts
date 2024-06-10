@@ -2,7 +2,8 @@ import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 
 export class JavaScriptExporter implements FormatExporter {
-  async check(): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async check(requests: ParsedRequest[]): Promise<boolean> {
     return false;
   }
 

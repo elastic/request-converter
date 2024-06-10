@@ -33,7 +33,8 @@ const PYCONSTANTS: Record<string, string> = {
 export class PythonExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
 
-  async check(): Promise<boolean> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async check(requests: ParsedRequest[]): Promise<boolean> {
     return true;
   }
 

@@ -24,7 +24,7 @@ export type ConvertOptions = {
 };
 
 export interface FormatExporter {
-  check(): Promise<boolean>;
+  check(requests: ParsedRequest[]): Promise<boolean>;
   convert(requests: ParsedRequest[], options: ConvertOptions): Promise<string>;
 }
 
@@ -60,17 +60,18 @@ export function listFormats(): string[] {
  */
 export async function convertRequests(
   source: string,
-  outputFormat: string,
+  outputFormat: string | FormatExporter,
   options: ConvertOptions,
 ): Promise<boolean | string> {
   const requests = await parseRequests(source);
-  const exporter = EXPORTERS[outputFormat];
+  const exporter =
+    typeof outputFormat == "string" ? EXPORTERS[outputFormat] : outputFormat;
   if (options.debug) {
     /* istanbul ignore next */
     console.log(JSON.stringify(requests));
   }
   if (options.checkOnly) {
-    return await exporter.check();
+    return await exporter.check(requests);
   }
   return await exporter.convert(requests, options);
 }

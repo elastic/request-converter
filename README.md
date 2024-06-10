@@ -92,3 +92,26 @@ client = Elasticsearch(
 
 resp = client.info()
 ```
+
+## Using a Custom Exporter
+
+Instead of passing the name of one of the available exporters, you can pass a
+custom exporter instance.
+
+To define a custom exporter format, create a class that implements the
+`FormatExporter` interface. Here is an example exporter that outputs the name
+of the API used in the request:
+
+```typescript
+import { FormatExporter, convertRequests } from "@elastic/request-converter";
+
+class MyExporter implements FormatExporter {
+  async check(requests: ParsedRequest[]): Promise<boolean> { return true; }
+  async convert(requests: ParsedRequest[], options: ConvertOptions): Promise<string> {
+    return requests.map(req => req.api).join("\n");
+  }
+}
+
+const apis = await convertRequests("GET /my-index/_search\nGET /\n", new MyExporter(), {});
+console.log(apis); // outputs "search\ninfo"
+```
