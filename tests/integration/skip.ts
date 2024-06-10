@@ -134,6 +134,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "2a5f7e7d6b92c66e52616845146d2820": {
     reason: "example puts `id` path attribute in body",
+    formats: ["python"],
   },
   "9b09ad677a0f4331830bed254a8388d1": {
     reason: "example uses undefined method for endpoint",

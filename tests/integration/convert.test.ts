@@ -56,6 +56,9 @@ describe("convert", () => {
   for (const c of cases) {
     const { digest, source } = c;
     for (const format of Object.keys(TEST_FORMATS)) {
+      if (process.env.ONLY_FORMAT && format != process.env.ONLY_FORMAT) {
+        continue;
+      }
       const reason = shouldBeSkipped(digest, format);
       const testOrFail = !reason ? test : test.failing;
       testOrFail.each([
