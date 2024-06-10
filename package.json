@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "type": "commonjs",
   "bin": {
-    "es-request-converter": "./dist/es-request-converter.js"
+    "es-request-converter": "dist/es-request-converter.js"
   },
   "scripts": {
     "build": "npm run clean && tsc && npm run copy-files",
