@@ -25,7 +25,9 @@ export class CurlExporter implements FormatExporter {
           JSON.stringify(request.body).replaceAll("'", escapedSingleQuote) +
           "'";
       }
-      output += `curl -X ${request.method}${headers}${body} "${endpoint}${request.url}"\n`;
+      const method =
+        request.method != "HEAD" ? `-X ${request.method}` : "--head";
+      output += `curl ${method}${headers}${body} "${endpoint}${request.url}"\n`;
     }
     return output;
   }

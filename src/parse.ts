@@ -155,9 +155,9 @@ function parseCommand(source: string) {
 
   // TODO: this should be an issue in the docs,
   // the correct url is `<index/_mapping`
-  /* istanbul ignore next */
   if (data.path.endsWith("_mappings")) {
     data.path = data.path.slice(0, -1);
+    data.url = data.url.replace(data.path + "s", data.path);
   }
 
   // identify the body

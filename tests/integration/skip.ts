@@ -171,7 +171,7 @@ const skip: Record<string, SkippedTest> = {
   a34d70d7022eb4ba48909d440c80390f: {
     reason: "url cannot be parsed",
   },
-  x9afa0844883b7471883aa378a8dd10b4: {
+  "9afa0844883b7471883aa378a8dd10b4": {
     reason: "client does not implement this endpoint",
     formats: ["python"],
   },
