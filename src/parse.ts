@@ -1,6 +1,5 @@
 import { METHODS } from "http";
 import { URL } from "url";
-import querystring, { ParsedUrlQuery } from "querystring";
 import * as Router from "find-my-way-ts";
 import { Model, Request } from "./metamodel";
 
@@ -24,7 +23,7 @@ export type ParsedRequest = {
   /** The path portion of the request URL. */
   path: string;
   /** An object with the arguments passed in the query string of the request. */
-  query?: ParsedUrlQuery;
+  query?: Record<string, string>;
   /** The body of the request, given as an object for a JSON body, or an array of
    * objects for the ndjson bodies used in bulk requests. */
   body?: JSONObject | JSONObject[];
@@ -145,11 +144,10 @@ function parseCommand(source: string) {
   data.path = decodeURIComponent(data.path);
 
   if (parsedUrl.search.length) {
-    data.query = querystring.parse(parsedUrl.search.slice(1));
-    for (const q in data.query) {
-      if (data.query[q] == "") {
-        data.query[q] = "true";
-      }
+    const parsedQuery = new URLSearchParams(parsedUrl.search.slice(1));
+    data.query = {};
+    for (const [key, value] of parsedQuery) {
+      data.query[key] = value || "true";
     }
   }
 
@@ -218,7 +216,7 @@ async function getAPI(
   method: string,
   path: string,
 ): Promise<Router.FindResult<ESRoute>> {
-  if (!router.has("GET", "/")) {
+  if (router.find("GET", "/") == undefined) {
     // download the Elasticsearch spec
     const r = await fetch(SPEC_URL);
     const spec = (await r.json()) as Model;
