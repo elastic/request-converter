@@ -89,7 +89,7 @@ Supported options:
 
 | Option name | Type | Required | Description |
 | ----------- | ---- | -------- | ----------- |
-| `elasticsearchUrl` | `string` | yes | The Elasticsearch endpoint to use in the generated commands. |
+| `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use in the generated commands. The default is `http://localhost:9200`. |
 | `windows` | `boolean` | no | If `true`, use PowerShell escaping rules for quotes. If `false`, use bash/zsh escaping rules. The default is `false`. |
 
 ### python
@@ -102,7 +102,7 @@ Supported options:
 | ----------- | ---- | -------- | ----------- |
 | `printResponse` | `boolean` | no | If `true`, add code to print the response. The default is `false`. |
 | `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
-| `elasticsearchUrl` | `string` | only if `complete` is `true` | The Elasticsearch endpoint to use. |
+| `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use. The default is `http://localhost:9200`. |
 
 ## Command-Line Interface
 

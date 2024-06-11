@@ -24,6 +24,18 @@ jobs:
       - name: Prettier
         run: |
           npm run prettier
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+      - name: Install
+        run: |
+          npm install
+      - name: Build documentation
+        run: |
+          npm run docs
   unit-tests:
     runs-on: ${{ matrix.os }}
     strategy:
