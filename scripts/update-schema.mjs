@@ -18,5 +18,5 @@ if (response.status !== 200) {
   throw new Error(`Cannot download schema for ${majorMinorVersion}`);
 }
 console.log(`Updated schema to "${version}" for version ${majorMinorVersion}.`);
-const fileStream = fs.createWriteStream('.examples.json');
+const fileStream = fs.createWriteStream('src/schema.json');
 await finished(Readable.fromWeb(response.body).pipe(fileStream));
