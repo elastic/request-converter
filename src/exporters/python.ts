@@ -9,6 +9,7 @@ import { ParsedRequest } from "../parse";
 // call
 const UNSUPPORTED_APIS = new RegExp(
   "^connector.*$" +
+    "|^inference.*$" +
     "|^_internal.*$" +
     "|^security.create_cross_cluster_api_key$" +
     "|^security.update_cross_cluster_api_key$" +
@@ -23,12 +24,6 @@ const PYCONSTANTS: Record<string, string> = {
   false: "False",
   null: "None",
 };
-
-// const PYCONSTANTS_QUOTED: Record<string, string> = {
-//   '"true"': "True",
-//   '"false"': "False",
-//   '"null"': "None",
-// };
 
 export class PythonExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
@@ -62,8 +57,6 @@ export class PythonExporter implements FormatExporter {
           return result;
         } else if (PYCONSTANTS[lines[0]]) {
           return PYCONSTANTS[lines[0]];
-          //} else if (PYCONSTANTS_QUOTED[lines[0]]) {
-          //  return PYCONSTANTS_QUOTED[lines[0]];
         } else {
           return lines[0];
         }
