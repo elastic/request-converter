@@ -1,5 +1,7 @@
 import { METHODS } from "http";
 import { URL } from "url";
+import { readFile } from "fs/promises";
+import path from "path";
 import * as Router from "find-my-way-ts";
 import { Model, Request } from "./metamodel";
 
@@ -15,7 +17,7 @@ export type ParsedRequest = {
   /** The request definition from the Elasticsearch specification that applies to this request. */
   request?: Request;
   /** The dynamic parameters that are part of the request's URL. */
-  params: { [x: string]: string | undefined };
+  params: Record<string, string | undefined>;
   /** The request method. */
   method: string;
   /** The complete request URL, including query string. */
@@ -34,8 +36,6 @@ type ESRoute = {
   request: Request;
 };
 
-const SPEC_URL =
-  "https://raw.githubusercontent.com/elastic/elasticsearch-specification/main/output/schema/schema.json";
 const router = Router.make<ESRoute>({
   ignoreTrailingSlash: true,
   maxParamLength: 1000,
@@ -214,12 +214,15 @@ function parseCommand(source: string) {
 // use a router to figure out the API name
 async function getAPI(
   method: string,
-  path: string,
+  endpointPath: string,
 ): Promise<Router.FindResult<ESRoute>> {
   if (router.find("GET", "/") == undefined) {
-    // download the Elasticsearch spec
-    const r = await fetch(SPEC_URL);
-    const spec = (await r.json()) as Model;
+    // load the Elasticsearch spec
+    const spec = JSON.parse(
+      await readFile(path.join(__dirname, "./schema.json"), {
+        encoding: "utf-8",
+      }),
+    ) as Model;
     for (const endpoint of spec.endpoints) {
       for (const url of endpoint.urls) {
         const { path, methods } = url;
@@ -263,7 +266,9 @@ async function getAPI(
     }
   }
 
-  const formattedPath = path.startsWith("/") ? path : `/${path}`;
+  const formattedPath = endpointPath.startsWith("/")
+    ? endpointPath
+    : `/${endpointPath}`;
   const route = router.find(method, formattedPath);
   if (!route) {
     /* istanbul ignore next */
