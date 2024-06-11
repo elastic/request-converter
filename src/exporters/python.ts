@@ -9,6 +9,7 @@ import { ParsedRequest } from "../parse";
 // call
 const UNSUPPORTED_APIS = new RegExp(
   "^connector.*$" +
+    "|^inference.*$" +
     "|^_internal.*$" +
     "|^security.create_cross_cluster_api_key$" +
     "|^security.update_cross_cluster_api_key$" +
