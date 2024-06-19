@@ -124,7 +124,8 @@ export class PythonExporter implements FormatExporter {
         "ifRequestBodyKind",
         function (this: ParsedRequest, kind: string, options) {
           let bodyKind = this.request?.body?.kind;
-          if (this.api == "search" && "sub_searches" in (this.body ?? {})) {
+          const parsedBody = typeof this.body == "object" ? this.body : {};
+          if (this.api == "search" && "sub_searches" in parsedBody) {
             // Change the kind of any search requests that use sub-searches to
             // "value", so that the template renders a single body argument
             // instead of expanding the kwargs. This is needed because the

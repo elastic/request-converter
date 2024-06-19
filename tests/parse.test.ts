@@ -54,7 +54,7 @@ GET /customer/_doc/1
 GET/customer/_doc/1?foo=bar&v
 
 
-PUT /customer/_doc/1{
+PUT /customer%7B/_doc/1{
   "foo": {  // comment
     "bar": "GET{POST}"
   }
@@ -88,6 +88,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "PUT",
       url: "/customer/_doc/1?foo=bar",
       path: "/customer/_doc/1",
+      rawPath: "/customer/_doc/1",
       query: { foo: "bar" },
       body: { name: "John Doe" },
     });
@@ -97,6 +98,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "GET",
       url: "/customer/_doc/1",
       path: "/customer/_doc/1",
+      rawPath: "/customer/_doc/1",
     });
     expect(reqs[2]).toMatchObject({
       api: "get",
@@ -104,14 +106,16 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "GET",
       url: "/customer/_doc/1?foo=bar&v",
       path: "/customer/_doc/1",
+      rawPath: "/customer/_doc/1",
       query: { foo: "bar", v: "true" },
     });
     expect(reqs[3]).toMatchObject({
       api: "index",
-      params: { index: "customer", id: "1" },
+      params: { index: "customer{", id: "1" },
       method: "PUT",
-      url: "/customer/_doc/1",
-      path: "/customer/_doc/1",
+      url: "/customer%7B/_doc/1",
+      path: "/customer{/_doc/1",
+      rawPath: "/customer%7B/_doc/1",
       body: { foo: { bar: "GET{POST}" } },
     });
     expect(reqs[4]).toMatchObject({
@@ -120,6 +124,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "GET",
       url: "/customer/_doc/1",
       path: "/customer/_doc/1",
+      rawPath: "/customer/_doc/1",
     });
     expect(reqs[5]).toMatchObject({
       api: "bulk",
@@ -127,6 +132,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "POST",
       url: "/_bulk?foo=bar",
       path: "/_bulk",
+      rawPath: "/_bulk",
       query: { foo: "bar" },
       body: [{ name: "John Doe" }, { name: "John Doe" }, { name: "John Doe" }],
     });
@@ -136,6 +142,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "POST",
       url: "/_bulk?foo=bar",
       path: "/_bulk",
+      rawPath: "/_bulk",
       query: { foo: "bar" },
       body: [
         { name: "John\nDoe" },
@@ -149,6 +156,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "GET",
       url: "/customer/_doc/1",
       path: "/customer/_doc/1",
+      rawPath: "/customer/_doc/1",
     });
     expect(reqs[8]).toMatchObject({
       api: "nodes.reload_secure_settings",
@@ -156,6 +164,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "POST",
       url: "/_nodes/reload_secure_settings",
       path: "/_nodes/reload_secure_settings",
+      rawPath: "/_nodes/reload_secure_settings",
       body: { reload_secure_settings: "s3cr3t" },
     });
     expect(reqs[9]).toMatchObject({
@@ -164,6 +173,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "GET",
       url: "/my_index/_analyze",
       path: "/my_index/_analyze",
+      rawPath: "/my_index/_analyze",
       body: { field: "text", text: "The quick Brown Foxes." },
     });
     expect(reqs[10]).toMatchObject({
@@ -172,6 +182,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       method: "POST",
       url: "/_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
       path: "/_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
+      rawPath:
+        "/_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
       body: { description: "Snapshot 1", retain: true },
     });
   });
@@ -191,12 +203,23 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
   });
 
   it("errors with badly formatted bodies", async () => {
-    expect(
-      async () =>
-        await parseRequest(`GET /my-index/_search
+    const script = `GET /my-index/_search
 {
   "query": ...
-}`),
-    ).rejects.toThrowError("body cannot be parsed");
+}`;
+    expect(async () => await parseRequest(script)).rejects.toThrowError(
+      "body cannot be parsed",
+    );
+    const req = await parseRequest(script, { ignoreErrors: true });
+    expect(req).toMatchObject({
+      api: "search",
+      body: '\n{\n  "query": ...\n}',
+      method: "GET",
+      params: {
+        index: "my-index",
+      },
+      path: "/my-index/_search",
+      rawPath: "/my-index/_search",
+    });
   });
 });
