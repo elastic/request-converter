@@ -11,6 +11,11 @@ interface JSONObject {
   [x: string]: JSONValue;
 }
 
+export type ParseOptions = {
+  /** Wether to ignore errors and continue parsing */
+  ignoreErrors?: boolean;
+};
+
 export type ParsedRequest = {
   /** The name of the Elasticsearch API this request refers to. */
   api?: string;
@@ -22,13 +27,15 @@ export type ParsedRequest = {
   method: string;
   /** The complete request URL, including query string. */
   url: string;
-  /** The path portion of the request URL. */
+  /** The path portion of the request URL, with URL decoding applied. */
   path: string;
+  /** The path portion of the request URL, without URL decoding applied. */
+  rawPath: string;
   /** An object with the arguments passed in the query string of the request. */
   query?: Record<string, string>;
   /** The body of the request, given as an object for a JSON body, or an array of
    * objects for the ndjson bodies used in bulk requests. */
-  body?: JSONObject | JSONObject[];
+  body?: JSONObject | JSONObject[] | string;
 };
 
 type ESRoute = {
@@ -98,7 +105,7 @@ export function splitSource(source: string): string[] {
 }
 
 // parse a single console command
-function parseCommand(source: string) {
+function parseCommand(source: string, options: ParseOptions) {
   source = source
     // removes comments tags, such as `<1>`
     .replace(/<([\S\s])>/g, "")
@@ -110,6 +117,7 @@ function parseCommand(source: string) {
     method: "",
     url: "",
     path: "",
+    rawPath: "",
   };
 
   const len = source.length;
@@ -124,6 +132,9 @@ function parseCommand(source: string) {
   }
   /* istanbul ignore if */
   if (!data.method) {
+    if (options?.ignoreErrors) {
+      return data;
+    }
     throw new Error("Invalid request method");
   }
 
@@ -137,11 +148,11 @@ function parseCommand(source: string) {
     data.url = "/" + data.url;
   }
   const parsedUrl = new URL(`http://localhost${data.url}`);
-  data.path =
+  data.rawPath =
     parsedUrl.pathname != "/"
       ? parsedUrl.pathname.replace(/\/$/, "")
       : parsedUrl.pathname;
-  data.path = decodeURIComponent(data.path);
+  data.path = decodeURIComponent(data.rawPath);
 
   if (parsedUrl.search.length) {
     const parsedQuery = new URLSearchParams(parsedUrl.search.slice(1));
@@ -155,6 +166,7 @@ function parseCommand(source: string) {
   // the correct url is `<index/_mapping`
   if (data.path.endsWith("_mappings")) {
     data.path = data.path.slice(0, -1);
+    data.rawPath = data.rawPath.slice(0, -1);
     data.url = data.url.replace(data.path + "s", data.path);
   }
 
@@ -171,7 +183,11 @@ function parseCommand(source: string) {
         const ndbody = body.split("\n").filter(Boolean) as string[];
         data.body = ndbody.map((b) => JSON.parse(b));
       } catch (err) {
-        throw new Error("body cannot be parsed");
+        if (options?.ignoreErrors) {
+          data.body = body;
+        } else {
+          throw new Error("body cannot be parsed");
+        }
       }
     }
   }
@@ -279,14 +295,23 @@ async function getAPI(
   return route;
 }
 
-export async function parseRequest(source: string): Promise<ParsedRequest> {
+export async function parseRequest(
+  source: string,
+  options?: ParseOptions,
+): Promise<ParsedRequest> {
   source = source.replace(/^\s+|\s+$/g, ""); // trim whitespace
-  const req = parseCommand(source);
-  const route = await getAPI(req.method, req.path);
-  req.api = route.handler.name;
-  req.request = route.handler.request;
-  if (Object.keys(route.params).length > 0) {
-    req.params = route.params;
+  const req = parseCommand(source, options ?? {});
+  try {
+    const route = await getAPI(req.method, req.rawPath);
+    req.api = route.handler.name;
+    req.request = route.handler.request;
+    if (Object.keys(route.params).length > 0) {
+      req.params = route.params;
+    }
+  } catch (error) {
+    if (!options?.ignoreErrors) {
+      throw error;
+    }
   }
   return req;
 }
@@ -301,7 +326,12 @@ export async function parseRequest(source: string): Promise<ParsedRequest> {
  * @returns The function returns an array of `ParsedRequest` objects, each describing
  *   a request.
  */
-export async function parseRequests(source: string): Promise<ParsedRequest[]> {
+export async function parseRequests(
+  source: string,
+  options?: ParseOptions,
+): Promise<ParsedRequest[]> {
   const sources = splitSource(source);
-  return await Promise.all(sources.map((source) => parseRequest(source)));
+  return await Promise.all(
+    sources.map((source) => parseRequest(source, options)),
+  );
 }

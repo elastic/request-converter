@@ -1,2 +1,2 @@
 export { convertRequests, ConvertOptions, FormatExporter } from "./convert";
-export { parseRequests, ParsedRequest } from "./parse";
+export { parseRequests, ParseOptions, ParsedRequest } from "./parse";
