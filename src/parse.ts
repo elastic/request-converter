@@ -227,6 +227,66 @@ function parseCommand(source: string, options: ParseOptions) {
   }
 }
 
+/** Load a schema.json file with the Elasticsearch specification.
+ *
+ * This function is used internally to load the Elasticsearch specification to
+ * use to categorize requests. It is normally not necessary to invoke this
+ * function directly, but it can be used to load a different version of the
+ * specification than the one bundled with this package.
+ *
+ * @param filename The path to the schema.json file to load.
+ */
+export async function loadSchema(filename: string) {
+  if (router.find("GET", "/") != undefined) {
+    throw Error("A schema has already been loaded");
+  }
+
+  const spec = JSON.parse(
+    await readFile(filename, { encoding: "utf-8" }),
+  ) as Model;
+  for (const endpoint of spec.endpoints) {
+    for (const url of endpoint.urls) {
+      const { path, methods } = url;
+      let formattedPath = path
+        .split("/")
+        .map((p) => (p.startsWith("{") ? `:${p.slice(1, -1)}` : p))
+        .join("/");
+      /* istanbul ignore next */
+      if (!formattedPath.startsWith("/")) {
+        formattedPath = "/" + formattedPath;
+      }
+
+      // find the request in the spec
+      try {
+        let req: Request | undefined;
+        for (const type of spec.types) {
+          if (
+            type.name.namespace == endpoint.request?.namespace &&
+            type.name.name == endpoint.request?.name
+          ) {
+            if (type.kind != "request") {
+              /* istanbul ignore next */
+              throw new Error(
+                `Unexpected request type ${type.kind} for URL ${url}`,
+              );
+            }
+            req = type as Request;
+            break;
+          }
+        }
+        const r = {
+          name: endpoint.name,
+          request: req as Request,
+        };
+        router.on(methods, formattedPath as Router.PathInput, r);
+      } catch (err) {
+        // in some cases there are routes that have the same url but different
+        // dynamic parameters, which causes find-my-way to fail
+      }
+    }
+  }
+}
+
 // use a router to figure out the API name
 async function getAPI(
   method: string,
@@ -234,52 +294,7 @@ async function getAPI(
 ): Promise<Router.FindResult<ESRoute>> {
   if (router.find("GET", "/") == undefined) {
     // load the Elasticsearch spec
-    const spec = JSON.parse(
-      await readFile(path.join(__dirname, "./schema.json"), {
-        encoding: "utf-8",
-      }),
-    ) as Model;
-    for (const endpoint of spec.endpoints) {
-      for (const url of endpoint.urls) {
-        const { path, methods } = url;
-        let formattedPath = path
-          .split("/")
-          .map((p) => (p.startsWith("{") ? `:${p.slice(1, -1)}` : p))
-          .join("/");
-        /* istanbul ignore next */
-        if (!formattedPath.startsWith("/")) {
-          formattedPath = "/" + formattedPath;
-        }
-
-        // find the request in the spec
-        try {
-          let req: Request | undefined;
-          for (const type of spec.types) {
-            if (
-              type.name.namespace == endpoint.request?.namespace &&
-              type.name.name == endpoint.request?.name
-            ) {
-              if (type.kind != "request") {
-                /* istanbul ignore next */
-                throw new Error(
-                  `Unexpected request type ${type.kind} for URL ${url}`,
-                );
-              }
-              req = type as Request;
-              break;
-            }
-          }
-          const r = {
-            name: endpoint.name,
-            request: req as Request,
-          };
-          router.on(methods, formattedPath as Router.PathInput, r);
-        } catch (err) {
-          // in some cases there are routes that have the same url but different
-          // dynamic parameters, which causes find-my-way to fail
-        }
-      }
-    }
+    await loadSchema(path.join(__dirname, "./schema.json"));
   }
 
   const formattedPath = endpointPath.startsWith("/")
