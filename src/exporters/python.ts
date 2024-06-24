@@ -57,6 +57,15 @@ export class PythonExporter implements FormatExporter {
           return result;
         } else if (PYCONSTANTS[lines[0]]) {
           return PYCONSTANTS[lines[0]];
+        } else if (lines[0].startsWith('"') && lines[0].endsWith('"')) {
+          // special case: handle strings such as "true", "false" or "null" as
+          // their native types
+          const s = lines[0].substring(1, lines[0].length - 1);
+          if (PYCONSTANTS[s]) {
+            return PYCONSTANTS[s];
+          } else {
+            return lines[0];
+          }
         } else {
           return lines[0];
         }
