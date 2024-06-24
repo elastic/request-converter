@@ -386,6 +386,14 @@ const skip: Record<string, SkippedTest> = {
   "083e514297c09e91211f0d168aef1b0b": {
     reason: "example uses bad format for comments",
   },
+  b22559a7c319f90bc63a41cac1c39b4c: {
+    reason: "test passes boolean field as string",
+    formats: ["python"],
+  },
+  cfad3631be0634ee49c424f9ccec62d9: {
+    reason: "test passes boolean field as string",
+    formats: ["python"],
+  },
 };
 
 export function shouldBeSkipped(
