@@ -33,7 +33,10 @@ if [[ "$(git tag -l v$LAST_VERSION)" == "" ]]; then
 else
     VERSION="${LAST_VERSION%.*}.$((${LAST_VERSION##*.}+1))"
 fi
-read -p "Next release will be $VERSION"
+read -p "Suggested next release is $VERSION. Press ENTER to accept, or type version if different: " override_version
+if [[ "$override_version" != "" ]]; then
+    VERSION=$override_version
+fi
 
 # generate release notes
 GIT_REPO=elastic\\$(git config --get remote.origin.url | grep -oE "\/[0-9a-zA-Z_-]+")
@@ -53,7 +56,7 @@ tail -n +2 CHANGES.md >> _CHANGES.md
 mv _CHANGES.md CHANGES.md
 
 # edit release notes
-${EDITOR:-vi} _log.md
+${EDITOR:-vi} CHANGES.md
 
 # update package version
 sed -i .bak 's/^  "version": ".*",$/  "version": "'$VERSION'",/' package.json
