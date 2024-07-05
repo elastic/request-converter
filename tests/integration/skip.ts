@@ -408,6 +408,30 @@ const skip: Record<string, SkippedTest> = {
     reason: "test passes boolean field as string",
     formats: ["python"],
   },
+  "7e77509ab646276ff78f58bb38bec8dd": {
+    reason: "query_ruleset name was renamed to query_rules",
+    formats: ["python"],
+  },
+  "61d6b9503459914c436930c3ae87d454": {
+    reason: "query_ruleset name was renamed to query_rules",
+    formats: ["python"],
+  },
+  "56db76c987106a870357854d3068ad98": {
+    reason: "query_ruleset name was renamed to query_rules",
+    formats: ["python"],
+  },
+  "5fde0d78e9b2cc0519f8a63848ed344e": {
+    reason: "query_ruleset name was renamed to query_rules",
+    formats: ["python"],
+  },
+  e619e896ce3dad9dcfc6f8700438be98: {
+    reason: "query_ruleset name was renamed to query_rules",
+    formats: ["python"],
+  },
+  d595b40bf1ea71923f9824d0f9c99c49: {
+    reason: "query_ruleset name was renamed to query_rules",
+    formats: ["python"],
+  },
 };
 
 export function shouldBeSkipped(
