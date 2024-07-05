@@ -10,6 +10,7 @@
   },
   "scripts": {
     "update-schema": "node scripts/update-schema.mjs",
+    "release": "./scripts/release.sh",
     "build": "npm run clean && tsc && npm run copy-files",
     "clean": "rimraf dist/",
     "copy-files": "copyfiles -u 1 src/**/*.js src/**/*.json src/**/*.tpl dist/",
@@ -28,7 +29,7 @@
     "fix:precommit": "./scripts/precommit.sh",
     "watch:build": "tsc -w",
     "watch:test": "jest --test-path-ignore-patterns integration --coverage --watch",
-    "prepare": "husky"
+    "prepare": "husky install"
   },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
