@@ -201,10 +201,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example uses undefined `settings` attribute",
     formats: ["python"],
   },
-  "365256ebdfa47b449780771d9beba8d9": {
-    reason: "example uses undefined method for endpoint",
-    formats: ["python"],
-  },
   e9ae959608d128202921b174f4faa7a8: {
     reason: "invalid request syntax",
   },
@@ -241,14 +237,6 @@ const skip: Record<string, SkippedTest> = {
   },
   "6539a04aac4d43e6ce4a769fe8cdf2d8": {
     reason: "example uses unknown URL",
-  },
-  "8bf1e7a6d529547906ba8b1d6501fa0c": {
-    reason: "example uses undefined method for endpoint",
-    formats: ["python"],
-  },
-  "90083d93e46fad2524755b8d4d1306fc": {
-    reason: "example uses undefined method for endpoint",
-    formats: ["python"],
   },
   "615dc36f0978c676624fb7d1144b4899": {
     reason: "example uses unknown URL",
