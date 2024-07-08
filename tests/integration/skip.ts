@@ -103,9 +103,11 @@ const skip: Record<string, SkippedTest> = {
   },
   "3f1fe5f5f99b98d0891f38003e10b636": {
     reason: "endpoint URL is not in the spec",
+    formats: ["python"],
   },
   "2afdf0d83724953aa2875b5fb37d60cc": {
     reason: "endpoint URL is not in the spec",
+    formats: ["python"],
   },
   "67b71a95b6fe6c83faae51ea038a1bf1": {
     reason: "endpoint URL is not in the spec",
@@ -199,9 +201,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example uses undefined `settings` attribute",
     formats: ["python"],
   },
-  "365256ebdfa47b449780771d9beba8d9": {
-    reason: "example uses undefined method for endpoint",
-  },
   e9ae959608d128202921b174f4faa7a8: {
     reason: "invalid request syntax",
   },
@@ -234,15 +233,10 @@ const skip: Record<string, SkippedTest> = {
   },
   "405511f7c1f12cc0a227b4563fe7b2e2": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "6539a04aac4d43e6ce4a769fe8cdf2d8": {
     reason: "example uses unknown URL",
-  },
-  "8bf1e7a6d529547906ba8b1d6501fa0c": {
-    reason: "example uses undefined method for endpoint",
-  },
-  "90083d93e46fad2524755b8d4d1306fc": {
-    reason: "example uses undefined method for endpoint",
   },
   "615dc36f0978c676624fb7d1144b4899": {
     reason: "example uses unknown URL",
@@ -262,12 +256,15 @@ const skip: Record<string, SkippedTest> = {
   },
   "7c8f207e43115ea8f20d2298be5aaebc": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "19c00c6b29bc7dbc5e92b3668da2da93": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   bcdfaa4487747249699a86a0dcd22f5e: {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "5bbccf103107e505c17ae59863753efd": {
     reason: "example uses GET request with body",
@@ -300,6 +297,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "77518e8c6198acfe77c0934fd2fe65cb": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   dd71b0c9f9197684ff29c61062c55660: {
     reason: "example uses unknown URL",
@@ -307,6 +305,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "b62eaa20c4e0e48134a6d1d1b3c30b26[1]": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "57dc15e5ad663c342fd5c1d86fcd1b29": {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
@@ -318,12 +317,15 @@ const skip: Record<string, SkippedTest> = {
   },
   "88a283dfccc481f1afba79d9b3c61f51": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "340b027449ca37d2e778e747974af9ff": {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   f20692e35a61b98746e926549030702b: {
     reason: "example uses unknown URL",
+    formats: ["python"],
   },
   "80dd7f5882c59b9c1c90e8351937441f": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
@@ -392,30 +394,6 @@ const skip: Record<string, SkippedTest> = {
   },
   cfad3631be0634ee49c424f9ccec62d9: {
     reason: "test passes boolean field as string",
-    formats: ["python"],
-  },
-  "7e77509ab646276ff78f58bb38bec8dd": {
-    reason: "query_ruleset name was renamed to query_rules",
-    formats: ["python"],
-  },
-  "61d6b9503459914c436930c3ae87d454": {
-    reason: "query_ruleset name was renamed to query_rules",
-    formats: ["python"],
-  },
-  "56db76c987106a870357854d3068ad98": {
-    reason: "query_ruleset name was renamed to query_rules",
-    formats: ["python"],
-  },
-  "5fde0d78e9b2cc0519f8a63848ed344e": {
-    reason: "query_ruleset name was renamed to query_rules",
-    formats: ["python"],
-  },
-  e619e896ce3dad9dcfc6f8700438be98: {
-    reason: "query_ruleset name was renamed to query_rules",
-    formats: ["python"],
-  },
-  d595b40bf1ea71923f9824d0f9c99c49: {
-    reason: "query_ruleset name was renamed to query_rules",
     formats: ["python"],
   },
 };
