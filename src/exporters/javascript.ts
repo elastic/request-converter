@@ -35,7 +35,13 @@ export class JavaScriptExporter implements FormatExporter {
   get template(): Handlebars.TemplateDelegate {
     if (!this._template) {
       Handlebars.registerHelper("json", function (context) {
-        return JSON.stringify(context, null, 2);
+        const val = JSON.stringify(context, null, 2);
+
+        // turn number strings into numbers
+        if (val.match(/^"\d+"$/)) {
+          return parseInt(val.replaceAll('"', ""), 10);
+        }
+        return val;
       });
 
       // custom conditional for requests without any arguments
@@ -73,7 +79,6 @@ export class JavaScriptExporter implements FormatExporter {
       //   props: the list of schema properties this attribute belongs to
       Handlebars.registerHelper("alias", (name, props) => {
         const aliases: Record<string, string> = {
-          from: "from_",
           _meta: "meta",
           _field_names: "field_names",
           _routing: "routing",
@@ -99,16 +104,8 @@ export class JavaScriptExporter implements FormatExporter {
       Handlebars.registerHelper(
         "ifRequestBodyKind",
         function (this: ParsedRequest, kind: string, options) {
-          let bodyKind = this.request?.body?.kind;
-          const parsedBody = typeof this.body == "object" ? this.body : {};
+          const bodyKind = this.request?.body?.kind;
 
-          if (this.api == "search" && "sub_searches" in parsedBody) {
-            // Change the kind of any search requests that use sub-searches to
-            // "value", so that the template renders a single body argument
-            // instead of expanding the kwargs. This is needed because the
-            // Python client does not support "sub_searches" as a kwarg yet.
-            bodyKind = "value";
-          }
           if (bodyKind == kind) {
             return options.fn(this);
           } else {
