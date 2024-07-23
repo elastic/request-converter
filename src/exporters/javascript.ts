@@ -1,7 +1,7 @@
 import { readFileSync } from "fs";
 import path from "path";
 import Handlebars from "handlebars";
-import * as prettier from "prettier";
+import prettier from "prettier";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 
@@ -101,6 +101,7 @@ export class JavaScriptExporter implements FormatExporter {
         function (this: ParsedRequest, kind: string, options) {
           let bodyKind = this.request?.body?.kind;
           const parsedBody = typeof this.body == "object" ? this.body : {};
+
           if (this.api == "search" && "sub_searches" in parsedBody) {
             // Change the kind of any search requests that use sub-searches to
             // "value", so that the template renders a single body argument
@@ -116,10 +117,16 @@ export class JavaScriptExporter implements FormatExporter {
         },
       );
 
+      Handlebars.registerHelper("camelCase", (text) => toCamelCase(text));
+
       const t = readFileSync(path.join(__dirname, "./javascript.tpl"), "utf-8");
       this._template = Handlebars.compile(t);
     }
 
     return this._template;
   }
+}
+
+function toCamelCase(str: string): string {
+  return str.replace(/_([a-z])/g, (k) => k[1].toUpperCase());
 }

@@ -9,9 +9,20 @@ import { shouldBeSkipped } from "./skip";
 
 const TEST_FORMATS: Record<string, string> = {
   python: "py",
-  //"javascript": "js",
+  javascript: "js",
   curl: "sh",
 };
+
+interface Example {
+  digest: string;
+  lang: string;
+  source: string;
+}
+
+interface Case {
+  digest: string;
+  source: string;
+}
 
 beforeAll(async () => {
   // start a simple web server that will capture requests sent when running
@@ -25,9 +36,10 @@ afterAll(async () => {
 });
 
 describe("convert", () => {
-  const examples: { digest: string; lang: string; source: string }[] =
-    JSON.parse(readFileSync(".examples.json", { encoding: "utf-8" }));
-  const cases: { digest: string; source: string }[] = [];
+  const examples: Example[] = JSON.parse(
+    readFileSync(".examples.json", "utf-8"),
+  );
+  const cases: Case[] = [];
   for (const example of examples) {
     if (
       process.env.ONLY_EXAMPLE &&
@@ -46,12 +58,6 @@ describe("convert", () => {
       }
     }
   }
-  /*
-  const from = 0;
-  const to = 100;
-  cases.splice(to);
-  cases.splice(0, from);
-  */
 
   for (const c of cases) {
     const { digest, source } = c;
@@ -79,6 +85,9 @@ describe("convert", () => {
           const ext = TEST_FORMATS[format];
           let parsedRequest: ParsedRequest | undefined;
           await writeFile(`.tmp.request.${ext}`, code as string);
+
+          let failureMessage = `Failed code snippet:\n\n${code}\n\n`;
+
           try {
             await exec(
               path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`),
@@ -86,7 +95,7 @@ describe("convert", () => {
             parsedRequest = await parseRequest(source);
           } catch (err) {
             // force an assertion to have a reference to the failing test
-            expect({ error: err, source }).toEqual({
+            expect({ error: err, source }, failureMessage).toEqual({
               error: undefined,
               source,
             });
@@ -119,15 +128,26 @@ describe("convert", () => {
           }
           */
 
-          expect({ result: capturedRequest.path, source }).toEqual({
+          failureMessage = `${failureMessage}\n\nparsed request:\n\n${JSON.stringify(parsedRequest, null, 2)}\n\n`;
+
+          expect(
+            { result: capturedRequest.path, source },
+            failureMessage,
+          ).toEqual({
             result: parsedRequest?.path,
             source,
           });
-          expect({ result: capturedRequest.query, source }).toEqual({
+          expect(
+            { result: capturedRequest.query, source },
+            failureMessage,
+          ).toEqual({
             result: parsedRequest?.query ?? {},
             source,
           });
-          expect({ result: capturedRequest.body, source }).toEqual({
+          expect(
+            { result: capturedRequest.body, source },
+            failureMessage,
+          ).toEqual({
             result: parsedRequest?.body ?? {},
             source,
           });

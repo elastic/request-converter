@@ -53,3 +53,7 @@ docs
 dist
 .venv
 .examples.json
+
+tests/integration/package.json
+tests/integration/es-client/
+.tmp.request.*
