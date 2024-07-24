@@ -453,6 +453,11 @@ const skip: Record<string, SkippedTest> = {
     reason: "test passes size number as string",
     formats: ["javascript"],
   },
+  "8a617dbfe5887f8ecc8815de132b6eb0": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
 };
 
 export function shouldBeSkipped(
