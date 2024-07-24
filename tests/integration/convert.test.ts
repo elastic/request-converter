@@ -86,7 +86,7 @@ describe("convert", () => {
           let parsedRequest: ParsedRequest | undefined;
           await writeFile(`.tmp.request.${ext}`, code as string);
 
-          let failureMessage = `Failed code snippet:\n\n${code}\n\n`;
+          const failureMessage = `Failed code snippet:\n\n${code}\n\n`;
 
           try {
             await exec(
@@ -127,8 +127,6 @@ describe("convert", () => {
             );
           }
           */
-
-          failureMessage = `${failureMessage}\n\nparsed request:\n\n${JSON.stringify(parsedRequest, null, 2)}\n\n`;
 
           expect(
             { result: capturedRequest.path, source },
