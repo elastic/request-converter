@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
 
-set -exo pipefail
+set -eo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
 
 if [[ ! -d "$SCRIPT_DIR/node_modules" ]]; then
   echo "Installing from branch $BRANCH."
-  git clone -b "$BRANCH" --depth=1 "https://github.com/elastic/elasticsearch-js.git" "$SCRIPT_DIR/es-client"
+  test -d "$SCRIPT_DIR/es-client" || git clone -b "$BRANCH" --depth=1 "https://github.com/elastic/elasticsearch-js.git" "$SCRIPT_DIR/es-client"
   pushd "$SCRIPT_DIR/es-client"
   npm install
   npm run build
