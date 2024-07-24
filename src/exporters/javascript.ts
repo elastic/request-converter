@@ -7,8 +7,9 @@ import { ParsedRequest } from "../parse";
 
 const UNSUPPORTED_APIS = new RegExp(
   "^connector.*$" +
-    "|^inference.*$" +
+    "|^query_rules.*$" +
     "|^_internal.*$" +
+    "|^inference.*$" +
     "|^security.create_cross_cluster_api_key$" +
     "|^security.update_cross_cluster_api_key$" +
     "|^security.update_settings$" +
@@ -78,17 +79,6 @@ export class JavaScriptExporter implements FormatExporter {
       //   name: the name of the attribute
       //   props: the list of schema properties this attribute belongs to
       Handlebars.registerHelper("alias", (name, props) => {
-        const aliases: Record<string, string> = {
-          _meta: "meta",
-          _field_names: "field_names",
-          _routing: "routing",
-          _source: "source",
-          _source_excludes: "source_excludes",
-          _source_includes: "source_includes",
-        };
-        if (aliases[name]) {
-          return aliases[name];
-        }
         if (props) {
           for (const prop of props) {
             if (prop.name == name && prop.codegenName != undefined) {

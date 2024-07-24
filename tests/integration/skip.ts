@@ -213,7 +213,7 @@ const skip: Record<string, SkippedTest> = {
   },
   aeaa97939a05f5b2f3f2c43b771f35e3: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   a1d0603b24a5b048f0959975d8057534: {
     reason: "client does not implement this endpoint variant",
@@ -424,6 +424,34 @@ const skip: Record<string, SkippedTest> = {
   dcfa7f479a33f459a2d222a92e651451: {
     reason: "example uses undefined `description` attribute",
     formats: ["python"],
+  },
+  "20e3b181114e00c943a27a9bbcf85f15": {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  "405db6f3a01eceacfaa8b0ed3e4b3ac2": {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  e48e7da65c2b32d724fd7e3bfa175c6f: {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  c873f9cd093e26515148f052e28c7805: {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  f96d4614f2fc294339fef325b794355f: {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  "7ebfb30b3ece855c1b783d9210939469": {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  "1147a02afa087278e51fa365fb9e06b7": {
+    reason: "test passes size number as string",
+    formats: ["javascript"],
   },
 };
 
