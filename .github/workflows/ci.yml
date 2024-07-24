@@ -94,3 +94,21 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-python
+  integration-tests-javascript:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+      - name: Install
+        run: |
+          npm install
+      - name: Build
+        run: |
+          npm run build
+      - name: Prepare for testing
+        run: |
+          npm run test:setup
+      - name: Integration tests
+        run: |
+          npm run test:integration-javascript
