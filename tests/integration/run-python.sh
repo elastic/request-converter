@@ -2,6 +2,12 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
 
+if [[ "$1" == "" ]]; then
+    # the `test:setup` command runs this script without arguments to initialize
+    # the venv, so we first delete any previous one
+    rm -rf $SCRIPT_DIR/.venv
+fi
+
 if [[ ! -d $SCRIPT_DIR/.venv ]]; then
     python -m venv $SCRIPT_DIR/.venv
     echo "Installing from branch $BRANCH."

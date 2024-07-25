@@ -315,18 +315,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
     formats: ["python"],
   },
-  "88a283dfccc481f1afba79d9b3c61f51": {
-    reason: "example uses unknown URL",
-    formats: ["python"],
-  },
-  "340b027449ca37d2e778e747974af9ff": {
-    reason: "example uses unknown URL",
-    formats: ["python"],
-  },
-  f20692e35a61b98746e926549030702b: {
-    reason: "example uses unknown URL",
-    formats: ["python"],
-  },
   "80dd7f5882c59b9c1c90e8351937441f": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
     formats: ["python"],
@@ -394,6 +382,35 @@ const skip: Record<string, SkippedTest> = {
   },
   cfad3631be0634ee49c424f9ccec62d9: {
     reason: "test passes boolean field as string",
+    formats: ["python"],
+  },
+  "63bf3480627a89b4b4ede4150e1d6bc0": {
+    reason: "example uses unknown URL",
+  },
+  eb9a41f7fc8bdf5559bb9db822ae3a65: {
+    reason: "example uses unknown URL",
+  },
+  "44385b61342e20ea05f254015b2b04d7": {
+    reason: "example uses unknown URL",
+  },
+  "5deeed427f35cbaee4b8ddc45002a9d7": {
+    reason: "example uses unknown URL",
+  },
+  "2acf75803494fef29f9ca70671aa6be1": {
+    reason: "example uses unknown URL",
+  },
+  "8b144b3eb20872595fd7cbc6c245c7c8": {
+    reason: "example uses unknown URL",
+  },
+  "95c1b376652533c352bbf793c74d1b08": {
+    reason: "example uses unknown URL",
+  },
+  "2577acb462b95bd4394523cf2f8a661f": {
+    reason: "example uses undefined `tables` attribute",
+    formats: ["python"],
+  },
+  dcfa7f479a33f459a2d222a92e651451: {
+    reason: "example uses undefined `description` attribute",
     formats: ["python"],
   },
 };
