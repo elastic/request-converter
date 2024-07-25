@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -eo pipefail
+set -exo pipefail
 
 SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
@@ -18,5 +18,5 @@ if [[ ! -d "$SCRIPT_DIR/node_modules" ]]; then
 fi
 
 if [[ "$1" != "" ]]; then
-  env NODE_PATH="$SCRIPT_DIR" node $1
+  env NODE_PATH="$SCRIPT_DIR/node_modules" node $1
 fi
