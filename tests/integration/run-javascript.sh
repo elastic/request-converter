@@ -15,7 +15,7 @@ if [ ! -d "$CLIENT_DIR" ]; then
   popd
 fi
 
-if [ ! -d "$SCRIPT_DIR"]; then
+if [ ! -d "$SCRIPT_DIR" ]; then
   mkdir "$SCRIPT_DIR"
   pushd "$SCRIPT_DIR"
   npm init -y
