@@ -34,6 +34,14 @@ describe("convert", () => {
     ).toBeTruthy();
   });
 
+  it("checks for javascript", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "javascript", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+  });
+
   it("converts to curl", async () => {
     expect(
       await convertRequests(devConsoleScript, "curl", {
@@ -143,6 +151,24 @@ resp1 = client.search(
     "/_internal/desired_balance",
 )
 
+`,
+    );
+  });
+
+  it("converts to javascript", async () => {
+    expect(await convertRequests(devConsoleScript, "javascript", {})).toEqual(
+      `const response = client.info();
+
+const response1 = client.search({
+  index: "my-index",
+  from: 40,
+  size: 20,
+  query: {
+    term: {
+      "user.id": "kimchy's",
+    },
+  },
+});
 `,
     );
   });
