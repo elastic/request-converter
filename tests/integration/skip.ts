@@ -458,6 +458,46 @@ const skip: Record<string, SkippedTest> = {
       "test uses username in path, but client sends it in the body as well, which is valid",
     formats: ["javascript"],
   },
+  "47e6dfb5b09d954c9c0c33fda2b6c66d": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "111c31db1fd29baeaa9964eafaea6789": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "7b3f255d28ce5b46d111402b96b41351": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "53e4ac5a4009fd21024f4b31e54aa83f": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  b2b26f8568c5dba7649e79f09b859272: {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "9d5855075e7008270459cc88c189043d": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "0b47b0bef81b9b5eecfb3775695bd6ad": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  bf1de9fa1b825fa875d27fa08821a6d1: {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
 };
 
 export function shouldBeSkipped(
