@@ -1,7 +1,7 @@
 import { parseRequests, ParsedRequest } from "./parse";
 import { PythonExporter } from "./exporters/python";
 import { CurlExporter } from "./exporters/curl";
-//import { JavaScriptExporter } from "./exporters/javascript";
+import { JavaScriptExporter } from "./exporters/javascript";
 
 export type ConvertOptions = {
   /** When `true`, the converter will only check if the conversion can be carried
@@ -31,13 +31,13 @@ export interface FormatExporter {
 const EXPORTERS: Record<string, FormatExporter> = {
   python: new PythonExporter(),
   curl: new CurlExporter(),
-  //javascript: new JavaScriptExporter(),
+  javascript: new JavaScriptExporter(),
 };
 
 /**
  * Return the list of available export formats.
  *
- * @returs An array of strings with the names of the formats that are available
+ * @returns An array of strings with the names of the formats that are available
  *   to use in the `convertRequests()` function.
  */
 export function listFormats(): string[] {

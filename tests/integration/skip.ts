@@ -6,19 +6,19 @@ type SkippedTest = {
 const skip: Record<string, SkippedTest> = {
   fd7eeadab6251d9113c4380a7fbe2572: {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   d69bd36335774c8ae1286cee21310241: {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "0b8fa90bc9aeeadb420ad785bd0b9953": {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   b24a374c0ad264abbcacb5686f5ed61c: {
     reason: "example puts attributes in body, spec says they go in query",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "42ba7c1d13aee91fe6f0a8a42c30eb74": {
     reason: "example references a non-existent `lazy` query attribute",
@@ -26,7 +26,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "96ea0e80323d6d2d99964625c004a44d": {
     reason: "example references a non-existant `enabled` body attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   d0c03847106d23ad632ceb624d647c37: {
     reason: "example has invalid body",
@@ -51,31 +51,31 @@ const skip: Record<string, SkippedTest> = {
   },
   c2c21e2824fbf6b7198ede30419da82b: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   b94cee0f74f57742b3948f9b784dfdd4: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   ad92a1a8bb1b0f26d1536fe8ba4ffd17: {
     reason: "example puts `id` path attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "29953082744b7a36e437b392a6391c81": {
     reason: "example puts `id` path attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "3182f26c61fbe5cf89400804533d5ed2": {
     reason: "example puts `id` path attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "48d9697a14dfe131325521f48a7adc84": {
     reason: "example puts `id` path attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "3e6db3d80439c2c176dbd1bb1296b6cf": {
     reason: "example puts `id` path attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "39ce44333d28ed2b833722d3e3cb06f3": {
     reason:
@@ -99,11 +99,11 @@ const skip: Record<string, SkippedTest> = {
   },
   "1ceaa211756e2db3d48c6bc4b1a861b0": {
     reason: "example has bad URL syntax",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "3f1fe5f5f99b98d0891f38003e10b636": {
     reason: "endpoint URL is not in the spec",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "2afdf0d83724953aa2875b5fb37d60cc": {
     reason: "endpoint URL is not in the spec",
@@ -136,7 +136,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "2a5f7e7d6b92c66e52616845146d2820": {
     reason: "example puts `id` path attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "9b09ad677a0f4331830bed254a8388d1": {
     reason: "example uses undefined method for endpoint",
@@ -149,23 +149,23 @@ const skip: Record<string, SkippedTest> = {
   },
   a71154ea11a5214f409ecfd118e9b5e3: {
     reason: "invalid `query` attribute in body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   e3019fd5f23458ae49ad9854c97d321c: {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "9c01db07c9ac395b6370e3b33965c21f": {
     reason: "example uses undefined `oidc_authentication` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "2a1eece9a59ac1773edcf0a932c26de0": {
     reason: "example uses undefined `oidc_logout` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "734e2b1d1ca84a305240a449738f0eba": {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   fe806011466e7cdc1590da186297edb6: {
     reason: "url cannot be parsed",
@@ -175,31 +175,31 @@ const skip: Record<string, SkippedTest> = {
   },
   "9afa0844883b7471883aa378a8dd10b4": {
     reason: "client does not implement this endpoint",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   e0bbfb368eae307e9508ab8d6e9cf23c: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   ef9c29759459904fef162acd223462c4: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   f160561efab38e40c2feebf5a2542ab5: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "0470d7101637568b9d3d1239f06325a7": {
     reason: "example uses invalid URL",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   ba10b644a4e9a2e7d78744ca607355d0: {
     reason: "example uses undefined `data_stream_name` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "1b3762712c14a19e8c2956b4f530d327": {
     reason: "example uses undefined `settings` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   e9ae959608d128202921b174f4faa7a8: {
     reason: "invalid request syntax",
@@ -209,23 +209,23 @@ const skip: Record<string, SkippedTest> = {
   },
   "16985e5b17d2da0955a14fbe02e8dfca": {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   aeaa97939a05f5b2f3f2c43b771f35e3: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   a1d0603b24a5b048f0959975d8057534: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   b37919cc438b47477343833b4e522408: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   f0c3235d8fce641d6ff8ce90ab7b7b8b: {
     reason: "example uses undefined `parameters` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "88cecae3f0363fc186d955dd8616b5d4": {
     reason: "example uses undefined `keep_alive` attribute",
@@ -256,19 +256,19 @@ const skip: Record<string, SkippedTest> = {
   },
   "7c8f207e43115ea8f20d2298be5aaebc": {
     reason: "example uses unknown URL",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "19c00c6b29bc7dbc5e92b3668da2da93": {
     reason: "example uses unknown URL",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   bcdfaa4487747249699a86a0dcd22f5e: {
     reason: "example uses unknown URL",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "5bbccf103107e505c17ae59863753efd": {
     reason: "example uses GET request with body",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "2d633b7f346b828d01f923ce9dbf6ad5": {
     reason: "invalid request syntax",
@@ -279,15 +279,15 @@ const skip: Record<string, SkippedTest> = {
   },
   "0dfde6a9d953822fd4b3aa0121ddd8fb": {
     reason: "example uses undefined `render_query` attribute.",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   a162eb50853331c80596f5994e9d1c38: {
     reason: "example uses undefined `render_query` attribute.",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "4b113c7f475cfe484a150ddbb8e6c5c7": {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "174b93c323aa8e9cc8ee2a3df5736810": {
     reason: "example uses unknown URL",
@@ -297,7 +297,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "77518e8c6198acfe77c0934fd2fe65cb": {
     reason: "example uses unknown URL",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   dd71b0c9f9197684ff29c61062c55660: {
     reason: "example uses unknown URL",
@@ -309,23 +309,35 @@ const skip: Record<string, SkippedTest> = {
   },
   "57dc15e5ad663c342fd5c1d86fcd1b29": {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   d35c8cf7a98b3f112e1de8797ec6689d: {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
+    formats: ["python", "javascript"],
+  },
+  "88a283dfccc481f1afba79d9b3c61f51": {
+    reason: "example uses unknown URL",
     formats: ["python"],
+  },
+  "340b027449ca37d2e778e747974af9ff": {
+    reason: "example uses unknown URL",
+    formats: ["python", "javascript"],
+  },
+  f20692e35a61b98746e926549030702b: {
+    reason: "example uses unknown URL",
+    formats: ["python", "javascript"],
   },
   "80dd7f5882c59b9c1c90e8351937441f": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   c580990a70028bb49cca8a6bde86bbf6: {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "6f3b723bf6179b96c3413597ed7f49e1": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "0ab002c6618af75e1041a23c692327ad": {
     reason: "example uses unknown URL",
@@ -336,7 +348,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "3ed79871d956bfb2d6d2721d7272520c": {
     reason: "client does not implement this endpoint variant",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
   "3c4d7ef8422d2db423a8f23effcddaa1[3]": {
     reason: "example uses unknown URL",
@@ -412,6 +424,79 @@ const skip: Record<string, SkippedTest> = {
   dcfa7f479a33f459a2d222a92e651451: {
     reason: "example uses undefined `description` attribute",
     formats: ["python"],
+  },
+  "20e3b181114e00c943a27a9bbcf85f15": {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  "405db6f3a01eceacfaa8b0ed3e4b3ac2": {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  e48e7da65c2b32d724fd7e3bfa175c6f: {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  c873f9cd093e26515148f052e28c7805: {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  f96d4614f2fc294339fef325b794355f: {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  "7ebfb30b3ece855c1b783d9210939469": {
+    reason: "test passes date epoch number as string",
+    formats: ["javascript"],
+  },
+  "1147a02afa087278e51fa365fb9e06b7": {
+    reason: "test passes size number as string",
+    formats: ["javascript"],
+  },
+  "8a617dbfe5887f8ecc8815de132b6eb0": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "47e6dfb5b09d954c9c0c33fda2b6c66d": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "111c31db1fd29baeaa9964eafaea6789": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "7b3f255d28ce5b46d111402b96b41351": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "53e4ac5a4009fd21024f4b31e54aa83f": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  b2b26f8568c5dba7649e79f09b859272: {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "9d5855075e7008270459cc88c189043d": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  "0b47b0bef81b9b5eecfb3775695bd6ad": {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
+  bf1de9fa1b825fa875d27fa08821a6d1: {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
   },
 };
 
