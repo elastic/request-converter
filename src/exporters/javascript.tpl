@@ -12,7 +12,7 @@ const client = new Client({
 {{#each requests}}
 {{#supportedApi}}
 {{#hasArgs}}
-const response{{#if @index}}{{@index}}{{/if}} = client.{{camelCase this.api}}({
+const response{{#if @index}}{{@index}}{{/if}} = await = client.{{camelCase this.api}}({
   {{#each this.params}}
   "{{alias @key ../this.request.path}}": {{{json this}}},
   {{/each}}
@@ -28,10 +28,10 @@ const response{{#if @index}}{{@index}}{{/if}} = client.{{camelCase this.api}}({
   {{/ifRequestBodyKind}}
 })
 {{else}}
-const response{{#if @index}}{{@index}}{{/if}} = client.{{camelCase this.api}}()
+const response{{#if @index}}{{@index}}{{/if}} = await client.{{camelCase this.api}}()
 {{/hasArgs}}
 {{else}}
-const response{{#if @index}}{{@index}}{{/if}} = client.transport.request({
+const response{{#if @index}}{{@index}}{{/if}} = await client.transport.request({
   method: "{{this.method}}",
   path: "{{this.path}}",
   {{#if this.query}}
