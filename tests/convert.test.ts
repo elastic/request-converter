@@ -157,9 +157,9 @@ resp1 = client.search(
 
   it("converts to javascript", async () => {
     expect(await convertRequests(devConsoleScript, "javascript", {})).toEqual(
-      `const response = client.info();
+      `const response = await client.info();
 
-const response1 = client.search({
+const response1 = await client.search({
   index: "my-index",
   from: 40,
   size: 20,

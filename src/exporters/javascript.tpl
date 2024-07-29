@@ -12,7 +12,7 @@ const client = new Client({
 {{#each requests}}
 {{#supportedApi}}
 {{#hasArgs}}
-const response{{#if @index}}{{@index}}{{/if}} = await = client.{{camelCase this.api}}({
+const response{{#if @index}}{{@index}}{{/if}} = await client.{{camelCase this.api}}({
   {{#each this.params}}
   "{{alias @key ../this.request.path}}": {{{json this}}},
   {{/each}}
