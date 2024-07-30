@@ -498,6 +498,11 @@ const skip: Record<string, SkippedTest> = {
       "test uses username in path, but client sends it in the body as well, which is valid",
     formats: ["javascript"],
   },
+  f187ac2dc35425cb0ef48f328cc7e435: {
+    reason:
+      "test uses username in path, but client sends it in the body as well, which is valid",
+    formats: ["javascript"],
+  },
 };
 
 export function shouldBeSkipped(
