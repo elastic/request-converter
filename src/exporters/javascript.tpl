@@ -8,6 +8,8 @@ const client = new Client({
   },
 })
 
+async function run() {
+
 {{/if}}
 {{#each requests}}
 {{#supportedApi}}
@@ -47,3 +49,13 @@ console.log(response{{#if @index}}{{@index}}{{/if}})
 {{/if}}
 
 {{/each}}
+
+{{#if complete}}
+}
+
+{{#if ../printResponse}}
+run().then(console.log).catch(console.error)
+{{else}}
+run()
+{{/if}}
+{{/if}}
