@@ -23,7 +23,6 @@ if [ ! -d "$SCRIPT_DIR" ]; then
   npm init -y
   npm install
   npm install "$CLIENT_DIR"
-  npm run build
   popd
 fi
 
