@@ -315,17 +315,13 @@ const skip: Record<string, SkippedTest> = {
     reason: "example uses undefined `oidc_prepare_authentication` attribute",
     formats: ["python", "javascript"],
   },
-  "88a283dfccc481f1afba79d9b3c61f51": {
-    reason: "example uses unknown URL",
-    formats: ["python"],
-  },
   "340b027449ca37d2e778e747974af9ff": {
     reason: "example uses unknown URL",
-    formats: ["python", "javascript"],
+    formats: ["javascript"],
   },
   f20692e35a61b98746e926549030702b: {
     reason: "example uses unknown URL",
-    formats: ["python", "javascript"],
+    formats: ["javascript"],
   },
   "80dd7f5882c59b9c1c90e8351937441f": {
     reason: "example uses unknown `bulk_update_api_keys` attribute",
