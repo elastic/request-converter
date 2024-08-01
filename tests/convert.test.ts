@@ -34,6 +34,14 @@ describe("convert", () => {
     ).toBeTruthy();
   });
 
+  it("checks for javascript", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "javascript", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+  });
+
   it("converts to curl", async () => {
     expect(
       await convertRequests(devConsoleScript, "curl", {
@@ -147,6 +155,56 @@ resp1 = client.search(
     );
   });
 
+  it("converts to javascript", async () => {
+    expect(await convertRequests(devConsoleScript, "javascript", {})).toEqual(
+      `const response = await client.info();
+
+const response1 = await client.search({
+  index: "my-index",
+  from: 40,
+  size: 20,
+  query: {
+    term: {
+      "user.id": "kimchy's",
+    },
+  },
+});
+`,
+    );
+  });
+
+  it("converts to a complete javascript snippet with full async compatibility", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "javascript", { complete: true }),
+    ).toEqual(
+      `const { Client } = require("@elastic/elasticsearch");
+
+const client = new Client({
+  nodes: [process.env["ELASTICSEARCH_URL"]],
+  auth: {
+    apiKey: process.env["ELASTIC_API_KEY"],
+  },
+});
+
+async function run() {
+  const response = await client.info();
+
+  const response1 = await client.search({
+    index: "my-index",
+    from: 40,
+    size: 20,
+    query: {
+      term: {
+        "user.id": "kimchy's",
+      },
+    },
+  });
+}
+
+run();
+`,
+    );
+  });
   it("supports a custom exporter", async () => {
     class MyExporter implements FormatExporter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
