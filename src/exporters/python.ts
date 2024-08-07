@@ -133,7 +133,7 @@ export class PythonExporter implements FormatExporter {
       Handlebars.registerHelper(
         "ifRequestBodyKind",
         function (this: ParsedRequest, kind: string, options) {
-          let bodyKind = this.request?.body?.kind || "value";
+          let bodyKind = this.request?.body?.kind ?? "value";
           const parsedBody = typeof this.body == "object" ? this.body : {};
           if (this.api == "search" && "sub_searches" in parsedBody) {
             // Change the kind of any search requests that use sub-searches to
