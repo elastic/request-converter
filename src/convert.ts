@@ -66,8 +66,11 @@ export async function convertRequests(
   const requests = await parseRequests(source);
   const exporter =
     typeof outputFormat == "string" ? EXPORTERS[outputFormat] : outputFormat;
+  if (!exporter) {
+    throw new Error("Invalid output format");
+  }
+  /* istanbul ignore next */
   if (options.debug) {
-    /* istanbul ignore next */
     console.log(JSON.stringify(requests));
   }
   if (options.checkOnly) {
