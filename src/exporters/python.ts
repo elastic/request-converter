@@ -45,7 +45,7 @@ export class PythonExporter implements FormatExporter {
     if (!this.template) {
       // custom data renderer for Python
       Handlebars.registerHelper("pyprint", (context) => {
-        const lines = JSON.stringify(context, null, 4).split(/\r?\n/);
+        const lines = JSON.stringify(context ?? null, null, 4).split(/\r?\n/);
         for (let i = 1; i < lines.length; i++) {
           lines[i] = "    " + lines[i];
         }
