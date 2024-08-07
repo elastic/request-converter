@@ -94,7 +94,7 @@ export class JavaScriptExporter implements FormatExporter {
       Handlebars.registerHelper(
         "ifRequestBodyKind",
         function (this: ParsedRequest, kind: string, options) {
-          const bodyKind = this.request?.body?.kind;
+          const bodyKind = this.request?.body?.kind ?? "value";
 
           if (bodyKind == kind) {
             return options.fn(this);
