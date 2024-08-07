@@ -36,7 +36,7 @@ export class JavaScriptExporter implements FormatExporter {
   get template(): Handlebars.TemplateDelegate {
     if (!this._template) {
       Handlebars.registerHelper("json", function (context) {
-        const val = JSON.stringify(context, null, 2);
+        const val = JSON.stringify(context ?? null, null, 2);
 
         // turn number strings into numbers
         if (val.match(/^"\d+"$/)) {
