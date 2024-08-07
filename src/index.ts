@@ -1,4 +1,9 @@
-export { convertRequests, ConvertOptions, FormatExporter } from "./convert";
+export {
+  listFormats,
+  convertRequests,
+  ConvertOptions,
+  FormatExporter,
+} from "./convert";
 export {
   parseRequests,
   ParseOptions,
