@@ -42,6 +42,15 @@ describe("convert", () => {
     ).toBeTruthy();
   });
 
+  it("errors for unknown language", async () => {
+    expect(
+      async () =>
+        await convertRequests(devConsoleScript, "perl", {
+          checkOnly: true,
+        }),
+    ).rejects.toThrowError("Invalid output format");
+  });
+
   it("converts to curl", async () => {
     expect(
       await convertRequests(devConsoleScript, "curl", {
