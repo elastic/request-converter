@@ -1,5 +1,11 @@
 # request-converter change log
 
+## 8.15.2 (2024-08-07)
+* Export the `listFormats()` function ([#47](https://github.com/elastic/request-converter/pull/47))
+* Friendly error when invalid export format is requested ([#48](https://github.com/elastic/request-converter/pull/48))
+* Treat bodies as of type 'value' when not described in schema ([#49](https://github.com/elastic/request-converter/pull/49))
+* Ensure undefined bodies are encoded as null ([#53](https://github.com/elastic/request-converter/pull/53))
+
 ## 8.15.1 (2024-08-02)
 * JavaScript support ([#44](https://github.com/elastic/request-converter/pull/44))
 
@@ -20,6 +26,3 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
-
-
-
