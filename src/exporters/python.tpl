@@ -24,7 +24,7 @@ resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
     {{/each}}
     {{else ifRequestBodyKind "value"}}
     {{#if this.request.body.codegenName}}{{this.request.body.codegenName}}{{else}}body{{/if}}={{{pyprint this.body}}},
-    {{/ifRequestBodyKind}}
+{{/ifRequestBodyKind}}
 )
 {{else}}
 resp{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}()
