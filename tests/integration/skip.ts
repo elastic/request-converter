@@ -77,11 +77,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example puts `id` path attribute in body",
     formats: ["python", "javascript"],
   },
-  "39ce44333d28ed2b833722d3e3cb06f3": {
-    reason:
-      "example references a non-existant `include_named_queries_score` query attribute",
-    formats: ["python"],
-  },
   e39d51202913bf6d861e9e721570cdb8: {
     reason: "example has bad request syntax",
   },
@@ -286,6 +281,10 @@ const skip: Record<string, SkippedTest> = {
     formats: ["python", "javascript"],
   },
   "4b113c7f475cfe484a150ddbb8e6c5c7": {
+    reason: "example references a non-existant `remote_indices` body attribute",
+    formats: ["python", "javascript"],
+  },
+  "7f2d511cb64743c006225e5933a14bb4": {
     reason: "example references a non-existant `remote_indices` body attribute",
     formats: ["python", "javascript"],
   },
