@@ -17,9 +17,9 @@
     "docs": "typedoc src/index.ts",
     "lint": "eslint src tests",
     "prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --list-different",
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --test-path-ignore-patterns integration --coverage",
+    "test": "jest --test-path-ignore-patterns integration --coverage",
     "test:setup": "node scripts/download-examples.mjs && ./tests/integration/run-python.sh && ./tests/integration/run-javascript.sh",
-    "test:integration": "node --experimental-vm-modules node_modules/jest/bin/jest.js tests/integration",
+    "test:integration": "jest tests/integration",
     "test:integration-curl": "./scripts/test-format.sh curl",
     "test:integration-python": "./scripts/test-format.sh python",
     "test:integration-javascript": "./scripts/test-format.sh javascript",
@@ -29,7 +29,7 @@
     "fix:prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --write",
     "fix:precommit": "./scripts/precommit.sh",
     "watch:build": "tsc -w",
-    "watch:test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --test-path-ignore-patterns integration --coverage --watch",
+    "watch:test": "jest --test-path-ignore-patterns integration --coverage --watch",
     "prepare": "husky install"
   },
   "main": "dist/index.js",
@@ -43,6 +43,7 @@
     "@types/jest": "^29.5.12",
     "@types/jest-expect-message": "^1.1.0",
     "@types/node": "^20.12.12",
+    "@types/prettier": "^2.7.3",
     "copyfiles": "^2.4.1",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
@@ -63,10 +64,13 @@
     "commander": "^12.1.0",
     "find-my-way-ts": "^0.1.2",
     "handlebars": "^4.7.8",
-    "prettier": "^3.3.2"
+    "prettier": "^2.8.8"
   },
   "directories": {
     "test": "tests"
   },
-  "keywords": []
+  "keywords": [],
+  "prettier": {
+    "trailingComma": "all"
+  }
 }
