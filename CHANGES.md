@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 8.15.3 (2024-08-13)
+* downgrade prettier to avoid dynamic imports ([#58](https://github.com/elastic/request-converter/pull/58))
+
 ## 8.15.2 (2024-08-07)
 * Export the `listFormats()` function ([#47](https://github.com/elastic/request-converter/pull/47))
 * Friendly error when invalid export format is requested ([#48](https://github.com/elastic/request-converter/pull/48))
@@ -26,3 +29,4 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
