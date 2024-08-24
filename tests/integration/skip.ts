@@ -77,11 +77,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example puts `id` path attribute in body",
     formats: ["python", "javascript"],
   },
-  "39ce44333d28ed2b833722d3e3cb06f3": {
-    reason:
-      "example references a non-existant `include_named_queries_score` query attribute",
-    formats: ["python"],
-  },
   e39d51202913bf6d861e9e721570cdb8: {
     reason: "example has bad request syntax",
   },
@@ -392,33 +387,8 @@ const skip: Record<string, SkippedTest> = {
     reason: "test passes boolean field as string",
     formats: ["python"],
   },
-  "63bf3480627a89b4b4ede4150e1d6bc0": {
-    reason: "example uses unknown URL",
-  },
-  eb9a41f7fc8bdf5559bb9db822ae3a65: {
-    reason: "example uses unknown URL",
-  },
-  "44385b61342e20ea05f254015b2b04d7": {
-    reason: "example uses unknown URL",
-  },
-  "5deeed427f35cbaee4b8ddc45002a9d7": {
-    reason: "example uses unknown URL",
-  },
-  "2acf75803494fef29f9ca70671aa6be1": {
-    reason: "example uses unknown URL",
-  },
-  "8b144b3eb20872595fd7cbc6c245c7c8": {
-    reason: "example uses unknown URL",
-  },
-  "95c1b376652533c352bbf793c74d1b08": {
-    reason: "example uses unknown URL",
-  },
   "2577acb462b95bd4394523cf2f8a661f": {
     reason: "example uses undefined `tables` attribute",
-    formats: ["python"],
-  },
-  dcfa7f479a33f459a2d222a92e651451: {
-    reason: "example uses undefined `description` attribute",
     formats: ["python"],
   },
   "20e3b181114e00c943a27a9bbcf85f15": {
@@ -498,6 +468,22 @@ const skip: Record<string, SkippedTest> = {
     reason:
       "test uses username in path, but client sends it in the body as well, which is valid",
     formats: ["javascript"],
+  },
+  "4982c547be1ad9455ae836990aea92c5": {
+    reason: "test uses unknown `adaptive_allocations` attribute",
+    formats: ["python", "javascript"],
+  },
+  dfce1be1d035aff0b8fdf4a8839f7795: {
+    reason: "test uses unknown `adaptive_allocations` attribute",
+    formats: ["python", "javascript"],
+  },
+  "39ce44333d28ed2b833722d3e3cb06f3": {
+    reason: "test uses unknown `include_named_queries_score` query attribute",
+    formats: ["python"],
+  },
+  "7f2d511cb64743c006225e5933a14bb4": {
+    reason: "test uses unknown `remote_indices` attribute",
+    formats: ["python"],
   },
 };
 
