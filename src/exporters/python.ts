@@ -8,9 +8,12 @@ import { ParsedRequest } from "../parse";
 // in the Python client. APIs in this list are rendered with a perform_request()
 // call
 const UNSUPPORTED_APIS = new RegExp(
-  "^connector.*$" +
-    "|^inference.*$" +
-    "|^_internal.*$" +
+  "^_internal.*$" +
+    "|^connector.update_features$" +
+    "|^connector.sync_job_.*$" +
+    "|^ingest.get_geoip_database$" +
+    "|^ingest.put_geoip_database$" +
+    "|^ingest.delete_geoip_database$" +
     "|^security.create_cross_cluster_api_key$" +
     "|^security.update_cross_cluster_api_key$" +
     "|^security.update_settings$" +

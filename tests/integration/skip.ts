@@ -481,6 +481,10 @@ const skip: Record<string, SkippedTest> = {
     reason: "test uses unknown `adaptive_allocations` attribute",
     formats: ["python", "javascript"],
   },
+  "39ce44333d28ed2b833722d3e3cb06f3": {
+    reason: "test uses unknown `include_named_queries_score` query attribute",
+    formats: ["python"],
+  },
 };
 
 export function shouldBeSkipped(

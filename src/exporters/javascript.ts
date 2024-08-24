@@ -6,10 +6,13 @@ import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 
 const UNSUPPORTED_APIS = new RegExp(
-  "^connector.*$" +
-    "|^query_rules.*$" +
+  "^query_rules.*$" +
+    "|^connector.update_features$" +
+    "|^connector.sync_job_.*$" +
+    "|^ingest.get_geoip_database$" +
+    "|^ingest.put_geoip_database$" +
+    "|^ingest.delete_geoip_database$" +
     "|^_internal.*$" +
-    "|^inference.*$" +
     "|^security.create_cross_cluster_api_key$" +
     "|^security.update_cross_cluster_api_key$" +
     "|^security.update_settings$" +
