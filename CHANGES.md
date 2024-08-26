@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 8.15.4 (2024-08-26)
+* Add support for the Connector API
+
 ## 8.15.3 (2024-08-13)
 * downgrade prettier to avoid dynamic imports ([#58](https://github.com/elastic/request-converter/pull/58))
 
@@ -29,4 +32,5 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
