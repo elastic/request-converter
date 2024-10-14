@@ -14,6 +14,7 @@ if [ ! -d "$CLIENT_DIR" ]; then
     git clone -b "main" --depth=1 "https://github.com/elastic/elasticsearch-js.git" "$CLIENT_DIR")
   pushd "$CLIENT_DIR"
   npm install
+  npm install @types/node@18.11.9  # temporary workaround, see https://github.com/elastic/elasticsearch-js/pull/2374
   npm run build
   popd
 fi
