@@ -6,11 +6,11 @@ type SkippedTest = {
 const skip: Record<string, SkippedTest> = {
   fd7eeadab6251d9113c4380a7fbe2572: {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python", "javascript"],
+    formats: ["python"],
   },
   d69bd36335774c8ae1286cee21310241: {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python", "javascript"],
+    formats: ["python"],
   },
   "0b8fa90bc9aeeadb420ad785bd0b9953": {
     reason: "example references a non-existant `remote_indices` body attribute",
@@ -282,7 +282,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "4b113c7f475cfe484a150ddbb8e6c5c7": {
     reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python", "javascript"],
+    formats: ["python"],
   },
   "174b93c323aa8e9cc8ee2a3df5736810": {
     reason: "example uses unknown URL",
@@ -477,13 +477,9 @@ const skip: Record<string, SkippedTest> = {
     reason: "test uses unknown `adaptive_allocations` attribute",
     formats: ["python", "javascript"],
   },
-  "39ce44333d28ed2b833722d3e3cb06f3": {
-    reason: "test uses unknown `include_named_queries_score` query attribute",
-    formats: ["python"],
-  },
   "7f2d511cb64743c006225e5933a14bb4": {
     reason: "test uses unknown `remote_indices` attribute",
-    formats: ["python"],
+    formats: ["python", "javascript"],
   },
 };
 
