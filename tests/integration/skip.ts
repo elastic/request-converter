@@ -4,14 +4,6 @@ type SkippedTest = {
 };
 
 const skip: Record<string, SkippedTest> = {
-  fd7eeadab6251d9113c4380a7fbe2572: {
-    reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
-  },
-  d69bd36335774c8ae1286cee21310241: {
-    reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
-  },
   "0b8fa90bc9aeeadb420ad785bd0b9953": {
     reason: "example references a non-existant `remote_indices` body attribute",
     formats: ["python", "javascript"],
@@ -279,10 +271,6 @@ const skip: Record<string, SkippedTest> = {
   a162eb50853331c80596f5994e9d1c38: {
     reason: "example uses undefined `render_query` attribute.",
     formats: ["python", "javascript"],
-  },
-  "4b113c7f475cfe484a150ddbb8e6c5c7": {
-    reason: "example references a non-existant `remote_indices` body attribute",
-    formats: ["python"],
   },
   "174b93c323aa8e9cc8ee2a3df5736810": {
     reason: "example uses unknown URL",
