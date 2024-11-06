@@ -15,12 +15,14 @@ export class CurlExporter implements FormatExporter {
       (options.elasticsearchUrl ?? "").replace(/\/$/, "") ??
       "http://localhost:9200";
     const escapedSingleQuote = options.windows ? "''" : "'\"'\"'";
+    const envPrefix = options.windows ? "$env:" : "$";
+    const auth = ` -H "Authorization: ApiKey ${envPrefix}ELASTIC_API_KEY"`;
     let output = "";
     for (const request of requests) {
-      let headers = "";
+      let headers = auth;
       let body = "";
       if (request.body) {
-        headers = ' -H "Content-Type: application/json"';
+        headers += ' -H "Content-Type: application/json"';
         body =
           " -d '" +
           JSON.stringify(request.body).replaceAll("'", escapedSingleQuote) +
