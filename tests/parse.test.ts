@@ -42,6 +42,18 @@ describe("parse", () => {
     });
   });
 
+  it("parses search POST request given in a single line", async () => {
+    const req = await parseRequest(`POST /my-index/_search { "size": 5 }`);
+    expect(req).toMatchObject({
+      api: "search",
+      params: { index: "my-index" },
+      method: "POST",
+      url: "/my-index/_search",
+      path: "/my-index/_search",
+      body: { size: 5 },
+    });
+  });
+
   it("parses a complex sequence of requests", async () => {
     const reqs = await parseRequests(`PUT /customer/_doc/1?foo=bar
 {
@@ -73,11 +85,11 @@ POST /_bulk?foo=bar
 { "name": "John\\nDoe" }
 
 
-GET /customer/_doc/1
+GET /{customer}/_doc/1
 
 POST _nodes/reload_secure_settings\n{\n  "reload_secure_settings": "s3cr3t" <1>\n}
 
-GET my_index/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Foxes."\n}
+GET {my_index}/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Foxes."\n}
 
 POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n{\n  "description": "Snapshot 1",\n  "retain": true\n}
 `);
@@ -152,11 +164,11 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     });
     expect(reqs[7]).toMatchObject({
       api: "get",
-      params: { index: "customer", id: "1" },
+      params: { index: "{customer}", id: "1" },
       method: "GET",
-      url: "/customer/_doc/1",
-      path: "/customer/_doc/1",
-      rawPath: "/customer/_doc/1",
+      url: "/%7Bcustomer%7D/_doc/1",
+      path: "/{customer}/_doc/1",
+      rawPath: "/%7Bcustomer%7D/_doc/1",
     });
     expect(reqs[8]).toMatchObject({
       api: "nodes.reload_secure_settings",
@@ -169,11 +181,11 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     });
     expect(reqs[9]).toMatchObject({
       api: "indices.analyze",
-      params: { index: "my_index" },
+      params: { index: "{my_index}" },
       method: "GET",
-      url: "/my_index/_analyze",
-      path: "/my_index/_analyze",
-      rawPath: "/my_index/_analyze",
+      url: "/%7Bmy_index%7D/_analyze",
+      path: "/{my_index}/_analyze",
+      rawPath: "/%7Bmy_index%7D/_analyze",
       body: { field: "text", text: "The quick Brown Foxes." },
     });
     expect(reqs[10]).toMatchObject({
