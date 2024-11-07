@@ -142,11 +142,22 @@ function parseCommand(source: string, options: ParseOptions) {
   skip(" ", "\n");
   const urlStart = index;
   until("{", "\n");
+  if (source[index] == "{" && source[index + 1].match(/[a-z]/i)) {
+    // this is a placeholder element inside the URL (as used in doc examples),
+    // so we continue scanning
+    index++;
+    until("{", "\n");
+  }
 
   data.url = source.slice(urlStart, index).trim();
   if (data.url[0] != "/") {
     data.url = "/" + data.url;
   }
+  data.url = data.url
+    // replaces { with %7B (braces in many doc examples are not URIencoded)
+    .replace(/{/g, "%7B")
+    // replaces } with %7D
+    .replace(/}/g, "%7D");
   const parsedUrl = new URL(`http://localhost${data.url}`);
   data.rawPath =
     parsedUrl.pathname != "/"
