@@ -1,5 +1,9 @@
 # request-converter change log
 
+## 8.16.1 (2024-11-11)
+* parse `{placeholders}` in request URLs ([#64](https://github.com/elastic/request-converter/pull/64))
+* Add API key to curl generated requests ([#63](https://github.com/elastic/request-converter/pull/63))
+
 ## 8.16.0 (2024-10-14)
 * Update schema for 8.16
 
@@ -35,6 +39,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
