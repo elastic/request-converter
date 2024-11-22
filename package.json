@@ -39,7 +39,6 @@
   ],
   "devDependencies": {
     "@eslint/js": "^9.3.0",
-    "@types/child-process-promise": "^2.2.6",
     "@types/jest": "^29.5.12",
     "@types/jest-expect-message": "^1.1.0",
     "@types/node": "^20.12.12",
@@ -60,7 +59,6 @@
     "typescript-eslint": "^7.10.0"
   },
   "dependencies": {
-    "child-process-promise": "^2.2.1",
     "commander": "^12.1.0",
     "find-my-way-ts": "^0.1.2",
     "handlebars": "^4.7.8",
