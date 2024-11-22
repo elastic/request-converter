@@ -69,7 +69,7 @@ export class JavaScriptExporter implements FormatExporter {
       Handlebars.registerHelper(
         "supportedApi",
         function (this: ParsedRequest, options) {
-          if (!UNSUPPORTED_APIS.test(this.api as string)) {
+          if (!UNSUPPORTED_APIS.test(this.api as string) && this.request) {
             return options.fn(this);
           } else {
             return options.inverse(this);
