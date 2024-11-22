@@ -4,6 +4,7 @@ describe("parse", () => {
   it("parses info GET request", async () => {
     const req = await parseRequest("GET /");
     expect(req).toMatchObject({
+      source: "GET /",
       api: "info",
       params: {},
       method: "GET",
@@ -17,6 +18,7 @@ describe("parse", () => {
       "GET /my-index/_search?size=5&expand_wildcards",
     );
     expect(req).toMatchObject({
+      source: "GET /my-index/_search?size=5&expand_wildcards",
       api: "search",
       params: { index: "my-index" },
       method: "GET",
@@ -33,6 +35,7 @@ describe("parse", () => {
 }
 `);
     expect(req).toMatchObject({
+      source: 'POST /my-index/_search\n{\n  "size": 5\n}',
       api: "search",
       params: { index: "my-index" },
       method: "POST",
@@ -45,6 +48,7 @@ describe("parse", () => {
   it("parses search POST request given in a single line", async () => {
     const req = await parseRequest(`POST /my-index/_search { "size": 5 }`);
     expect(req).toMatchObject({
+      source: 'POST /my-index/_search { "size": 5 }',
       api: "search",
       params: { index: "my-index" },
       method: "POST",
@@ -95,6 +99,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
 `);
     expect(reqs.length).toEqual(11);
     expect(reqs[0]).toMatchObject({
+      source: 'PUT /customer/_doc/1?foo=bar\n{\n  "name": "John Doe"\n}',
       api: "index",
       params: { index: "customer", id: "1" },
       method: "PUT",
@@ -105,6 +110,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       body: { name: "John Doe" },
     });
     expect(reqs[1]).toMatchObject({
+      source: "GET /customer/_doc/1",
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
@@ -113,6 +119,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       rawPath: "/customer/_doc/1",
     });
     expect(reqs[2]).toMatchObject({
+      source: "GET/customer/_doc/1?foo=bar&v",
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
@@ -122,6 +129,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       query: { foo: "bar", v: "true" },
     });
     expect(reqs[3]).toMatchObject({
+      source:
+        'PUT /customer%7B/_doc/1{\n  "foo": {\n    "bar": "GET{POST}"\n  }\n}',
       api: "index",
       params: { index: "customer{", id: "1" },
       method: "PUT",
@@ -131,6 +140,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       body: { foo: { bar: "GET{POST}" } },
     });
     expect(reqs[4]).toMatchObject({
+      source: "GET /customer/_doc/1",
       api: "get",
       params: { index: "customer", id: "1" },
       method: "GET",
@@ -139,6 +149,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       rawPath: "/customer/_doc/1",
     });
     expect(reqs[5]).toMatchObject({
+      source:
+        'POST /_bulk?foo=bar\n{ "name": "John Doe" }\n{ "name": "John Doe" }\n{ "name": "John Doe" }',
       api: "bulk",
       params: {},
       method: "POST",
@@ -149,6 +161,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       body: [{ name: "John Doe" }, { name: "John Doe" }, { name: "John Doe" }],
     });
     expect(reqs[6]).toMatchObject({
+      source:
+        'POST /_bulk?foo=bar\n{ "name": "John\\nDoe" }\n{ "name": "John\\nDoe" }\n{ "name": "John\\nDoe" }',
       api: "bulk",
       params: {},
       method: "POST",
@@ -163,6 +177,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       ],
     });
     expect(reqs[7]).toMatchObject({
+      source: "GET /{customer}/_doc/1",
       api: "get",
       params: { index: "{customer}", id: "1" },
       method: "GET",
@@ -171,6 +186,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       rawPath: "/%7Bcustomer%7D/_doc/1",
     });
     expect(reqs[8]).toMatchObject({
+      source:
+        'POST _nodes/reload_secure_settings\n{\n  "reload_secure_settings": "s3cr3t" \n}',
       api: "nodes.reload_secure_settings",
       params: {},
       method: "POST",
@@ -180,6 +197,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       body: { reload_secure_settings: "s3cr3t" },
     });
     expect(reqs[9]).toMatchObject({
+      source:
+        'GET {my_index}/_analyze \n{\n  "field": "text",\n  "text": "The quick Brown Foxes."\n}',
       api: "indices.analyze",
       params: { index: "{my_index}" },
       method: "GET",
@@ -189,6 +208,8 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       body: { field: "text", text: "The quick Brown Foxes." },
     });
     expect(reqs[10]).toMatchObject({
+      source:
+        'POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n{\n  "description": "Snapshot 1",\n  "retain": true\n}',
       api: "ml.update_model_snapshot",
       params: { job_id: "it_ops_new_logs", snapshot_id: "1491852978" },
       method: "POST",
@@ -224,6 +245,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     );
     const req = await parseRequest(script, { ignoreErrors: true });
     expect(req).toMatchObject({
+      source: 'GET /my-index/_search\n{\n  "query": ...\n}',
       api: "search",
       body: '\n{\n  "query": ...\n}',
       method: "GET",
