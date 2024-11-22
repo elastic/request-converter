@@ -1,11 +1,14 @@
 import { readFileSync } from "fs";
 import { writeFile, rm } from "fs/promises";
+import childProcess from "child-process";
 import path from "path";
-import { exec } from "child-process-promise";
+import util from "util";
 import { convertRequests } from "../../src/convert";
 import { parseRequest, splitSource, ParsedRequest } from "../../src/parse";
 import { startServer, stopServer } from "./testserver";
 import { shouldBeSkipped } from "./skip";
+
+const execAsync = util.promisify(childProcess.exec);
 
 const TEST_FORMATS: Record<string, string> = {
   python: "py",
@@ -89,7 +92,7 @@ describe("convert", () => {
           const failureMessage = `Failed code snippet:\n\n${code}\n\n`;
 
           try {
-            await exec(
+            await execAsync(
               path.join(__dirname, `./run-${format}.sh .tmp.request.${ext}`),
             );
             parsedRequest = await parseRequest(source);
