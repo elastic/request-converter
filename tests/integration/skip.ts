@@ -375,10 +375,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "test passes boolean field as string",
     formats: ["python"],
   },
-  "2577acb462b95bd4394523cf2f8a661f": {
-    reason: "example uses undefined `tables` attribute",
-    formats: ["python"],
-  },
   "20e3b181114e00c943a27a9bbcf85f15": {
     reason: "test passes date epoch number as string",
     formats: ["javascript"],
