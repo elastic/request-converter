@@ -23,6 +23,9 @@ export type ConvertOptions = {
   [x: string]: unknown; // exporter specific options
 };
 
+/**
+ * This interface defines the structure of a language exporter.
+ */
 export interface FormatExporter {
   check(requests: ParsedRequest[]): Promise<boolean>;
   convert(requests: ParsedRequest[], options: ConvertOptions): Promise<string>;
@@ -77,4 +80,121 @@ export async function convertRequests(
     return await exporter.check(requests);
   }
   return await exporter.convert(requests, options);
+}
+
+/**
+ * This interface defines the structure of an externally hosted language
+ * exporter.
+ * @experimental
+ */
+export interface ExternalFormatExporter {
+  check(input: string): string;
+  convert(input: string): string;
+}
+
+/**
+ * Base class for remotely hosted language exporters.
+ *
+ * This class is used to wrap exporters that are hosted externally,
+ * for example as WASM modules.
+ * @experimental
+ */
+export class ExternalExporter implements FormatExporter {
+  private _check: (input: string) => string;
+  private _convert: (input: string) => string;
+
+  /**
+   * Class constructor.
+   *
+   * `module` must have `check` and `convert` entry point functions. Both
+   * functions must accept a JSON string with the input arguments. The
+   * response must be a JSON string with the format `{"return": ..., "error": "..."}`.
+   * If the `error` attribute is included, it is assumed that the function
+   * failed and an error will be raised with the given error message.
+   */
+  constructor(module: ExternalFormatExporter) {
+    this._check = module.check;
+    this._convert = module.convert;
+  }
+
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    const response = JSON.parse(this._check(JSON.stringify({ requests })));
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.return;
+  }
+
+  async convert(
+    requests: ParsedRequest[],
+    options: ConvertOptions,
+  ): Promise<string> {
+    const response = JSON.parse(
+      this._convert(JSON.stringify({ requests, options })),
+    );
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.return;
+  }
+}
+
+/**
+ * Base class for web hosted language exporters.
+ *
+ * This class is used to wrap exporters that are hosted externally as
+ * web services.
+ * @experimental
+ */
+export class WebExporter implements FormatExporter {
+  private baseUrl: string;
+
+  /**
+   * Class constructor.
+   *
+   * `baseUrl` is the location where the web service is hosted. The required
+   * endpoints are `/check` and `/convert`, appended to this URL. The
+   * endpoints must accept a JSON string with the input arguments. The
+   * response must be a JSON string with the format `{"return": ..., "error": "..."}`.
+   * If the `error` attribute is included, it is assumed that the function
+   * failed and an error will be raised with the given error message.
+   */
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
+
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    const response = await fetch(`${this.baseUrl}/check`, {
+      method: "POST",
+      body: JSON.stringify({ requests }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (response.ok) {
+      const json = await response.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.result;
+    }
+    throw new Error("Could not make web request");
+  }
+
+  async convert(
+    requests: ParsedRequest[],
+    options: ConvertOptions,
+  ): Promise<string> {
+    const response = await fetch(`${this.baseUrl}/check`, {
+      method: "POST",
+      body: JSON.stringify({ requests, options }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (response.ok) {
+      const json = await response.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.result;
+    }
+    throw new Error("Could not make web request");
+  }
 }

@@ -3,6 +3,7 @@ import {
   listFormats,
   FormatExporter,
   ConvertOptions,
+  ExternalExporter,
 } from "../src/convert";
 import { ParsedRequest } from "../src/parse";
 
@@ -290,5 +291,55 @@ run();
 
   it("returns the list of available formats", () => {
     expect(listFormats()).toContain("python");
+  });
+
+  it("supports a simple external exporter", async () => {
+    const externalExporter = {
+      check: (json: string) => {
+        const api: string = JSON.parse(json).requests[0].api;
+        const ret = api.indexOf("search") >= 0;
+        const error = api.indexOf("ml") >= 0 ? `unsupported:${api}` : null;
+        return JSON.stringify({ return: ret, error });
+      },
+      convert: (json: string) => {
+        const rets = JSON.parse(json).requests.map(
+          (req: ParsedRequest) => req.api,
+        );
+        return JSON.stringify({ return: rets.join("\n") });
+      },
+    };
+
+    expect(
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        new ExternalExporter(externalExporter),
+        { checkOnly: true },
+      ),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests(
+        "GET /_cat/indices",
+        new ExternalExporter(externalExporter),
+        { checkOnly: true },
+      ),
+    ).toBeFalsy();
+
+    expect(
+      async () =>
+        await convertRequests(
+          "POST _ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
+          new ExternalExporter(externalExporter),
+          { checkOnly: true },
+        ),
+    ).rejects.toThrowError("unsupported:ml.update_model_snapshot");
+
+    expect(
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        new ExternalExporter(externalExporter),
+        {},
+      ),
+    ).toEqual("search\ninfo");
   });
 });
