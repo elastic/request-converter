@@ -17,6 +17,8 @@ export type ParseOptions = {
 };
 
 export type ParsedRequest = {
+  /** The source request. */
+  source: string;
   /** The name of the Elasticsearch API this request refers to. */
   api?: string;
   /** The request definition from the Elasticsearch specification that applies to this request. */
@@ -110,9 +112,12 @@ function parseCommand(source: string, options: ParseOptions) {
     // removes comments tags, such as `<1>`
     .replace(/<([\S\s])>/g, "")
     // removes comments, such as `// optional`
-    .replace(/\/\/\s.+/g, "");
+    .replace(/\s*\/\/\s.+/g, "")
+    // trimp whitespace
+    .trim();
 
   const data: ParsedRequest = {
+    source: source,
     params: {},
     method: "",
     url: "",
