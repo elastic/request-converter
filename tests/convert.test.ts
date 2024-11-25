@@ -1,9 +1,12 @@
+import childProcess from "child_process";
+import path from "path";
 import {
   convertRequests,
   listFormats,
   FormatExporter,
   ConvertOptions,
   ExternalExporter,
+  WebExporter,
 } from "../src/convert";
 import { ParsedRequest } from "../src/parse";
 import wasmSimple from "./wasm/wasm-simple/pkg/wasm_simple";
@@ -354,5 +357,28 @@ run();
     expect(
       await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {}),
     ).toEqual("search,info");
+  });
+
+  it("supports a web external exporter", async () => {
+    const sleep = (secs: number) =>
+      new Promise((r) => setTimeout(r, secs * 1000));
+    const webExporter = new WebExporter("http://localhost:5000");
+
+    const proc = childProcess.spawn("python", [
+      path.join(__dirname, "web/python-simple/web.py"),
+    ]);
+    await sleep(0.5); // give the web app time to boot
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", webExporter, {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", webExporter, {}),
+    ).toEqual("search,info");
+
+    proc.kill("SIGKILL");
   });
 });

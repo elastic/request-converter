@@ -92,6 +92,17 @@ export interface ExternalFormatExporter {
   convert(input: string): string;
 }
 
+/* this helper function creates a copy of the requests array without the
+ * schema request properties, so that the payload sent to external exporters
+ * aren't huge.
+ */
+const getSlimRequests = (requests: ParsedRequest[]) => {
+  return requests.map((req) => {
+    const { request, ...others } = req; /* eslint-disable-line */
+    return { ...others };
+  });
+};
+
 /**
  * Base class for remotely hosted language exporters.
  *
@@ -118,7 +129,9 @@ export class ExternalExporter implements FormatExporter {
   }
 
   async check(requests: ParsedRequest[]): Promise<boolean> {
-    const response = JSON.parse(this._check(JSON.stringify({ requests })));
+    const response = JSON.parse(
+      this._check(JSON.stringify({ requests: getSlimRequests(requests) })),
+    );
     if (response.error) {
       throw new Error(response.error);
     }
@@ -130,7 +143,9 @@ export class ExternalExporter implements FormatExporter {
     options: ConvertOptions,
   ): Promise<string> {
     const response = JSON.parse(
-      this._convert(JSON.stringify({ requests, options })),
+      this._convert(
+        JSON.stringify({ requests: getSlimRequests(requests), options }),
+      ),
     );
     if (response.error) {
       throw new Error(response.error);
@@ -166,7 +181,7 @@ export class WebExporter implements FormatExporter {
   async check(requests: ParsedRequest[]): Promise<boolean> {
     const response = await fetch(`${this.baseUrl}/check`, {
       method: "POST",
-      body: JSON.stringify({ requests }),
+      body: JSON.stringify({ requests: getSlimRequests(requests) }),
       headers: { "Content-Type": "application/json" },
     });
     if (response.ok) {
@@ -174,7 +189,7 @@ export class WebExporter implements FormatExporter {
       if (json.error) {
         throw new Error(json.error);
       }
-      return json.result;
+      return json.return;
     }
     throw new Error("Could not make web request");
   }
@@ -183,9 +198,9 @@ export class WebExporter implements FormatExporter {
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
-    const response = await fetch(`${this.baseUrl}/check`, {
+    const response = await fetch(`${this.baseUrl}/convert`, {
       method: "POST",
-      body: JSON.stringify({ requests, options }),
+      body: JSON.stringify({ requests: getSlimRequests(requests), options }),
       headers: { "Content-Type": "application/json" },
     });
     if (response.ok) {
@@ -193,7 +208,7 @@ export class WebExporter implements FormatExporter {
       if (json.error) {
         throw new Error(json.error);
       }
-      return json.result;
+      return json.return;
     }
     throw new Error("Could not make web request");
   }
