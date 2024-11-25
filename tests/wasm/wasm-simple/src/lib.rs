@@ -13,7 +13,6 @@ struct ParsedRequest {
     path: String,
     query: Option<HashMap<String, String>>,
     raw_path: Option<String>,
-    request: Option<HashMap<String, serde_json::Value>>,
     source: String,
     url: String,
 }
@@ -33,21 +32,41 @@ struct Input {
     options: Option<ConvertOptions>,
 }
 
-/* check - return a boolean indicating if a conversion of the request(s) is supported */
+/* check()
+ * check if the given request(s) can be processed by this exporter
+ *
+ * arguments:
+ *   input: String  A JSONified string with the input arguments with format
+ *                  {"requests": ParsedRequest[]}
+ * 
+ * returns:
+ *   a JSON payload with the format {"return": bool} if successful
+ *   or {"error": "string"} on a failure
+ */
 #[wasm_bindgen]
 pub fn check(input: String) -> String {
     let Input { requests, options } = serde_json::from_str(input.as_str()).unwrap();
 
-    // this simplistic exporter returns true for all requests
+    // this example exporter returns true for all requests
     String::from("{\"return\": true}")
 }
 
-/* convert - generate code for the given requests and options */
+/* convert()
+ * convert the given request(s) to the target language
+ *
+ * arguments:
+ *   input: String  A JSONified string with the input arguments with format
+ *                  {"requests": ParsedRequest[], "options": ConvertOptions}
+ * 
+ * returns:
+ *   a JSON payload with the format {"return": "string"} if successful
+ *   or {"error": "string"} on a failure
+ */
 #[wasm_bindgen]
 pub fn convert(input: String) -> String {
     let Input { requests, options } = serde_json::from_str(input.as_str()).unwrap();
 
-    // this simplistic exporter just returns a comma-separated list of the API names
+    // this example exporter returns a comma-separated list of the API names
     // of the given requests
     let ret = requests.iter().map(|req| req.api.clone().unwrap_or(String::from("?"))).collect::<Vec<_>>();
 

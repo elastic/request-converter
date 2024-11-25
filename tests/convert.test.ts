@@ -1,4 +1,4 @@
-import childProcess from "child_process";
+import childProcess, { ChildProcess } from "child_process";
 import path from "path";
 import {
   convertRequests,
@@ -359,26 +359,51 @@ run();
     ).toEqual("search,info");
   });
 
-  it("supports a web external exporter", async () => {
-    const sleep = (secs: number) =>
-      new Promise((r) => setTimeout(r, secs * 1000));
-    const webExporter = new WebExporter("http://localhost:5000");
+  describe("web external exporter tests", () => {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const baseUrl = "http://127.0.0.1:5000";
+    const webExporter = new WebExporter(baseUrl);
+    let proc: ChildProcess | null = null;
 
-    const proc = childProcess.spawn("python", [
-      path.join(__dirname, "web/python-simple/web.py"),
-    ]);
-    await sleep(0.5); // give the web app time to boot
+    beforeEach(async () => {
+      proc = childProcess.spawn("python", [
+        path.join(__dirname, "web/python-simple/web.py"),
+      ]);
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await sleep(1_000); // give the web app time to boot
+        try {
+          const response = await fetch(baseUrl);
+          if (response.ok) {
+            break; // web service is responsive
+          }
+        } catch (err) {
+          // we need to wait some more
+        }
+      }
+    }, 30_000); // use a longer timeout here, to give the web service time to start
 
-    expect(
-      await convertRequests("GET /my-index/_search\nGET /\n", webExporter, {
-        checkOnly: true,
-      }),
-    ).toBeTruthy();
+    afterEach(async () => {
+      if (proc) {
+        proc.kill("SIGKILL");
+        proc = null;
+      }
+    });
 
-    expect(
-      await convertRequests("GET /my-index/_search\nGET /\n", webExporter, {}),
-    ).toEqual("search,info");
+    it("supports a web external exporter", async () => {
+      expect(
+        await convertRequests("GET /my-index/_search\nGET /\n", webExporter, {
+          checkOnly: true,
+        }),
+      ).toBeTruthy();
 
-    proc.kill("SIGKILL");
+      expect(
+        await convertRequests(
+          "GET /my-index/_search\nGET /\n",
+          webExporter,
+          {},
+        ),
+      ).toEqual("search,info");
+    });
   });
 });
