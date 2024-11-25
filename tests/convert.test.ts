@@ -6,6 +6,7 @@ import {
   ExternalExporter,
 } from "../src/convert";
 import { ParsedRequest } from "../src/parse";
+import wasmSimple from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `GET /
 
@@ -294,7 +295,7 @@ run();
   });
 
   it("supports a simple external exporter", async () => {
-    const externalExporter = {
+    const externalExporter = new ExternalExporter({
       check: (json: string) => {
         const api: string = JSON.parse(json).requests[0].api;
         const ret = api.indexOf("search") >= 0;
@@ -307,29 +308,27 @@ run();
         );
         return JSON.stringify({ return: rets.join("\n") });
       },
-    };
+    });
 
     expect(
       await convertRequests(
         "GET /my-index/_search\nGET /\n",
-        new ExternalExporter(externalExporter),
+        externalExporter,
         { checkOnly: true },
       ),
     ).toBeTruthy();
 
     expect(
-      await convertRequests(
-        "GET /_cat/indices",
-        new ExternalExporter(externalExporter),
-        { checkOnly: true },
-      ),
+      await convertRequests("GET /_cat/indices", externalExporter, {
+        checkOnly: true,
+      }),
     ).toBeFalsy();
 
     expect(
       async () =>
         await convertRequests(
           "POST _ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
-          new ExternalExporter(externalExporter),
+          externalExporter,
           { checkOnly: true },
         ),
     ).rejects.toThrowError("unsupported:ml.update_model_snapshot");
@@ -337,9 +336,23 @@ run();
     expect(
       await convertRequests(
         "GET /my-index/_search\nGET /\n",
-        new ExternalExporter(externalExporter),
+        externalExporter,
         {},
       ),
     ).toEqual("search\ninfo");
+  });
+
+  it("supports a wasm external exporter", async () => {
+    const wasmExporter = new ExternalExporter(wasmSimple);
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {}),
+    ).toEqual("search,info");
   });
 });
