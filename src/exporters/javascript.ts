@@ -24,16 +24,22 @@ const UNSUPPORTED_APIS = new RegExp(
 export class JavaScriptExporter implements FormatExporter {
   _template: Handlebars.TemplateDelegate;
 
-  async check(): Promise<boolean> {
-    return true;
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    // only return true if all requests are for Elasticsearch
+    return requests
+      .map((req) => req.service == "es")
+      .reduce((prev, curr) => prev && curr, true);
   }
 
   async convert(
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
+    if (!(await this.check(requests))) {
+      throw new Error("Cannot perform conversion");
+    }
     const output = this.template({ requests, ...options });
-    return await prettier.format(output, { parser: "typescript" });
+    return prettier.format(output, { parser: "typescript" });
   }
 
   get template(): Handlebars.TemplateDelegate {

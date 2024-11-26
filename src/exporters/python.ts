@@ -34,13 +34,19 @@ export class PythonExporter implements FormatExporter {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async check(requests: ParsedRequest[]): Promise<boolean> {
-    return true;
+    // only return true if all requests are for Elasticsearch
+    return requests
+      .map((req) => req.service == "es")
+      .reduce((prev, curr) => prev && curr, true);
   }
 
   async convert(
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
+    if (!(await this.check(requests))) {
+      throw new Error("Cannot perform conversion");
+    }
     return (await this.getTemplate())({ requests, ...options });
   }
 
