@@ -17,10 +17,19 @@ POST /my-index/_search?from=40&size=20
   }
 }`;
 
+const kibanaScript = `GET /
+
+GET kbn:/api/saved_objects/_find?type=dashboard`;
+
 describe("convert", () => {
   it("checks for curl", async () => {
     expect(
       await convertRequests(devConsoleScript, "curl", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "curl", {
         checkOnly: true,
       }),
     ).toBeTruthy();
@@ -32,6 +41,11 @@ describe("convert", () => {
         checkOnly: true,
       }),
     ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "python", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
   });
 
   it("checks for javascript", async () => {
@@ -40,6 +54,11 @@ describe("convert", () => {
         checkOnly: true,
       }),
     ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "javascript", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
   });
 
   it("errors for unknown language", async () => {
@@ -69,6 +88,17 @@ describe("convert", () => {
       }),
     ).toEqual(
       'curl -X GET -H "Authorization: ApiKey $env:ELASTIC_API_KEY" "http://localhost:9876/"\ncurl -X POST -H "Authorization: ApiKey $env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
+    );
+  });
+
+  it("converts Kibana to curl", async () => {
+    expect(
+      await convertRequests(kibanaScript, "curl", {
+        elasticsearchUrl: "http://localhost:9876",
+        otherUrls: { kbn: "http://localhost:5601" },
+      }),
+    ).toEqual(
+      'curl -X GET -H "Authorization: ApiKey $ELASTIC_API_KEY" "http://localhost:9876/"\ncurl -X GET -H "Authorization: ApiKey $ELASTIC_API_KEY" "http://localhost:5601/api/saved_objects/_find?type=dashboard"\n',
     );
   });
 
@@ -164,6 +194,16 @@ resp1 = client.search(
     );
   });
 
+  it("errors when converting Kibana to Python", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "python", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
   it("converts to javascript", async () => {
     expect(await convertRequests(devConsoleScript, "javascript", {})).toEqual(
       `const response = await client.info();
@@ -214,6 +254,17 @@ run();
 `,
     );
   });
+
+  it("errors when converting Kibana to JavaScript", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "javascript", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
   it("supports a custom exporter", async () => {
     class MyExporter implements FormatExporter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
