@@ -19,6 +19,8 @@ export type ParseOptions = {
 export type ParsedRequest = {
   /** The source request. */
   source: string;
+  /** The target service code. This is "es" for Elasticsearch, "kbn" for Kibana. */
+  service: string;
   /** The name of the Elasticsearch API this request refers to. */
   api?: string;
   /** The request definition from the Elasticsearch specification that applies to this request. */
@@ -118,6 +120,7 @@ function parseCommand(source: string, options: ParseOptions) {
 
   const data: ParsedRequest = {
     source: source,
+    service: "es",
     params: {},
     method: "",
     url: "",
@@ -155,6 +158,10 @@ function parseCommand(source: string, options: ParseOptions) {
   }
 
   data.url = source.slice(urlStart, index).trim();
+  if (data.url.indexOf(":/") >= 0) {
+    [data.service, data.url] = data.url.split(":/", 2);
+    data.url = "/" + data.url;
+  }
   if (data.url[0] != "/") {
     data.url = "/" + data.url;
   }
@@ -332,16 +339,19 @@ export async function parseRequest(
 ): Promise<ParsedRequest> {
   source = source.replace(/^\s+|\s+$/g, ""); // trim whitespace
   const req = parseCommand(source, options ?? {});
-  try {
-    const route = await getAPI(req.method, req.rawPath);
-    req.api = route.handler.name;
-    req.request = route.handler.request;
-    if (Object.keys(route.params).length > 0) {
-      req.params = route.params;
-    }
-  } catch (error) {
-    if (!options?.ignoreErrors) {
-      throw error;
+  if (req.service == "es") {
+    // for Elasticsearch URLs we can get API details
+    try {
+      const route = await getAPI(req.method, req.rawPath);
+      req.api = route.handler.name;
+      req.request = route.handler.request;
+      if (Object.keys(route.params).length > 0) {
+        req.params = route.params;
+      }
+    } catch (error) {
+      if (!options?.ignoreErrors) {
+        throw error;
+      }
     }
   }
   return req;

@@ -11,12 +11,10 @@ export class CurlExporter implements FormatExporter {
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
-    const endpoint =
-      (options.elasticsearchUrl ?? "").replace(/\/$/, "") ??
-      "http://localhost:9200";
     const escapedSingleQuote = options.windows ? "''" : "'\"'\"'";
     const envPrefix = options.windows ? "$env:" : "$";
     const auth = ` -H "Authorization: ApiKey ${envPrefix}ELASTIC_API_KEY"`;
+    const otherUrls = (options.otherUrls as Record<string, string>) ?? {};
     let output = "";
     for (const request of requests) {
       let headers = auth;
@@ -30,7 +28,11 @@ export class CurlExporter implements FormatExporter {
       }
       const method =
         request.method != "HEAD" ? `-X ${request.method}` : "--head";
-      output += `curl ${method}${headers}${body} "${endpoint}${request.url}"\n`;
+      const baseUrl =
+        (otherUrls[request.service] ?? "").replace(/\/$/, "") ||
+        (options.elasticsearchUrl ?? "").replace(/\/$/, "") ||
+        "http://localhost:9200";
+      output += `curl ${method}${headers}${body} "${baseUrl}${request.url}"\n`;
     }
     return output;
   }

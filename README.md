@@ -92,6 +92,7 @@ Supported options:
 | Option name | Type | Required | Description |
 | ----------- | ---- | -------- | ----------- |
 | `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use in the generated commands. The default is `http://localhost:9200`. |
+| `otherUrls` | `Record<string, string>` | no | URLs for other services. For Kibana, use `{kbn: "http://localhost:5601"}` |
 | `windows` | `boolean` | no | If `true`, use PowerShell escaping rules for quotes. If `false`, use bash/zsh escaping rules. The default is `false`. |
 
 ### python
