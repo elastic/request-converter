@@ -1,5 +1,9 @@
 # request-converter change log
 
+## 8.16.2 (2024-11-26)
+* Support Kibana URLs in the curl exporter ([#72](https://github.com/elastic/request-converter/pull/72))
+* include source script in parsed request ([#67](https://github.com/elastic/request-converter/pull/67))
+
 ## 8.16.1 (2024-11-11)
 * parse `{placeholders}` in request URLs ([#64](https://github.com/elastic/request-converter/pull/64))
 * Add API key to curl generated requests ([#63](https://github.com/elastic/request-converter/pull/63))
@@ -39,6 +43,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
