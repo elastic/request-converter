@@ -1,7 +1,11 @@
+import childProcess, { ChildProcess } from "child_process";
 import { parseRequests, ParsedRequest } from "./parse";
 import { PythonExporter } from "./exporters/python";
 import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
+import util from "util";
+
+const execAsync = util.promisify(childProcess.exec);
 
 export type ConvertOptions = {
   /** When `true`, the converter will only check if the conversion can be carried
@@ -151,6 +155,62 @@ export class ExternalExporter implements FormatExporter {
       throw new Error(response.error);
     }
     return response.return;
+  }
+}
+
+/**
+ * Base class for separate executable language exporters.
+ *
+ * This class is used to wrap exporters that are hosted externally as
+ * independent processes.
+ * @experimental
+ */
+export class SubprocessExporter implements FormatExporter {
+  private baseCmd: string;
+
+  /**
+   * Class constructor.
+   *
+   * `baseCmd` is the base command to run to invoke the exporter. The commands
+   * will receive two arguments, first the function to invoke ("check" or
+   * "convert") and then the JSON payload that is the input to the function.
+   * The function must output the response to stdout in JSON format. A response
+   * must be a JSON string with the format `{"return": ..., "error": "..."}`.
+   * If the `error` attribute is included, it is assumed that the function
+   * failed and an error will be raised with the given error message.
+   */
+  constructor(baseCmd: string) {
+    this.baseCmd = baseCmd;
+  }
+
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    const input = JSON.stringify({ requests: getSlimRequests(requests) });
+    const { stdout, stderr } = await execAsync(`${this.baseCmd} check '${input}'`);
+    console.log(stderr);
+    if (stdout) {
+      const json = JSON.parse(stdout);
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.return;
+    }
+    throw new Error("Could not invoke exporter");
+  }
+
+  async convert(
+    requests: ParsedRequest[],
+    options: ConvertOptions,
+  ): Promise<string> {
+    const input = JSON.stringify({ requests: getSlimRequests(requests), options });
+    const { stdout } = await execAsync(`${this.baseCmd} convert '${input}'`);
+    if (stdout) {
+      const json = JSON.parse(stdout);
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.return;
+    }
+    throw new Error("Could not invoke exporter");
   }
 }
 

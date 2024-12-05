@@ -8,7 +8,7 @@
     <Nullable>enable</Nullable>
 
     <RuntimeIdentifier>browser-wasm</RuntimeIdentifier>
-    <WasmMainJSPath>main.ts</WasmMainJSPath>
+    <WasmMainJSPath>main.mjs</WasmMainJSPath>
 
     <!-- JSExport requires unsafe code -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -17,6 +17,7 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <WasmEmitSymbolMap>false</WasmEmitSymbolMap>
 
+    <JsonSerializerIsReflectionEnabledByDefault>true</JsonSerializerIsReflectionEnabledByDefault>
   </PropertyGroup>
 
 </Project>

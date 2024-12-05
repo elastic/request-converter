@@ -6,11 +6,11 @@ import {
   FormatExporter,
   ConvertOptions,
   ExternalExporter,
+  SubprocessExporter,
   WebExporter,
 } from "../src/convert";
 import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
-//import wasmDotnet from './wasm/wasm-dotnet/bin/Release/net9.0/browser-wasm/AppBundle/main.js';
 
 const devConsoleScript = `GET /
 
@@ -360,22 +360,19 @@ run();
     ).toEqual("search,info");
   });
 
-  // it("supports a C#/wasm external exporter", async () => {
-  //   if (wasmDotnet.init) {
-  //     await (wasmDotnet.init as () => Promise<void>)();
-  //   }
-  //   const wasmExporter = new ExternalExporter(wasmDotnet as ExternalFormatExporter);
-  //
-  //   expect(
-  //     await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {
-  //       checkOnly: true,
-  //     }),
-  //   ).toBeTruthy();
-  //
-  //   expect(
-  //     await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {}),
-  //   ).toEqual("search,info");
-  // });
+  it("supports a C#/wasm external exporter", async () => {
+    const dotnetExporter = new SubprocessExporter("node tests/wasm/wasm-dotnet/bin/Release/net9.0/browser-wasm/AppBundle/main.mjs");
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", dotnetExporter, {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", dotnetExporter, {}),
+    ).toEqual("search,info");
+  });
 
   describe("web external exporter tests", () => {
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
