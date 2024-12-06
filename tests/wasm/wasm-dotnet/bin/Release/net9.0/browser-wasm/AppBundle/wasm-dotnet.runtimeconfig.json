@@ -31,7 +31,7 @@
       "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false,
       "System.StartupHookProvider.IsSupported": false,
       "System.Text.Encoding.EnableUnsafeUTF7Encoding": false,
-      "System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault": true,
+      "System.Text.Json.JsonSerializer.IsReflectionEnabledByDefault": false,
       "System.Threading.Thread.EnableAutoreleasePool": false
     },
     "wasmHostProperties": {

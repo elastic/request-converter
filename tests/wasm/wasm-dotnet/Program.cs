@@ -1,4 +1,7 @@
-﻿using System.Runtime.CompilerServices;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Versioning;
 using System.Text.Json;
@@ -46,10 +49,9 @@ internal readonly record struct ErrorResponse
 }
 
 [JsonSerializable(typeof(Input))]
-[JsonSerializable(typeof(SuccessResponse<>))]
+[JsonSerializable(typeof(SuccessResponse<bool>))]
+[JsonSerializable(typeof(SuccessResponse<string>))]
 [JsonSerializable(typeof(ErrorResponse))]
-[JsonSerializable(typeof(string))]
-[JsonSerializable(typeof(bool))]
 internal partial class SerializerContext : JsonSerializerContext;
 
 [SupportedOSPlatform("browser")]
@@ -121,16 +123,16 @@ internal static partial class RequestConverter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string Serialize<T>(T input)
     {
-#pragma warning disable IL2026 // False positive
+#pragma warning disable IL2026, IL3050 // False positive
         return JsonSerializer.Serialize(input, SerializerOptions);
-#pragma warning restore IL2026
+#pragma warning restore IL2026, IL3050
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static T? Deserialize<T>(string input)
     {
-#pragma warning disable IL2026 // False positive
+#pragma warning disable IL2026, IL3050 // False positive
         return JsonSerializer.Deserialize<T>(input, SerializerOptions);
-#pragma warning restore IL2026
+#pragma warning restore IL2026, IL3050
     }
 }
