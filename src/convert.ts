@@ -1,7 +1,12 @@
+import childProcess from "child_process";
+import base64url from "base64url";
 import { parseRequests, ParsedRequest } from "./parse";
 import { PythonExporter } from "./exporters/python";
 import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
+import util from "util";
+
+const execAsync = util.promisify(childProcess.exec);
 
 export type ConvertOptions = {
   /** When `true`, the converter will only check if the conversion can be carried
@@ -23,6 +28,9 @@ export type ConvertOptions = {
   [x: string]: unknown; // exporter specific options
 };
 
+/**
+ * This interface defines the structure of a language exporter.
+ */
 export interface FormatExporter {
   check(requests: ParsedRequest[]): Promise<boolean>;
   convert(requests: ParsedRequest[], options: ConvertOptions): Promise<string>;
@@ -77,4 +85,197 @@ export async function convertRequests(
     return await exporter.check(requests);
   }
   return await exporter.convert(requests, options);
+}
+
+/**
+ * This interface defines the structure of an externally hosted language
+ * exporter.
+ * @experimental
+ */
+export interface ExternalFormatExporter {
+  check(input: string): string;
+  convert(input: string): string;
+}
+
+/* this helper function creates a copy of the requests array without the
+ * schema request properties, so that the payload sent to external exporters
+ * aren't huge.
+ */
+const getSlimRequests = (requests: ParsedRequest[]) => {
+  return requests.map((req) => {
+    const { request, ...others } = req; /* eslint-disable-line */
+    return { ...others };
+  });
+};
+
+/**
+ * Base class for remotely hosted language exporters.
+ *
+ * This class is used to wrap exporters that are hosted externally,
+ * for example as WASM modules.
+ * @experimental
+ */
+export class ExternalExporter implements FormatExporter {
+  private _check: (input: string) => string;
+  private _convert: (input: string) => string;
+
+  /**
+   * Class constructor.
+   *
+   * `module` must have `check` and `convert` entry point functions. Both
+   * functions must accept a JSON string with the input arguments. The
+   * response must be a JSON string with the format `{"return": ..., "error": "..."}`.
+   * If the `error` attribute is included, it is assumed that the function
+   * failed and an error will be raised with the given error message.
+   */
+  constructor(module: ExternalFormatExporter) {
+    this._check = module.check;
+    this._convert = module.convert;
+  }
+
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    const response = JSON.parse(
+      this._check(JSON.stringify({ requests: getSlimRequests(requests) })),
+    );
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.return;
+  }
+
+  async convert(
+    requests: ParsedRequest[],
+    options: ConvertOptions,
+  ): Promise<string> {
+    const response = JSON.parse(
+      this._convert(
+        JSON.stringify({ requests: getSlimRequests(requests), options }),
+      ),
+    );
+    if (response.error) {
+      throw new Error(response.error);
+    }
+    return response.return;
+  }
+}
+
+/**
+ * Base class for separate executable language exporters.
+ *
+ * This class is used to wrap exporters that are hosted externally as
+ * independent processes.
+ * @experimental
+ */
+export class SubprocessExporter implements FormatExporter {
+  private baseCmd: string;
+
+  /**
+   * Class constructor.
+   *
+   * `baseCmd` is the base command to run to invoke the exporter. The commands
+   * will receive two arguments, first the function to invoke ("check" or
+   * "convert") and then the JSON payload that is the input to the function.
+   * The function must output the response to stdout in JSON format. A response
+   * must be a JSON string with the format `{"return": ..., "error": "..."}`.
+   * If the `error` attribute is included, it is assumed that the function
+   * failed and an error will be raised with the given error message.
+   */
+  constructor(baseCmd: string) {
+    this.baseCmd = baseCmd;
+  }
+
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    const input = base64url.encode(
+      JSON.stringify({ requests: getSlimRequests(requests) }),
+    );
+    const { stdout, stderr } = await execAsync(
+      `${this.baseCmd} check ${input}`,
+    );
+    if (stdout) {
+      const json = JSON.parse(base64url.decode(stdout));
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.return;
+    }
+    throw new Error(`Could not invoke exporter: ${stderr}`);
+  }
+
+  async convert(
+    requests: ParsedRequest[],
+    options: ConvertOptions,
+  ): Promise<string> {
+    const input = base64url.encode(
+      JSON.stringify({ requests: getSlimRequests(requests), options }),
+    );
+    const { stdout } = await execAsync(`${this.baseCmd} convert ${input}`);
+    if (stdout) {
+      const json = JSON.parse(base64url.decode(stdout));
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.return;
+    }
+    throw new Error("Could not invoke exporter");
+  }
+}
+
+/**
+ * Base class for web hosted language exporters.
+ *
+ * This class is used to wrap exporters that are hosted externally as
+ * web services.
+ * @experimental
+ */
+export class WebExporter implements FormatExporter {
+  private baseUrl: string;
+
+  /**
+   * Class constructor.
+   *
+   * `baseUrl` is the location where the web service is hosted. The required
+   * endpoints are `/check` and `/convert`, appended to this URL. The
+   * endpoints must accept a JSON string with the input arguments. The
+   * response must be a JSON string with the format `{"return": ..., "error": "..."}`.
+   * If the `error` attribute is included, it is assumed that the function
+   * failed and an error will be raised with the given error message.
+   */
+  constructor(baseUrl: string) {
+    this.baseUrl = baseUrl;
+  }
+
+  async check(requests: ParsedRequest[]): Promise<boolean> {
+    const response = await fetch(`${this.baseUrl}/check`, {
+      method: "POST",
+      body: JSON.stringify({ requests: getSlimRequests(requests) }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (response.ok) {
+      const json = await response.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.return;
+    }
+    throw new Error("Could not make web request");
+  }
+
+  async convert(
+    requests: ParsedRequest[],
+    options: ConvertOptions,
+  ): Promise<string> {
+    const response = await fetch(`${this.baseUrl}/convert`, {
+      method: "POST",
+      body: JSON.stringify({ requests: getSlimRequests(requests), options }),
+      headers: { "Content-Type": "application/json" },
+    });
+    if (response.ok) {
+      const json = await response.json();
+      if (json.error) {
+        throw new Error(json.error);
+      }
+      return json.return;
+    }
+    throw new Error("Could not make web request");
+  }
 }

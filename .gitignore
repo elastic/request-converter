@@ -57,3 +57,4 @@ dist
 tests/integration/package.json
 tests/integration/es-client/
 .tmp.request.*
+__pycache__

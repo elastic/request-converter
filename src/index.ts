@@ -3,6 +3,9 @@ export {
   convertRequests,
   ConvertOptions,
   FormatExporter,
+  ExternalFormatExporter,
+  ExternalExporter,
+  WebExporter,
 } from "./convert";
 export {
   parseRequests,
