@@ -1,4 +1,5 @@
-import childProcess, { ChildProcess } from "child_process";
+import childProcess from "child_process";
+import base64url from "base64url";
 import { parseRequests, ParsedRequest } from "./parse";
 import { PythonExporter } from "./exporters/python";
 import { CurlExporter } from "./exporters/curl";
@@ -184,27 +185,32 @@ export class SubprocessExporter implements FormatExporter {
   }
 
   async check(requests: ParsedRequest[]): Promise<boolean> {
-    const input = JSON.stringify({ requests: getSlimRequests(requests) });
-    const { stdout, stderr } = await execAsync(`${this.baseCmd} check '${input}'`);
-    console.log(stderr);
+    const input = base64url.encode(
+      JSON.stringify({ requests: getSlimRequests(requests) }),
+    );
+    const { stdout, stderr } = await execAsync(
+      `${this.baseCmd} check '${input}'`,
+    );
     if (stdout) {
-      const json = JSON.parse(stdout);
+      const json = JSON.parse(base64url.decode(stdout));
       if (json.error) {
         throw new Error(json.error);
       }
       return json.return;
     }
-    throw new Error("Could not invoke exporter");
+    throw new Error(`Could not invoke exporter: ${stderr}`);
   }
 
   async convert(
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
-    const input = JSON.stringify({ requests: getSlimRequests(requests), options });
+    const input = base64url.encode(
+      JSON.stringify({ requests: getSlimRequests(requests), options }),
+    );
     const { stdout } = await execAsync(`${this.baseCmd} convert '${input}'`);
     if (stdout) {
-      const json = JSON.parse(stdout);
+      const json = JSON.parse(base64url.decode(stdout));
       if (json.error) {
         throw new Error(json.error);
       }

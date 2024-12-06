@@ -59,6 +59,7 @@
     "typescript-eslint": "^7.10.0"
   },
   "dependencies": {
+    "base64url": "^3.0.1",
     "commander": "^12.1.0",
     "find-my-way-ts": "^0.1.2",
     "handlebars": "^4.7.8",
