@@ -35,7 +35,21 @@ internal sealed record Input
     public ConvertOptions? Options { get; init; }
 }
 
+internal readonly record struct SuccessResponse<T>
+{
+    public required T? Return { get; init; }
+}
+
+internal readonly record struct ErrorResponse
+{
+    public required string? Error { get; init; }
+}
+
 [JsonSerializable(typeof(Input))]
+[JsonSerializable(typeof(SuccessResponse<>))]
+[JsonSerializable(typeof(ErrorResponse))]
+[JsonSerializable(typeof(string))]
+[JsonSerializable(typeof(bool))]
 internal partial class SerializerContext : JsonSerializerContext;
 
 [SupportedOSPlatform("browser")]
@@ -95,13 +109,13 @@ internal static partial class RequestConverter
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static string SuccessResponse<T>(T result)
     {
-        return Serialize(new { Return = result });
+        return Serialize(new SuccessResponse<T> { Return = result });
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static string ErrorResponse<T>(T error)
+    private static string ErrorResponse(string error)
     {
-        return Serialize(new { Error = error });
+        return Serialize(new ErrorResponse { Error = error });
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
