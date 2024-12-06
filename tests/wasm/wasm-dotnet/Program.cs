@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.JavaScript;
 using System.Runtime.Versioning;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -104,7 +106,7 @@ internal static partial class RequestConverter
         }
         catch (Exception e)
         {
-            return ErrorResponse($"Internal Error: {e.Message}");
+            return ErrorResponse($"Internal Error:\n {e}");
         }
     }
 
@@ -124,15 +126,47 @@ internal static partial class RequestConverter
     private static string Serialize<T>(T input)
     {
 #pragma warning disable IL2026, IL3050 // False positive
-        return JsonSerializer.Serialize(input, SerializerOptions);
+        var payload = JsonSerializer.SerializeToUtf8Bytes(input, SerializerOptions);
 #pragma warning restore IL2026, IL3050
+
+        return Base64UrlEncode(payload);
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     private static T? Deserialize<T>(string input)
     {
+        var payload = Base64UrlDecode(input);
+
 #pragma warning disable IL2026, IL3050 // False positive
-        return JsonSerializer.Deserialize<T>(input, SerializerOptions);
+        return JsonSerializer.Deserialize<T>(payload, SerializerOptions);
 #pragma warning restore IL2026, IL3050
+    }
+
+    private static string Base64UrlEncode(byte[] value)
+    {
+        var s = System.Convert.ToBase64String(value);
+
+        s = s.Split('=')[0];
+        s = s.Replace('+', '-');
+        s = s.Replace('/', '_');
+
+        return s;
+    }
+
+    private static byte[] Base64UrlDecode(string value)
+    {
+        var s = value;
+
+        s = s.Replace('-', '+');
+        s = s.Replace('_', '/');
+        s = (s.Length % 4) switch
+        {
+            0 => s,
+            2 => s + "==",
+            3 => s + "=",
+            _ => throw new DataException("Illegal base64 url string.")
+        };
+
+        return System.Convert.FromBase64String(s);
     }
 }
