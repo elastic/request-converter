@@ -1,60 +1,122 @@
-﻿using System.Runtime.InteropServices.JavaScript;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.JavaScript;
+using System.Runtime.Versioning;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-// a main function is required
+// A main function is required.
 return;
 
-public class ParsedRequest
+internal sealed record ParsedRequest
 {
-    public string? api {get; set;}
-    public Dictionary<string, string>? body;
-    public string method;
-    public Dictionary<string, object?> params1;
-    public string path;
-    public Dictionary<string, string>? query;
-    public string? raw_path;
-    public string source;
-    public string url;
+    public string? Api { get; init; }
+    public JsonElement? Body { get; init; }
+    public required string Method { get; init; }
+    public IReadOnlyDictionary<string, JsonElement>? Params { get; init; }
+    public required string Path { get; init; }
+    public IReadOnlyDictionary<string, JsonElement>? Query { get; init; }
+    public string? RawPath { get; init; }
+    public required string Source { get; init; }
+    public required string Url { get; init; }
 }
 
-public class ConvertOptions
+internal sealed record ConvertOptions
 {
-    public bool? check_only {get; set;}
-    public bool? complete;
-    public bool? print_response;
-    public string? elasticsearch_url;
-    public bool? debug;
+    public bool? CheckOnly { get; init; }
+    public bool? Complete { get; init; }
+    public bool? PrintResponse { get; init; }
+    public string? ElasticsearchUrl { get; init; }
+    public bool? Debug { get; init; }
 }
 
-public class Input
+internal sealed record Input
 {
-    public List<ParsedRequest>? requests {get; set;}
-    public ConvertOptions? options {get; set;}
+    public IReadOnlyList<ParsedRequest>? Requests { get; init; }
+    public ConvertOptions? Options { get; init; }
 }
 
 [JsonSerializable(typeof(Input))]
-[JsonSerializable(typeof(ParsedRequest))]
-[JsonSerializable(typeof(ConvertOptions))]
-[JsonSerializable(typeof(bool))]
-[JsonSerializable(typeof(int))]
-[JsonSerializable(typeof(string))]
-public partial class InputContext : JsonSerializerContext
-{
-}
+internal partial class SerializerContext : JsonSerializerContext;
 
-public partial class RequestConverter
+[SupportedOSPlatform("browser")]
+internal static partial class RequestConverter
 {
+    private static readonly JsonSerializerOptions SerializerOptions = new()
+    {
+        TypeInfoResolver = SerializerContext.Default,
+        PropertyNamingPolicy = JsonNamingPolicy.SnakeCaseLower
+    };
+
     [JSExport]
-    internal static string Check(string input) {
-        Input parsedInput = JsonSerializer.Deserialize<Input>(input, InputContext.Default.Input);
-        return "{\"return\":true}";
+    internal static string Check(string input)
+    {
+        return Execute(() =>
+        {
+            var parsedInput = Deserialize<Input>(input);
+            if (parsedInput is null)
+            {
+                return ErrorResponse("Failed to deserialize input.");
+            }
+
+            return SuccessResponse(true);
+        });
     }
 
     [JSExport]
-    internal static string Convert(string input) {
-        Input parsedInput = JsonSerializer.Deserialize<Input>(input, InputContext.Default.Input);
-        var result = String.Join(",", parsedInput.requests.ConvertAll<string>(req => req.api));
-        return $"{{\"return\":\"{result}\"}}";
+    internal static string Convert(string input)
+    {
+        return Execute(() =>
+        {
+            var parsedInput = Deserialize<Input>(input);
+            if (parsedInput is null)
+            {
+                return ErrorResponse("Failed to deserialize input.");
+            }
+
+            var result = string.Join(",", parsedInput.Requests?.Select(req => req.Api) ?? []);
+
+            return SuccessResponse(result);
+        });
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string Execute(Func<string> action)
+    {
+        try
+        {
+            return action();
+        }
+        catch (Exception e)
+        {
+            return ErrorResponse($"Internal Error: {e.Message}");
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string SuccessResponse<T>(T result)
+    {
+        return Serialize(new { Return = result });
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string ErrorResponse<T>(T error)
+    {
+        return Serialize(new { Error = error });
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static string Serialize<T>(T input)
+    {
+#pragma warning disable IL2026 // False positive
+        return JsonSerializer.Serialize(input, SerializerOptions);
+#pragma warning restore IL2026
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    private static T? Deserialize<T>(string input)
+    {
+#pragma warning disable IL2026 // False positive
+        return JsonSerializer.Deserialize<T>(input, SerializerOptions);
+#pragma warning restore IL2026
     }
 }
