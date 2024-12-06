@@ -361,7 +361,9 @@ run();
   });
 
   it("supports a C#/wasm external exporter", async () => {
-    const dotnetExporter = new SubprocessExporter("node tests/wasm/wasm-dotnet/bin/Release/net9.0/browser-wasm/AppBundle/main.mjs");
+    const dotnetExporter = new SubprocessExporter(
+      "node tests/wasm/wasm-dotnet/bin/Release/net9.0/browser-wasm/AppBundle/main.mjs",
+    );
 
     expect(
       await convertRequests("GET /my-index/_search\nGET /\n", dotnetExporter, {
@@ -370,7 +372,11 @@ run();
     ).toBeTruthy();
 
     expect(
-      await convertRequests("GET /my-index/_search\nGET /\n", dotnetExporter, {}),
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        dotnetExporter,
+        {},
+      ),
     ).toEqual("search,info");
   });
 

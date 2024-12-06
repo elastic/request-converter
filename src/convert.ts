@@ -189,7 +189,7 @@ export class SubprocessExporter implements FormatExporter {
       JSON.stringify({ requests: getSlimRequests(requests) }),
     );
     const { stdout, stderr } = await execAsync(
-      `${this.baseCmd} check '${input}'`,
+      `${this.baseCmd} check ${input}`,
     );
     if (stdout) {
       const json = JSON.parse(base64url.decode(stdout));
@@ -208,7 +208,7 @@ export class SubprocessExporter implements FormatExporter {
     const input = base64url.encode(
       JSON.stringify({ requests: getSlimRequests(requests), options }),
     );
-    const { stdout } = await execAsync(`${this.baseCmd} convert '${input}'`);
+    const { stdout } = await execAsync(`${this.baseCmd} convert ${input}`);
     if (stdout) {
       const json = JSON.parse(base64url.decode(stdout));
       if (json.error) {
