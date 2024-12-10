@@ -1,0 +1,14 @@
+{
+  "name": "wasm-simple",
+  "collaborators": [
+    "Miguel Grinberg <miguel.grinberg@gmail.com>"
+  ],
+  "version": "0.1.0",
+  "files": [
+    "wasm_simple_bg.wasm",
+    "wasm_simple.js",
+    "wasm_simple.d.ts"
+  ],
+  "main": "wasm_simple.js",
+  "types": "wasm_simple.d.ts"
+}
