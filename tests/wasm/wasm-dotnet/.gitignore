@@ -1,0 +1,14 @@
+.vs/
+obj/
+
+bin/*
+!bin/Release/
+
+bin/Release/*
+!bin/Release/net9.0/
+
+bin/Release/net9.0/*
+!bin/Release/net9.0/browser-wasm/
+
+bin/Release/net9.0/browser-wasm/*
+!bin/Release/net9.0/browser-wasm/AppBundle/

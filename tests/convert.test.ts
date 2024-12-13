@@ -1,10 +1,16 @@
+import childProcess, { ChildProcess } from "child_process";
+import path from "path";
 import {
   convertRequests,
   listFormats,
   FormatExporter,
   ConvertOptions,
+  ExternalExporter,
+  SubprocessExporter,
+  WebExporter,
 } from "../src/convert";
 import { ParsedRequest } from "../src/parse";
+import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `GET /
 
@@ -290,5 +296,135 @@ run();
 
   it("returns the list of available formats", () => {
     expect(listFormats()).toContain("python");
+  });
+
+  it("supports a simple external exporter", async () => {
+    const externalExporter = new ExternalExporter({
+      check: (json: string) => {
+        const api: string = JSON.parse(json).requests[0].api;
+        const ret = api.indexOf("search") >= 0;
+        const error = api.indexOf("ml") >= 0 ? `unsupported:${api}` : null;
+        return JSON.stringify({ return: ret, error });
+      },
+      convert: (json: string) => {
+        const rets = JSON.parse(json).requests.map(
+          (req: ParsedRequest) => req.api,
+        );
+        return JSON.stringify({ return: rets.join("\n") });
+      },
+    });
+
+    expect(
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        externalExporter,
+        { checkOnly: true },
+      ),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests("GET /_cat/indices", externalExporter, {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
+
+    expect(
+      async () =>
+        await convertRequests(
+          "POST _ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update",
+          externalExporter,
+          { checkOnly: true },
+        ),
+    ).rejects.toThrowError("unsupported:ml.update_model_snapshot");
+
+    expect(
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        externalExporter,
+        {},
+      ),
+    ).toEqual("search\ninfo");
+  });
+
+  it("supports a Rust/wasm external exporter", async () => {
+    const wasmExporter = new ExternalExporter(wasmRust);
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", wasmExporter, {}),
+    ).toEqual("search,info");
+  });
+
+  it("supports a C#/wasm external exporter", async () => {
+    const dotnetExporter = new SubprocessExporter(
+      "node tests/wasm/wasm-dotnet/bin/Release/net9.0/browser-wasm/AppBundle/main.mjs",
+    );
+
+    expect(
+      await convertRequests("GET /my-index/_search\nGET /\n", dotnetExporter, {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+
+    expect(
+      await convertRequests(
+        "GET /my-index/_search\nGET /\n",
+        dotnetExporter,
+        {},
+      ),
+    ).toEqual("search,info");
+  });
+
+  describe("web external exporter tests", () => {
+    const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+    const baseUrl = "http://127.0.0.1:5000";
+    const webExporter = new WebExporter(baseUrl);
+    let proc: ChildProcess | null = null;
+
+    beforeEach(async () => {
+      proc = childProcess.spawn("python", [
+        path.join(__dirname, "web/python-simple/web.py"),
+      ]);
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        await sleep(1_000); // give the web app time to boot
+        try {
+          const response = await fetch(baseUrl);
+          if (response.ok) {
+            break; // web service is responsive
+          }
+        } catch (err) {
+          // we need to wait some more
+        }
+      }
+    }, 30_000); // use a longer timeout here, to give the web service time to start
+
+    afterEach(async () => {
+      if (proc) {
+        proc.kill("SIGKILL");
+        proc = null;
+      }
+    });
+
+    it("supports a web external exporter", async () => {
+      expect(
+        await convertRequests("GET /my-index/_search\nGET /\n", webExporter, {
+          checkOnly: true,
+        }),
+      ).toBeTruthy();
+
+      expect(
+        await convertRequests(
+          "GET /my-index/_search\nGET /\n",
+          webExporter,
+          {},
+        ),
+      ).toEqual("search,info");
+    });
   });
 });

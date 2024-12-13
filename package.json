@@ -15,7 +15,7 @@
     "clean": "rimraf dist/",
     "copy-files": "copyfiles -u 1 src/**/*.js src/**/*.json src/**/*.tpl dist/",
     "docs": "typedoc src/index.ts",
-    "lint": "eslint src tests",
+    "lint": "eslint src tests --ignore-pattern tests/wasm/",
     "prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --list-different",
     "test": "jest --test-path-ignore-patterns integration --coverage",
     "test:setup": "node scripts/download-examples.mjs && ./tests/integration/run-python.sh && ./tests/integration/run-javascript.sh",
@@ -25,7 +25,7 @@
     "test:integration-javascript": "./scripts/test-format.sh javascript",
     "test:example": "./scripts/test-example.sh",
     "fix": "npm run fix:lint && npm run fix:prettier",
-    "fix:lint": "eslint src tests --fix",
+    "fix:lint": "eslint src tests --fix --ignore-pattern tests/wasm/",
     "fix:prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --write",
     "fix:precommit": "./scripts/precommit.sh",
     "watch:build": "tsc -w",
@@ -59,6 +59,7 @@
     "typescript-eslint": "^7.10.0"
   },
   "dependencies": {
+    "base64url": "^3.0.1",
     "commander": "^12.1.0",
     "find-my-way-ts": "^0.1.2",
     "handlebars": "^4.7.8",
