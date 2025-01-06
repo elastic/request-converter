@@ -84,7 +84,7 @@ GET /customer/_doc/1
 POST /_bulk?foo=bar
 { "name": "John Doe" }
 { "name": "John Doe" } // comment
-{ "name": "John Doe" }
+{ "name": "John Doe", }
 
 
 POST /_bulk?foo=bar
@@ -97,7 +97,7 @@ GET /{customer}/_doc/1
 
 POST _nodes/reload_secure_settings\n{\n  "reload_secure_settings": "s3cr3t" <1>\n}
 
-GET {my_index}/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Foxes."\n}
+GET {my_index}/_analyze <3>\n{\n  "field": "text",\n  "text": "The quick Brown Foxes.", \n}
 
 POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n{\n  "description": "Snapshot 1",\n  "retain": true\n}
 `);
@@ -159,7 +159,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     });
     expect(reqs[5]).toMatchObject({
       source:
-        'POST /_bulk?foo=bar\n{ "name": "John Doe" }\n{ "name": "John Doe" }\n{ "name": "John Doe" }',
+        'POST /_bulk?foo=bar\n{ "name": "John Doe" }\n{ "name": "John Doe" }\n{ "name": "John Doe", }',
       service: "es",
       api: "bulk",
       params: {},
@@ -211,7 +211,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     });
     expect(reqs[9]).toMatchObject({
       source:
-        'GET {my_index}/_analyze \n{\n  "field": "text",\n  "text": "The quick Brown Foxes."\n}',
+        'GET {my_index}/_analyze \n{\n  "field": "text",\n  "text": "The quick Brown Foxes.", \n}',
       service: "es",
       api: "indices.analyze",
       params: { index: "{my_index}" },
