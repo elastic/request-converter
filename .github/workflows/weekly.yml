@@ -20,7 +20,7 @@ jobs:
           npm run build
       - name: Prepare for testing
         run: |
-          npm run test:setup
+          npm run test:setup-curl
       - name: Integration tests
         run: |
           npm run test:integration-curl
@@ -40,7 +40,7 @@ jobs:
           npm run build
       - name: Prepare for testing
         run: |
-          npm run test:setup
+          npm run test:setup-python
       - name: Integration tests
         run: |
           npm run test:integration-python
@@ -60,7 +60,7 @@ jobs:
           npm run build
       - name: Prepare for testing
         run: |
-          npm run test:setup
+          npm run test:setup-javascript
       - name: Integration tests
         run: |
           npm run test:integration-javascript
