@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import { writeFile, rm } from "fs/promises";
-import childProcess from "child-process";
+import childProcess from "child_process";
 import path from "path";
 import util from "util";
 import { convertRequests } from "../../src/convert";
