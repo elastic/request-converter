@@ -194,7 +194,9 @@ function parseCommand(source: string, options: ParseOptions) {
   }
 
   // identify the body
-  const body = collapseLiteralStrings(source.slice(index));
+  const body = removeTrailingCommas(
+    collapseLiteralStrings(source.slice(index)),
+  );
 
   if (body != "") {
     try {
@@ -225,6 +227,11 @@ function parseCommand(source: string, options: ParseOptions) {
       splitData[idx] = JSON.stringify(splitData[idx]);
     }
     return splitData.join("");
+  }
+
+  // remove any trailing commas to prevent JSON parser failures
+  function removeTrailingCommas(data: string) {
+    return data.replace(/,([ |\t|\n]+[}|\]|)])/g, "$1");
   }
 
   // proceeds until it finds a character not present
