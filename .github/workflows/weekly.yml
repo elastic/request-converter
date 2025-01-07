@@ -64,3 +64,26 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-javascript
+  integration-tests-ruby:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+      - name: Install
+        run: |
+          npm install
+      - name: Build
+        run: |
+          npm run build
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: 3.4
+      - name: Prepare for testing
+        run: |
+          npm run test:setup-ruby
+      - name: Integration tests
+        run: |
+          npm run test:integration-ruby
