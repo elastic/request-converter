@@ -381,8 +381,8 @@ const skip: Record<string, SkippedTest> = {
     reason: "test uses unknown `adaptive_allocations` attribute",
     formats: ["python", "javascript"],
   },
-  "7f2d511cb64743c006225e5933a14bb4": {
-    reason: "test uses unknown `remote_indices` attribute",
+  ddaadd91b7743a1c7e946ce1b593cd1b: {
+    reason: "test uses unknown `service_settings` attribute",
     formats: ["python", "javascript"],
   },
 };
