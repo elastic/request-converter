@@ -3,8 +3,7 @@
 set -eo pipefail
 set -x
 
-CLIENT_DIR=/tmp/es-client
-SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+CLIENT_DIR=/tmp/ruby-client
 BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
 
 if [ ! -d "$CLIENT_DIR" ]; then
@@ -21,6 +20,6 @@ if [ ! -d "$CLIENT_DIR" ]; then
   popd
 fi
 
-# if [[ "$1" != "" ]]; then
-#   $SCRIPT_DIR/.venv/bin/python $1
-# fi
+if [[ "$1" != "" ]]; then
+  ruby $1
+fi
