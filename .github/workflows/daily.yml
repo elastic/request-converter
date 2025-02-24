@@ -4,7 +4,7 @@ on:
   schedule:
     - cron: "0 0 * * *"
 jobs:
-  integration-tests-curl:
+  integration-tests-curl-1:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,7 +24,7 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-curl
-  integration-tests-python:
+  integration-tests-python-1:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-python
-  integration-tests-javascript:
+  integration-tests-javascript-1:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -64,7 +64,7 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-javascript
-  integration-tests-curl:
+  integration-tests-curl-2:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -84,7 +84,7 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-curl
-  integration-tests-python:
+  integration-tests-python-2:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -104,7 +104,7 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-python
-  integration-tests-javascript:
+  integration-tests-javascript-2:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
