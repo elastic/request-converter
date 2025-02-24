@@ -1,5 +1,17 @@
 # request-converter change log
 
+## 8.18.0 (2025-02-24)
+* Support for externally hosted exporters ([#69](https://github.com/elastic/request-converter/pull/69))
+* Update schema for 8.18
+
+## 8.17.0 (2024-12-04)
+* Parse {placeholders} in request URLs ([#64](https://github.com/elastic/request-converter/pull/64))
+* Support trailing commas in requests ([#74](https://github.com/elastic/request-converter/pull/74))
+* Support Kibana URLs in the curl exporter (Fixes #71) ([#72](https://github.com/elastic/request-converter/pull/72))
+* Include source in parsed request ([#67](https://github.com/elastic/request-converter/pull/67))
+* Separate initialize functions per language ([#76](https://github.com/elastic/request-converter/pull/76))
+* Update schema for 8.17
+
 ## 8.16.0 (2024-10-14)
 * Update schema for 8.16
 
@@ -35,6 +47,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
