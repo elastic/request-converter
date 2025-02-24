@@ -1,10 +1,10 @@
-import { METHODS } from "http";
 import { URL } from "url";
 import { readFile } from "fs/promises";
 import path from "path";
 import * as Router from "find-my-way-ts";
 import { Model, Request } from "./metamodel";
 
+const httpMethods = ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"];
 export type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
 interface JSONObject {
@@ -62,7 +62,7 @@ export function splitSource(source: string): string[] {
   let prev = 0;
   while (index < len) {
     // Beginning of a new command, we should find the method and proceede to the url.
-    for (const method of METHODS) {
+    for (const method of httpMethods) {
       if (source.slice(index, len).startsWith(method)) {
         index += method.length;
         break;
@@ -80,7 +80,7 @@ export function splitSource(source: string): string[] {
     if (index == len) return;
     let brackets = 0;
     // If we found an http method, then we have found a new command.
-    for (const method of METHODS) {
+    for (const method of httpMethods) {
       if (source.slice(index, len).startsWith(method)) {
         return;
       }
@@ -131,7 +131,7 @@ function parseCommand(source: string, options: ParseOptions) {
   const len = source.length;
   let index = 0;
   // identify the method
-  for (const method of METHODS) {
+  for (const method of httpMethods) {
     if (source.slice(index, len).startsWith(method)) {
       data.method = method;
       index += method.length;
