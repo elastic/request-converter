@@ -1,10 +1,11 @@
-import { METHODS } from "http";
 import { URL } from "url";
 import { readFile } from "fs/promises";
 import path from "path";
 import * as Router from "find-my-way-ts";
 import { Model, Request } from "./metamodel";
 
+const isBrowser = typeof window !== "undefined";
+const httpMethods = ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"];
 export type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
 interface JSONObject {
@@ -47,7 +48,7 @@ type ESRoute = {
   request: Request;
 };
 
-const router = Router.make<ESRoute>({
+let router = Router.make<ESRoute>({
   ignoreTrailingSlash: true,
   maxParamLength: 1000,
 });
@@ -62,7 +63,7 @@ export function splitSource(source: string): string[] {
   let prev = 0;
   while (index < len) {
     // Beginning of a new command, we should find the method and proceede to the url.
-    for (const method of METHODS) {
+    for (const method of httpMethods) {
       if (source.slice(index, len).startsWith(method)) {
         index += method.length;
         break;
@@ -80,7 +81,7 @@ export function splitSource(source: string): string[] {
     if (index == len) return;
     let brackets = 0;
     // If we found an http method, then we have found a new command.
-    for (const method of METHODS) {
+    for (const method of httpMethods) {
       if (source.slice(index, len).startsWith(method)) {
         return;
       }
@@ -90,7 +91,7 @@ export function splitSource(source: string): string[] {
     // If we find an open curly bracket, we should also find the closing one
     // before to checking for the http method.
     if (source[index] == "{") {
-      for (;;) {
+      for (; index < len; ) {
         if (source[index] == "{") {
           brackets += 1;
         } else if (source[index] == "}") {
@@ -131,7 +132,7 @@ function parseCommand(source: string, options: ParseOptions) {
   const len = source.length;
   let index = 0;
   // identify the method
-  for (const method of METHODS) {
+  for (const method of httpMethods) {
     if (source.slice(index, len).startsWith(method)) {
       data.method = method;
       index += method.length;
@@ -264,16 +265,28 @@ function parseCommand(source: string, options: ParseOptions) {
  * function directly, but it can be used to load a different version of the
  * specification than the one bundled with this package.
  *
- * @param filename The path to the schema.json file to load.
+ * @param filename_or_object The path to the schema.json file to load, or an
+ *   object with a loaded schema.
  */
-export async function loadSchema(filename: string) {
-  if (router.find("GET", "/") != undefined) {
-    throw Error("A schema has already been loaded");
+export async function loadSchema(filename_or_object: string | object) {
+  let spec: Model;
+
+  if (typeof filename_or_object === "string") {
+    spec = JSON.parse(
+      await readFile(filename_or_object, { encoding: "utf-8" }),
+    ) as Model;
+  } else {
+    spec = filename_or_object as Model;
   }
 
-  const spec = JSON.parse(
-    await readFile(filename, { encoding: "utf-8" }),
-  ) as Model;
+  if (router.find("GET", "/") != undefined) {
+    // start from a clean router
+    router = Router.make<ESRoute>({
+      ignoreTrailingSlash: true,
+      maxParamLength: 1000,
+    });
+  }
+
   for (const endpoint of spec.endpoints) {
     for (const url of endpoint.urls) {
       const { path, methods } = url;
@@ -323,8 +336,12 @@ async function getAPI(
   endpointPath: string,
 ): Promise<Router.FindResult<ESRoute>> {
   if (router.find("GET", "/") == undefined) {
-    // load the Elasticsearch spec
-    await loadSchema(path.join(__dirname, "./schema.json"));
+    if (!isBrowser) {
+      // load the Elasticsearch spec
+      await loadSchema(path.join(__dirname, "./schema.json"));
+    } else {
+      throw new Error("Specification is missing");
+    }
   }
 
   const formattedPath = endpointPath.startsWith("/")

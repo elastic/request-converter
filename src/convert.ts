@@ -6,7 +6,8 @@ import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
 import util from "util";
 
-const execAsync = util.promisify(childProcess.exec);
+const isBrowser = typeof window !== "undefined";
+const execAsync = !isBrowser ? util.promisify(childProcess.exec) : undefined;
 
 export type ConvertOptions = {
   /** When `true`, the converter will only check if the conversion can be carried
@@ -188,6 +189,9 @@ export class SubprocessExporter implements FormatExporter {
     const input = base64url.encode(
       JSON.stringify({ requests: getSlimRequests(requests) }),
     );
+    if (execAsync === undefined) {
+      throw new Error("Cannot use exec()");
+    }
     const { stdout, stderr } = await execAsync(
       `${this.baseCmd} check ${input}`,
     );
@@ -208,6 +212,9 @@ export class SubprocessExporter implements FormatExporter {
     const input = base64url.encode(
       JSON.stringify({ requests: getSlimRequests(requests), options }),
     );
+    if (execAsync === undefined) {
+      throw new Error("Cannot use exec()");
+    }
     const { stdout } = await execAsync(`${this.baseCmd} convert ${input}`);
     if (stdout) {
       const json = JSON.parse(base64url.decode(stdout));

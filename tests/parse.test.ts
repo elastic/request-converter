@@ -273,6 +273,27 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     });
   });
 
+  it("errors with incomplete bodies", async () => {
+    const script = `GET /my-index/_search
+{`;
+    expect(async () => await parseRequests(script)).rejects.toThrowError(
+      "body cannot be parsed",
+    );
+    const req = await parseRequest(script, { ignoreErrors: true });
+    expect(req).toMatchObject({
+      source: "GET /my-index/_search\n{",
+      service: "es",
+      api: "search",
+      body: "\n{",
+      method: "GET",
+      params: {
+        index: "my-index",
+      },
+      path: "/my-index/_search",
+      rawPath: "/my-index/_search",
+    });
+  });
+
   it("parses kibana requests", async () => {
     const req = await parseRequest(
       "GET kbn:/api/saved_objects/_find?type=dashboard",

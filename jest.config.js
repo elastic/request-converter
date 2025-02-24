@@ -3,5 +3,10 @@ module.exports = {
   testEnvironment: "node",
   setupFilesAfterEnv: [
     "jest-expect-message"
+  ],
+  moduleFileExtensions: [
+    "ts",
+    "js",
+    "tpl"
   ]
 };
