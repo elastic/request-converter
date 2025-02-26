@@ -2,8 +2,10 @@ import { readFileSync } from "fs";
 import path from "path";
 import Handlebars from "handlebars";
 import prettier from "prettier";
+import prettierTypeScript from "prettier/parser-typescript";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
+import "./templates";
 
 const UNSUPPORTED_APIS = new RegExp(
   "^query_rules.*$" +
@@ -39,7 +41,10 @@ export class JavaScriptExporter implements FormatExporter {
       throw new Error("Cannot perform conversion");
     }
     const output = this.template({ requests, ...options });
-    return prettier.format(output, { parser: "typescript" });
+    return prettier.format(output, {
+      parser: "typescript",
+      plugins: [prettierTypeScript],
+    });
   }
 
   get template(): Handlebars.TemplateDelegate {
@@ -115,8 +120,17 @@ export class JavaScriptExporter implements FormatExporter {
 
       Handlebars.registerHelper("camelCase", (text) => toCamelCase(text));
 
-      const t = readFileSync(path.join(__dirname, "./javascript.tpl"), "utf-8");
-      this._template = Handlebars.compile(t);
+      if (process.env.NODE_ENV !== "test") {
+        this._template = Handlebars.templates["javascript.tpl"];
+      } else {
+        // when running tests we read the templates directly, in case the
+        // compiled file is not up to date
+        const t = readFileSync(
+          path.join(__dirname, "./javascript.tpl"),
+          "utf-8",
+        );
+        this._template = Handlebars.compile(t);
+      }
     }
 
     return this._template;
