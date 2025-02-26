@@ -91,7 +91,7 @@ export function splitSource(source: string): string[] {
     // If we find an open curly bracket, we should also find the closing one
     // before to checking for the http method.
     if (source[index] == "{") {
-      for (; index < len; ) {
+      while (index < len) {
         if (source[index] == "{") {
           brackets += 1;
         } else if (source[index] == "}") {
