@@ -30,7 +30,7 @@ textarea.form-control {
   width: 100%;
 }
 
-#language-choice {
+#version-choice, #language-choice {
   width: 150px;
 }
 
