@@ -1,4 +1,4 @@
-name: Deploy documentation
+name: Deploy website to GitHub Pages
 on:
   push:
     branches:
@@ -12,13 +12,21 @@ jobs:
       - uses: actions/checkout@v4
       - name: Setup node.js
         uses: actions/setup-node@v4
-      - name: Install
+      - name: Install library
         run: |
           npm install
       - name: Build documentation
         run: |
           npm run docs
-      - name: Deploy documentation
+      - name: Build demo application
+        run: |
+          cd demo
+          npm install
+          npm install .. --install-links
+          npm run build
+          cd ..
+          cp -R docs demo/dist
+      - name: Deploy website
         uses: JamesIves/github-pages-deploy-action@v4
         with:
-          folder: docs
+          folder: demo/dist

@@ -79,6 +79,7 @@ function App() {
   return (
     <Container id="main-container">
       <h1>Elasticsearch Request Converter Demo</h1>
+      <p>→ <a href="./docs/index.html">Library documentation</a></p>
       <Row>
         <Col className="col-6">
           <Stack direction="horizontal" className="heading">
