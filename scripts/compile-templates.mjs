@@ -9,7 +9,7 @@ const cmd = "handlebars python.tpl javascript.tpl -f templates.js -c";
 exec(cmd, (error, stdout, stderr) => {
   if (error) {
     console.log(stdout);
-    console.log(stderr);
+    console.error(stderr);
     process.exit(1);
   }
   let templates = fs.readFileSync("templates.js", 'utf-8');
