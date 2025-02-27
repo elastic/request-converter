@@ -11,15 +11,28 @@ client = Elasticsearch::Client.new(
 {{#supportedApi}}
 {{#hasArgs}}
 response{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
+{{#if this.body}}
   {{#each this.params}}
   {{alias @key ../this.request.path}}: "{{{this}}}",
   {{/each}}
   {{#each this.query}}
   {{alias @key ../this.request.query}}: {{{rubyprint this}}},
   {{/each}}
-  {{#if this.body}}
   body: {{{rubyprint this.body}}}
+{{else}}
+  {{#if this.query}}
+  {{#each this.params}}
+  {{alias @key ../this.request.path}}: "{{{this}}}",
+  {{/each}}
+  {{#each this.query}}
+  {{alias @key ../this.request.query}}: {{{rubyprint this}}}{{#unless @last}},{{/unless}}
+  {{/each}}
+  {{else}}
+  {{#each this.params}}
+  {{alias @key ../this.request.path}}: "{{{this}}}"{{#unless @last}},{{/unless}}
+  {{/each}}
   {{/if}}
+{{/if}}
 )
 {{else}}
 response{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}
