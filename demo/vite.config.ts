@@ -8,4 +8,5 @@ export default defineConfig({
   optimizeDeps: {
     include: ['@elastic/request-converter'],
   },
+  base: '/request-converter/'
 })
