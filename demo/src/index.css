@@ -1,0 +1,44 @@
+html, body, #root {
+  margin-top: 0;
+  margin-bottom: 0;
+  height: 100%;
+  min-height: 100%;
+}
+
+body {
+  color: #444;
+}
+
+h1 {
+  font-size: 2em;
+  font-weight: 1000;
+  color: #888;
+}
+
+textarea.form-control {
+  resize: none;
+  min-height: 200px;
+  font-family: monospace;
+  font-size: 14px;
+}
+
+.heading {
+  align-items: baseline;
+}
+
+.spacer {
+  width: 100%;
+}
+
+#version-choice, #language-choice {
+  width: 150px;
+}
+
+pre {
+  margin-top: 10px;
+  padding: 5px 5px 10px 5px;
+  overflow: hidden;
+  white-space: pre-wrap;
+}
+
+

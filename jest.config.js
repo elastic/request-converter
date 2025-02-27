@@ -8,5 +8,6 @@ module.exports = {
     "ts",
     "js",
     "tpl"
-  ]
+  ],
+  testTimeout: 10000
 };

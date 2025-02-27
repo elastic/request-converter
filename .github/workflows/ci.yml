@@ -24,7 +24,7 @@ jobs:
       - name: Prettier
         run: |
           npm run prettier
-  docs:
+  website:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -33,9 +33,20 @@ jobs:
       - name: Install
         run: |
           npm install
+      - name: Build package
+        run: |
+          npm run build
       - name: Build documentation
         run: |
           npm run docs
+      - name: Build demo application
+        run: |
+          cd demo
+          npm install
+          npm install .. --install-links
+          npm run build
+          cd ..
+          cp -R docs demo/dist
   unit-tests:
     runs-on: ${{ matrix.os }}
     strategy:
