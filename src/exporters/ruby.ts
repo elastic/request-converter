@@ -1,8 +1,9 @@
-import { readFile } from "fs/promises";
+import { readFileSync } from "fs";
 import path from "path";
 import Handlebars from "handlebars";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
+import "./templates";
 
 // this regex should match the list of APIs that do not have specific handlers
 // in the Ruby client. APIs in this list are rendered with a perform_request()
@@ -119,10 +120,14 @@ export class RubyExporter implements FormatExporter {
         return name;
       });
 
-      const t = await readFile(path.join(__dirname, "./ruby.tpl"), {
-        encoding: "utf-8",
-      });
-      this.template = Handlebars.compile(t);
+      if (process.env.NODE_ENV !== "test") {
+        this.template = Handlebars.templates["ruby.tpl"];
+      } else {
+        // when running tests we read the templates directly, in case the
+        // compiled file is not up to date
+        const t = readFileSync(path.join(__dirname, "./ruby.tpl"), "utf-8");
+        this.template = Handlebars.compile(t);
+      }
     }
     return this.template;
   }
