@@ -5,7 +5,7 @@ const sourceDir = (process.platform !== "win32")
   ? "src/exporters"
   : "src\\exporters";
 process.chdir(sourceDir);
-const cmd = "handlebars python.tpl javascript.tpl -f templates.js -c";
+const cmd = "handlebars python.tpl javascript.tpl ruby.tpl -f templates.js -c";
 exec(cmd, (error, stdout, stderr) => {
   if (error) {
     console.log(stdout);

@@ -4,6 +4,7 @@ import { parseRequests, ParsedRequest } from "./parse";
 import { PythonExporter } from "./exporters/python";
 import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
+import { RubyExporter } from "./exporters/ruby";
 import util from "util";
 
 const isBrowser = typeof window !== "undefined";
@@ -41,6 +42,7 @@ const EXPORTERS: Record<string, FormatExporter> = {
   python: new PythonExporter(),
   curl: new CurlExporter(),
   javascript: new JavaScriptExporter(),
+  ruby: new RubyExporter(),
 };
 
 /**

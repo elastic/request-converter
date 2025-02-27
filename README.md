@@ -79,8 +79,8 @@ const { convertRequests, listFormats } = require("@elastic/request-converter");
 
 ## Available Formats
 
-At this time the converter supports `curl` and `python`. Work is currently in
-progress to add support for `javascript`, `ruby` and `php`.
+At this time the converter supports `curl`, `python`, `javascript` and `ruby`. Work is currently in
+progress to add support for `php`.
 
 ### curl
 
@@ -98,6 +98,18 @@ Supported options:
 ### python
 
 The Python exporter generates code for the Elasticsearch Python client.
+
+Supported options:
+
+| Option name | Type | Required | Description |
+| ----------- | ---- | -------- | ----------- |
+| `printResponse` | `boolean` | no | If `true`, add code to print the response. The default is `false`. |
+| `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
+| `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use. The default is `http://localhost:9200`. |
+
+### ruby
+
+The Ruby exporter generates code for the Elasticsearch Ruby client.
 
 Supported options:
 
