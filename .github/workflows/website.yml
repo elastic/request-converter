@@ -15,6 +15,9 @@ jobs:
       - name: Install library
         run: |
           npm install
+      - name: Build package
+        run: |
+          npm run build
       - name: Build documentation
         run: |
           npm run docs
