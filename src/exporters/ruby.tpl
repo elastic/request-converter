@@ -1,9 +1,9 @@
 {{#if complete}}
-require 'elasticsearch'
+require "elasticsearch"
 
 client = Elasticsearch::Client.new(
-  host: {{#if elasticsearchUrl}}'{{elasticsearchUrl}}'{{else}}ENV['ELASTICSEARCH_URL']{{/if}},
-  api_key: ENV['ELASTIC_API_KEY']
+  host: {{#if elasticsearchUrl}}"{{elasticsearchUrl}}"{{else}}ENV["ELASTICSEARCH_URL"]{{/if}},
+  api_key: ENV["ELASTIC_API_KEY"]
 )
 
 {{/if}}
@@ -12,7 +12,7 @@ client = Elasticsearch::Client.new(
 {{#hasArgs}}
 response{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
   {{#each this.params}}
-  {{alias @key ../this.request.path}}: '{{{this}}}',
+  {{alias @key ../this.request.path}}: "{{{this}}}",
   {{/each}}
   {{#each this.query}}
   {{alias @key ../this.request.query}}: {{{rubyprint this}}},
@@ -26,13 +26,13 @@ response{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}
 {{/hasArgs}}
 {{else}}
 response{{#if @index}}{{@index}}{{/if}} = client.perform_request(
-  '{{this.method}}',
-  '{{this.path}}',
+  "{{this.method}}",
+  "{{this.path}}",
   {{#if this.query}}
   params: {{{rubyprint this.query}}},
   {{/if}}
   {{#if this.body}}
-  headers: { 'Content-Type': 'application/json' },
+  headers: { "Content-Type": "application/json" },
   body: {{{rubyprint this.body}}},
   {{/if}}
 )
