@@ -2,7 +2,7 @@
 
 Library that converts Elasticsearch requests in Dev Console syntax to other formats.
 
-Check out the [documentation](https://elastic.github.io/request-converter).
+Try it out [here](https://elastic.github.io/request-converter).
 
 ## Installation
 
