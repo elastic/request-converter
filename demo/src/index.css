@@ -1,10 +1,3 @@
-html, body, #root {
-  margin-top: 0;
-  margin-bottom: 0;
-  height: 100%;
-  min-height: 100%;
-}
-
 body {
   color: #444;
 }
@@ -20,6 +13,10 @@ textarea.form-control {
   min-height: 200px;
   font-family: monospace;
   font-size: 14px;
+}
+
+#main-container {
+  margin-top: 10px;
 }
 
 .heading {
@@ -41,4 +38,18 @@ pre {
   white-space: pre-wrap;
 }
 
+.copy-clipboard {
+  line-height: 0.5em;
+  padding-bottom: 11px;
+  font-size: 150%;
+  border: 1px solid #ddd;
+}
 
+.clipboard-toast {
+  margin-top: 90px;
+  width: 200px;
+}
+
+.clipboard-toast .toast {
+  background-color: #eee;
+}
