@@ -92,9 +92,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "endpoint URL is not in the spec",
     formats: ["python"],
   },
-  "67b71a95b6fe6c83faae51ea038a1bf1": {
-    reason: "endpoint URL is not in the spec",
-  },
   "50096ee0ca53fe8a88450ebb2a50f285": {
     reason: "example references a non-existant `delimiter` query attribute",
     formats: ["python"],
@@ -205,9 +202,6 @@ const skip: Record<string, SkippedTest> = {
   "6539a04aac4d43e6ce4a769fe8cdf2d8": {
     reason: "example uses unknown URL",
   },
-  "615dc36f0978c676624fb7d1144b4899": {
-    reason: "example uses unknown URL",
-  },
   af91019991bee136df5460e2fd4ac72a: {
     reason: "example uses unknown `lazy` query attribute",
     formats: ["python"],
@@ -231,9 +225,6 @@ const skip: Record<string, SkippedTest> = {
   },
   "2d633b7f346b828d01f923ce9dbf6ad5": {
     reason: "invalid request syntax",
-  },
-  "174b93c323aa8e9cc8ee2a3df5736810": {
-    reason: "example uses unknown URL",
   },
   "61a528b86d38c2f17a172326edf6b53b": {
     reason: "example uses unknown URL",
@@ -384,6 +375,9 @@ const skip: Record<string, SkippedTest> = {
   "7f2d511cb64743c006225e5933a14bb4": {
     reason: "test uses unknown `remote_indices` attribute",
     formats: ["python", "javascript"],
+  },
+  "31bc93e429ad0de11dd2dd231e8f2c5e": {
+    reason: "example uses unknown URL",
   },
 };
 

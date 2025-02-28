@@ -38,6 +38,11 @@ pre {
   white-space: pre-wrap;
 }
 
+.links {
+  margin-top: auto;
+  margin-bottom: 0;
+}
+
 .copy-clipboard {
   line-height: 0.5em;
   padding-bottom: 11px;
