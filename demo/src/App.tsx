@@ -75,7 +75,7 @@ function App() {
     })();
   }, [hasSchema, source, language]);
 
-  const onRequestChanged = (ev: React.ChangeEvent<HTMLSelectElement>): null => {
+  const onRequestChanged = (ev: React.ChangeEvent<HTMLSelectElement>): any => {
     setSource(ev.target.value);
     ev.target.style.height = ev.target.scrollHeight + "px";
   };
