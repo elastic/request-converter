@@ -84,14 +84,6 @@ const skip: Record<string, SkippedTest> = {
   ba59a3b9a0a2694704b2bf9c6ad4a8cf: {
     reason: "example has bad request syntax",
   },
-  "1ceaa211756e2db3d48c6bc4b1a861b0": {
-    reason: "example has bad URL syntax",
-    formats: ["python", "javascript"],
-  },
-  "2afdf0d83724953aa2875b5fb37d60cc": {
-    reason: "endpoint URL is not in the spec",
-    formats: ["python"],
-  },
   "50096ee0ca53fe8a88450ebb2a50f285": {
     reason: "example references a non-existant `delimiter` query attribute",
     formats: ["python"],
@@ -157,14 +149,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example uses invalid URL",
     formats: ["python", "javascript"],
   },
-  ba10b644a4e9a2e7d78744ca607355d0: {
-    reason: "example uses undefined `data_stream_name` attribute",
-    formats: ["python", "javascript"],
-  },
-  "1b3762712c14a19e8c2956b4f530d327": {
-    reason: "example uses undefined `settings` attribute",
-    formats: ["python", "javascript"],
-  },
   e9ae959608d128202921b174f4faa7a8: {
     reason: "invalid request syntax",
   },
@@ -193,10 +177,6 @@ const skip: Record<string, SkippedTest> = {
   },
   "88cecae3f0363fc186d955dd8616b5d4": {
     reason: "example uses undefined `keep_alive` attribute",
-    formats: ["python"],
-  },
-  "405511f7c1f12cc0a227b4563fe7b2e2": {
-    reason: "example uses unknown URL",
     formats: ["python"],
   },
   "6539a04aac4d43e6ce4a769fe8cdf2d8": {
@@ -370,10 +350,6 @@ const skip: Record<string, SkippedTest> = {
   },
   dfce1be1d035aff0b8fdf4a8839f7795: {
     reason: "test uses unknown `adaptive_allocations` attribute",
-    formats: ["python", "javascript"],
-  },
-  "7f2d511cb64743c006225e5933a14bb4": {
-    reason: "test uses unknown `remote_indices` attribute",
     formats: ["python", "javascript"],
   },
 };
