@@ -16,10 +16,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example references a non-existent `lazy` query attribute",
     formats: ["python"],
   },
-  "96ea0e80323d6d2d99964625c004a44d": {
-    reason: "example references a non-existant `enabled` body attribute",
-    formats: ["python", "javascript"],
-  },
   d0c03847106d23ad632ceb624d647c37: {
     reason: "example has invalid body",
   },
@@ -344,13 +340,20 @@ const skip: Record<string, SkippedTest> = {
       "test uses username in path, but client sends it in the body as well, which is valid",
     formats: ["javascript"],
   },
-  "4982c547be1ad9455ae836990aea92c5": {
-    reason: "test uses unknown `adaptive_allocations` attribute",
-    formats: ["python", "javascript"],
+  "31bc93e429ad0de11dd2dd231e8f2c5e": {
+    reason: "endpoint does not exist in schema",
   },
-  dfce1be1d035aff0b8fdf4a8839f7795: {
-    reason: "test uses unknown `adaptive_allocations` attribute",
-    formats: ["python", "javascript"],
+  "3f1fe5f5f99b98d0891f38003e10b636": {
+    reason: "test uses `wait_for_completion_timeout` nonexistant argument",
+    formats: ["javascript", "python"],
+  },
+  "2a1eece9a59ac1773edcf0a932c26de0": {
+    reason: "test uses `token` nonexistant argument",
+    formats: ["javascript", "python"],
+  },
+  ccc613951c61f0b17e1ed8a2d3ae54a2: {
+    reason: "test uses `index_template_substitutions` nonexistant argument",
+    formats: ["javascript", "python"],
   },
 };
 
