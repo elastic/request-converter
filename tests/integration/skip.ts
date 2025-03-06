@@ -355,6 +355,10 @@ const skip: Record<string, SkippedTest> = {
     reason: "test uses `index_template_substitutions` nonexistant argument",
     formats: ["javascript", "python"],
   },
+  "4b91ad7c9b44e07db4a4e81390f19ad3": {
+    reason: "test uses `stream_inference` which Python does not implement",
+    formats: ["python"],
+  },
 };
 
 export function shouldBeSkipped(
