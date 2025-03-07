@@ -340,9 +340,6 @@ const skip: Record<string, SkippedTest> = {
       "test uses username in path, but client sends it in the body as well, which is valid",
     formats: ["javascript"],
   },
-  "31bc93e429ad0de11dd2dd231e8f2c5e": {
-    reason: "endpoint does not exist in schema",
-  },
   "3f1fe5f5f99b98d0891f38003e10b636": {
     reason: "test uses `wait_for_completion_timeout` nonexistant argument",
     formats: ["javascript", "python"],
@@ -354,6 +351,26 @@ const skip: Record<string, SkippedTest> = {
   ccc613951c61f0b17e1ed8a2d3ae54a2: {
     reason: "test uses `index_template_substitutions` nonexistant argument",
     formats: ["javascript", "python"],
+  },
+  "120fcf9f55128d6a81d5e87a9c235bbd": {
+    reason: "test uses `stream_inference` which clients do not implement",
+    formats: ["python", "javascript"],
+  },
+  "82bb6c61dab959f4446dc5ecab7ecbdf": {
+    reason: "test uses `stream_inference` which clients do not implement",
+    formats: ["python", "javascript"],
+  },
+  "45954b8aaedfed57012be8b6538b0a24": {
+    reason: "test uses `stream_inference` which clients do not implement",
+    formats: ["python", "javascript"],
+  },
+  "4b91ad7c9b44e07db4a4e81390f19ad3": {
+    reason: "test uses `stream_inference` which clients do not implement",
+    formats: ["python", "javascript"],
+  },
+  "2afd49985950cbcccf727fa858d00067": {
+    reason: "invalid `query` attribute in body",
+    formats: ["python", "javascript"],
   },
 };
 
