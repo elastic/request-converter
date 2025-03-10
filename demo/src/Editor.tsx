@@ -1,12 +1,11 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, KeyboardEvent } from 'react';
 import Form from 'react-bootstrap/Form';
-import Dropdown from 'react-bootstrap/Dropdown';
 import {Light as SyntaxHighlighter} from 'react-syntax-highlighter';
 import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 const TAB = "  ";
 
-SyntaxHighlighter.registerLanguage('foo', (hljs) => ({
+SyntaxHighlighter.registerLanguage('foo', (hljs: any) => ({
     case_insensitive: true, // language is case-insensitive
     keywords: {
       keyword: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
@@ -42,11 +41,14 @@ type EditorProps = {
 };
 
 export default function Editor({ className, id, value, onChange }: EditorProps) {
-  const editorRef = useRef(null);
-  const highlightRef = useRef(null);
+  const editorRef = useRef<HTMLTextAreaElement | null>(null);
+  const highlightRef = useRef<HTMLDivElement | null>(null);
   const [width, setWidth] = useState(0);
 
   const updateWidth = () => {
+    if (!editorRef.current || !editorRef.current.parentElement) {
+      return;
+    }
     if (width != editorRef.current.parentElement.clientWidth - 1) {
       setWidth(editorRef.current.parentElement.clientWidth - 1);
     }
@@ -64,16 +66,22 @@ export default function Editor({ className, id, value, onChange }: EditorProps) 
   let height = Math.min(15, Math.max(6, value.split('\n').length)) + 1;
 
   const syncScroll = () => {
+    if (!editorRef.current || !highlightRef.current) {
+      return;
+    }
     highlightRef.current.style.height = editorRef.current.clientHeight + "px";
     highlightRef.current.scrollTop = editorRef.current.scrollTop;
     highlightRef.current.scrollLeft = editorRef.current.scrollLeft;
   };
 
-  const handleKeyDown = ev => {
-    const before = editorRef.current.value.slice(0, editorRef.current.selectionStart);
-    const after = editorRef.current.value.slice(editorRef.current.selectionEnd, editorRef.current.value.length);
+  const handleKeyDown = (ev: KeyboardEvent) => {
+    if (!editorRef.current) {
+      return;
+    }
+    const before = editorRef.current.value.slice(0, editorRef.current.selectionStart || undefined);
+    const after = editorRef.current.value.slice(editorRef.current.selectionEnd || undefined, editorRef.current.value.length);
     const atEol = (after === "" || after.startsWith("\n"));
-    const cursor_pos = editorRef.current.selectionEnd;
+    const cursor_pos = editorRef.current.selectionEnd || 0;
     if (ev.key == "{" && atEol) {
       ev.preventDefault();
       editorRef.current.value = before + "{}" + after;
@@ -159,7 +167,7 @@ export default function Editor({ className, id, value, onChange }: EditorProps) 
     }
   };
 
-  const changedEvent = ev => {
+  const changedEvent = (ev: any) => {
     if (onChange) {
       onChange(ev);
     } 
