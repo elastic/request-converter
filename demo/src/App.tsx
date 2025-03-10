@@ -7,7 +7,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import ToastContainer from 'react-bootstrap/ToastContainer';
 import Toast from 'react-bootstrap/Toast';
-import SyntaxHighlighter from 'react-syntax-highlighter';
+import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import Editor from './Editor';
 import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { compareVersions } from 'compare-versions';
 import { convertRequests, loadSchema, listFormats } from "@elastic/request-converter";
@@ -77,7 +78,6 @@ function App() {
 
   const onRequestChanged = (ev: React.ChangeEvent<HTMLSelectElement>): any => {
     setSource(ev.target.value);
-    ev.target.style.height = ev.target.scrollHeight + "px";
   };
 
   const copyToClipboard = async () => {
@@ -136,7 +136,7 @@ function App() {
       <Form id="main-form">
         <Row id="main-row">
           <Col className="col-6">
-            <Form.Control className={error ? "is-invalid" : ""} as="textarea" id="source" value={source} onChange={(ev: any) => onRequestChanged(ev)} />
+            <Editor className={error ? "is-invalid" : ""} id="source" value={source} onChange={(ev: any) => onRequestChanged(ev)} />
             {error && <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>}
           </Col>
           <Col className="col-6">

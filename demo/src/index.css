@@ -10,9 +10,13 @@ h1 {
 
 textarea.form-control {
   resize: none;
-  min-height: 200px;
+  min-height: 6em;
   font-family: monospace;
   font-size: 14px;
+}
+
+.is-invalid.form-control {
+  background-position: top calc(.375em + .1875rem) right calc(.375em + .1875rem);
 }
 
 #main-container {
