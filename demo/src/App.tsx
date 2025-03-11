@@ -7,7 +7,7 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import ToastContainer from 'react-bootstrap/ToastContainer';
 import Toast from 'react-bootstrap/Toast';
-import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import SyntaxHighlighter from './SyntaxHighlighter';
 import Editor from './Editor';
 import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { compareVersions } from 'compare-versions';

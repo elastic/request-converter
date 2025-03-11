@@ -1,37 +1,9 @@
 import { useRef, useState, useEffect, KeyboardEvent } from 'react';
 import Form from 'react-bootstrap/Form';
-import {Light as SyntaxHighlighter} from 'react-syntax-highlighter';
+import SyntaxHighlighter from './SyntaxHighlighter';
 import { atomOneLight } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 
 const TAB = "  ";
-
-SyntaxHighlighter.registerLanguage('foo', (hljs: any) => ({
-    case_insensitive: true, // language is case-insensitive
-    keywords: {
-      keyword: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
-      literal: ['true', 'false', 'null'],
-    },
-    contains: [
-      {
-        className: 'attr',
-        begin: /"(\\.|[^\\"\r\n])*"(?=\s*:)/,
-        relevance: 1.01
-      },
-      {
-        match: /[{}[\],:]/,
-        className: "punctuation",
-        relevance: 0
-      },
-      hljs.QUOTE_STRING_MODE,
-      hljs.C_NUMBER_MODE,
-      hljs.C_LINE_COMMENT_MODE,
-      hljs.HASH_COMMENT_MODE,
-      {
-        className: 'meta',
-        begin: '\/[^\\s]*',
-      },
-    ],
-  }));
 
 type EditorProps = {
   className: string,
@@ -204,7 +176,7 @@ export default function Editor({ className, id, value, onChange }: EditorProps) 
       }} ref={highlightRef}>
         <SyntaxHighlighter
           wrapLongLines={true}
-          language="foo"
+          language="elasticsearch"
           style={atomOneLight}
           customStyle={{
             margin: 0,
