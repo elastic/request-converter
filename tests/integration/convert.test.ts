@@ -14,6 +14,7 @@ const TEST_FORMATS: Record<string, string> = {
   python: "py",
   javascript: "js",
   curl: "sh",
+  ruby: "rb",
 };
 
 interface Example {
