@@ -13,3 +13,4 @@ export {
   ParsedRequest,
   loadSchema,
 } from "./parse";
+export { getCompletions, Completion } from "./complete";

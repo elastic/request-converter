@@ -62,3 +62,36 @@ pre {
 .clipboard-toast .toast {
   background-color: #eee;
 }
+
+.completions {
+  position: relative;
+}
+
+.completions .dropdown-menu {
+  max-height: 250px;
+  overflow-y: auto;
+}
+
+.completions .dropdown-item {
+  font-size: 0.8rem;
+}
+
+.completions .dropdown-item.active {
+  background-color: #aad;
+}
+
+.completionReplace {
+  color: #66c;
+}
+
+.active .completionReplace {
+  color: #66c;
+}
+
+.completionInsert {
+  color: #000;
+}
+
+.active .completionInsert {
+  color: #000;
+}

@@ -30,7 +30,11 @@ SyntaxHighlighter.registerLanguage('elasticsearch', (hljs: any) => ({
     hljs.HASH_COMMENT_MODE,
     {
       className: 'meta',
-      begin: '\/[^\\s]*',
+      begin: '\/[^\\s\\?]*',
+    },
+    {
+      className: 'comment',
+      begin: '\\?[^\\s]*',
     },
   ],
 }));
