@@ -42,7 +42,7 @@ afterAll(async () => {
 
 describe("convert", () => {
   const examples: Example[] = JSON.parse(
-    readFileSync(".examples.json", "utf-8"),
+    readFileSync("tests/integration/examples.json", "utf-8"),
   );
   const cases: Case[] = [];
   for (const example of examples) {

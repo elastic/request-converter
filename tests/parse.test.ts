@@ -273,6 +273,24 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
     });
   });
 
+  it("parses requests with placeholders", async () => {
+    const script = "POST /_create_from/{source}/{dest}";
+    const req = await parseRequests(script);
+    expect(req[0]).toMatchObject({
+      source: "POST /_create_from/{source}/{dest}",
+      service: "es",
+      api: "indices.create_from",
+      method: "POST",
+      params: {
+        source: "{source}",
+        dest: "{dest}",
+      },
+      path: "/_create_from/{source}/{dest}",
+      rawPath: "/_create_from/%7Bsource%7D/%7Bdest%7D",
+      url: "/_create_from/%7Bsource%7D/%7Bdest%7D",
+    });
+  });
+
   it("errors with incomplete bodies", async () => {
     const script = `GET /my-index/_search
 {`;
