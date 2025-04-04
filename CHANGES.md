@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 8.18.1 (2025-04-04)
+* Updated schema for 8.18
+
 ## 8.18.0 (2025-02-24)
 * Support for externally hosted exporters ([#69](https://github.com/elastic/request-converter/pull/69))
 * Update schema for 8.18
@@ -47,6 +50,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
