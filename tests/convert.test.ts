@@ -292,9 +292,11 @@ $resp1 = $client->search([
     "index" => "my-index",
     "from" => "40",
     "size" => "20",
-    "query" => [
-        "term" => [
-            "user.id" => "kimchy's",
+    "body" => [
+        "query" => [
+            "term" => [
+                "user.id" => "kimchy's",
+            ],
         ],
     ],
 ]);
@@ -316,9 +318,11 @@ $resp1 = $client->search([
     "index" => "my-index",
     "from" => "40",
     "size" => "20",
-    "query" => [
-        "term" => [
-            "user.id" => "kimchy's",
+    "body" => [
+        "query" => [
+            "term" => [
+                "user.id" => "kimchy's",
+            ],
         ],
     ],
 ]);
@@ -352,9 +356,11 @@ $resp1 = $client->search([
     "index" => "my-index",
     "from" => "40",
     "size" => "20",
-    "query" => [
-        "term" => [
-            "user.id" => "kimchy's",
+    "body" => [
+        "query" => [
+            "term" => [
+                "user.id" => "kimchy's",
+            ],
         ],
     ],
 ]);
@@ -371,10 +377,12 @@ $resp1 = $client->search([
         elasticsearchUrl: "https://localhost:9999",
       }),
     ).toEqual(
-      `$resp = $client->perform_request(
+      `$factory = Psr17FactoryDiscovery::findRequestFactory();
+$request = $factory->createRequest(
     "GET",
     "/_internal/desired_balance",
 );
+$resp = $client->sendRequest($request);
 
 `,
     );

@@ -13,6 +13,7 @@ const execAsync = util.promisify(childProcess.exec);
 const TEST_FORMATS: Record<string, string> = {
   python: "py",
   javascript: "js",
+  php: "php",
   curl: "sh",
 };
 
@@ -89,7 +90,7 @@ describe("convert", () => {
           let parsedRequest: ParsedRequest | undefined;
           await writeFile(`.tmp.request.${ext}`, code as string);
 
-          const failureMessage = `Failed code snippet:\n\n${code}\n\n`;
+          const failureMessage = `Failed code snippet:\n\n${source}\n\n${code}\n\n`;
 
           try {
             await execAsync(

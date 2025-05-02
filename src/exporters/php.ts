@@ -44,29 +44,50 @@ export class PHPExporter implements FormatExporter {
     return (await this.getTemplate())({ requests, ...options });
   }
 
-  phpprint(data: jsontype, indent: string): string {
+  phpprint(data: jsontype, indent: string, startIndented: boolean): string {
     // render a JSON data structure with PHP syntax
     if (typeof data === "number" || typeof data === "boolean") {
-      return String(data);
+      return (startIndented ? indent : "") + String(data);
     } else if (data === null || data === undefined) {
-      return "null";
+      return (startIndented ? indent : "") + "null";
     } else if (typeof data === "string") {
-      return '"' + data.replaceAll('"', '\\"') + '"';
+      return (
+        (startIndented ? indent : "") + '"' + data.replaceAll('"', '\\"') + '"'
+      );
     } else if (Array.isArray(data)) {
       const elements =
-        data.map((elem) => this.phpprint(elem, indent + "    ")).join(",\n") +
-        ",\n";
-      return "array(\n" + elements + indent + ")";
+        data.length === 0
+          ? ""
+          : data
+              .map(
+                (elem) => "    " + this.phpprint(elem, indent + "    ", true),
+              )
+              .join(",\n") + ",\n";
+      return (
+        (startIndented ? indent + "    " : "") +
+        "array(\n" +
+        elements +
+        indent +
+        "    )"
+      );
     } else if (typeof data === "object") {
       const elements =
-        Object.keys(data)
-          .map(
-            (key) =>
-              `${indent}        "${key}" => ` +
-              this.phpprint(data[key] as jsontype, indent + "    "),
-          )
-          .join(",\n") + ",\n";
-      return "[\n" + elements + indent + "    ]";
+        Object.keys(data).length === 0
+          ? ""
+          : Object.keys(data)
+              .map(
+                (key) =>
+                  `${indent}        "${key}" => ` +
+                  this.phpprint(data[key] as jsontype, indent + "    ", false),
+              )
+              .join(",\n") + ",\n";
+      if (elements.length) {
+        return (
+          (startIndented ? indent : "") + "[\n" + elements + indent + "    ]"
+        );
+      } else {
+        return (startIndented ? indent : "") + "new ArrayObject([])";
+      }
     } else {
       throw new Error(`Unexpected type in JSON payload`);
     }
@@ -76,8 +97,30 @@ export class PHPExporter implements FormatExporter {
     if (!this.template) {
       // custom data renderer for Python
       Handlebars.registerHelper("phpprint", (context) => {
-        return this.phpprint(context, "");
+        return this.phpprint(context, "", false);
       });
+
+      //
+      Handlebars.registerHelper(
+        "needsRequestFactory",
+        function (
+          this: { requests: ParsedRequest[] } & ConvertOptions,
+          options,
+        ) {
+          let anyUnsupported = false;
+          for (const request of this.requests) {
+            if (UNSUPPORTED_APIS.test(request.api as string)) {
+              anyUnsupported = true;
+              break;
+            }
+          }
+          if (anyUnsupported) {
+            return options.fn(this);
+          } else {
+            return options.inverse(this);
+          }
+        },
+      );
 
       // custom conditional for requests without any arguments
       Handlebars.registerHelper(
@@ -113,20 +156,6 @@ export class PHPExporter implements FormatExporter {
       //   name: the name of the attribute
       //   props: the list of schema properties this attribute belongs to
       Handlebars.registerHelper("alias", (name, props) => {
-        const aliases: Record<string, string> = {
-          /*
-          from: "from_",
-          _meta: "meta",
-          _field_names: "field_names",
-          _routing: "routing",
-          _source: "source",
-          _source_excludes: "source_excludes",
-          _source_includes: "source_includes",
-          */
-        };
-        if (aliases[name]) {
-          return aliases[name];
-        }
         if (props) {
           for (const prop of props) {
             if (prop.name == name && prop.codegenName != undefined) {
@@ -137,6 +166,21 @@ export class PHPExporter implements FormatExporter {
         return name;
       });
 
+      Handlebars.registerHelper("phpEndpoint", (name) => {
+        const snakeToCamel = (str: string) =>
+          str
+            .toLowerCase()
+            .replace(/([-_][a-z])/g, (group) =>
+              group.toUpperCase().replace("-", "").replace("_", ""),
+            );
+
+        const parts = name.split(".").map((part: string) => snakeToCamel(part));
+        const phpParts = parts.slice(0, -1).map((part: string) => part + "()");
+        phpParts.push(parts.slice(-1));
+        return phpParts.join("->");
+      });
+
+      /*
       // custom conditional to check for request body kind
       // the argument can be "properties" or "value"
       Handlebars.registerHelper(
@@ -158,6 +202,7 @@ export class PHPExporter implements FormatExporter {
           }
         },
       );
+      */
 
       if (process.env.NODE_ENV !== "test") {
         this.template = Handlebars.templates["php.tpl"];

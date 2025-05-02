@@ -4,6 +4,10 @@
 require(__DIR__ . "/vendor/autoload.php");
 
 use Elastic\Elasticsearch\ClientBuilder;
+{{#needsRequestFactory}}
+use Http\Discovery\Psr17FactoryDiscovery;
+{{else}}
+{{/needsRequestFactory}}
 
 $client = ClientBuilder::create()
     ->setHosts([{{#if elasticsearchUrl}}"{{elasticsearchUrl}}"{{else}}getenv("ELASTICSEARCH_URL"){{/if}}])
@@ -14,26 +18,23 @@ $client = ClientBuilder::create()
 {{#each requests}}
 {{#supportedApi}}
 {{#hasArgs}}
-$resp{{#if @index}}{{@index}}{{/if}} = $client->{{this.api}}([
+$resp{{#if @index}}{{@index}}{{/if}} = $client->{{{phpEndpoint this.api}}}([
     {{#each this.params}}
     "{{alias @key ../this.request.path}}" => "{{{this}}}",
     {{/each}}
     {{#each this.query}}
     "{{alias @key ../this.request.query}}" => {{{phpprint this}}},
     {{/each}}
-    {{#ifRequestBodyKind "properties"}}
-    {{#each this.body}}
-    "{{alias @key ../this.request.body.properties}}" => {{{phpprint this}}},
-    {{/each}}
-    {{else ifRequestBodyKind "value"}}
-    {{#if this.request.body.codegenName}}{{this.request.body.codegenName}}{{else}}body{{/if}}={{{phprint this.body}}},
-{{/ifRequestBodyKind}}
+    {{#if this.body}}
+    "body" => {{{phpprint this.body}}},
+{{/if}}
 ]);
 {{else}}
-$resp{{#if @index}}{{@index}}{{/if}} = $client->{{this.api}}();
+$resp{{#if @index}}{{@index}}{{/if}} = $client->{{{phpEndpoint this.api}}}();
 {{/hasArgs}}
 {{else}}
-$resp{{#if @index}}{{@index}}{{/if}} = $client->perform_request(
+$factory = Psr17FactoryDiscovery::findRequestFactory();
+$request = $factory->createRequest(
     "{{this.method}}",
     "{{this.path}}",
     {{#if this.query}}
@@ -44,6 +45,7 @@ $resp{{#if @index}}{{@index}}{{/if}} = $client->perform_request(
     body={{{phprint this.body}}},
     {{/if}}
 );
+$resp{{#if @index}}{{@index}}{{/if}} = $client->sendRequest($request);
 {{/supportedApi}}
 {{#if ../printResponse}}
 echo $resp{{#if @index}}{{@index}}{{/if}}->asString();
