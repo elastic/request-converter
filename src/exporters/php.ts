@@ -16,12 +16,19 @@ type jsontype =
 interface jsonarray extends Array<jsontype> {}
 interface jsonobject extends Record<string, jsontype> {}
 
-// this regex should match the list of APIs that do not have specific handlers
-// in the Python client. APIs in this list are rendered with a perform_request()
-// call
-const UNSUPPORTED_APIS = new RegExp(
-  "^_internal.*$" + "|^connector.update_features$",
-);
+function isSupportedAPI(req: ParsedRequest) {
+  let supported = false;
+  if (
+    req.availability &&
+    (req.availability.stack?.visibility !== "private" ||
+      req.availability.stack?.stability !== "experimental" ||
+      (req.availability.serverless &&
+        req.availability.serverless.visibility !== "private"))
+  ) {
+    supported = true;
+  }
+  return supported;
+}
 
 export class PHPExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
@@ -51,9 +58,7 @@ export class PHPExporter implements FormatExporter {
     } else if (data === null || data === undefined) {
       return (startIndented ? indent : "") + "null";
     } else if (typeof data === "string") {
-      return (
-        (startIndented ? indent : "") + '"' + data.replaceAll('"', '\\"') + '"'
-      );
+      return (startIndented ? indent : "") + JSON.stringify(data);
     } else if (Array.isArray(data)) {
       const elements =
         data.length === 0
@@ -109,7 +114,7 @@ export class PHPExporter implements FormatExporter {
         ) {
           let anyUnsupported = false;
           for (const request of this.requests) {
-            if (UNSUPPORTED_APIS.test(request.api as string)) {
+            if (!isSupportedAPI(request)) {
               anyUnsupported = true;
               break;
             }
@@ -143,28 +148,13 @@ export class PHPExporter implements FormatExporter {
       Handlebars.registerHelper(
         "supportedApi",
         function (this: ParsedRequest, options) {
-          if (!UNSUPPORTED_APIS.test(this.api as string) && this.request) {
+          if (isSupportedAPI(this)) {
             return options.fn(this);
           } else {
             return options.inverse(this);
           }
         },
       );
-
-      // attribute name renderer that considers aliases and code-specific names
-      // arguments:
-      //   name: the name of the attribute
-      //   props: the list of schema properties this attribute belongs to
-      Handlebars.registerHelper("alias", (name, props) => {
-        if (props) {
-          for (const prop of props) {
-            if (prop.name == name && prop.codegenName != undefined) {
-              return prop.codegenName;
-            }
-          }
-        }
-        return name;
-      });
 
       Handlebars.registerHelper("phpEndpoint", (name) => {
         const snakeToCamel = (str: string) =>
@@ -179,30 +169,6 @@ export class PHPExporter implements FormatExporter {
         phpParts.push(parts.slice(-1));
         return phpParts.join("->");
       });
-
-      /*
-      // custom conditional to check for request body kind
-      // the argument can be "properties" or "value"
-      Handlebars.registerHelper(
-        "ifRequestBodyKind",
-        function (this: ParsedRequest, kind: string, options) {
-          let bodyKind = this.request?.body?.kind ?? "value";
-          const parsedBody = typeof this.body == "object" ? this.body : {};
-          if (this.api == "search" && "sub_searches" in parsedBody) {
-            // Change the kind of any search requests that use sub-searches to
-            // "value", so that the template renders a single body argument
-            // instead of expanding the kwargs. This is needed because the
-            // Python client does not support "sub_searches" as a kwarg yet.
-            bodyKind = "value";
-          }
-          if (bodyKind == kind) {
-            return options.fn(this);
-          } else {
-            return options.inverse(this);
-          }
-        },
-      );
-      */
 
       if (process.env.NODE_ENV !== "test") {
         this.template = Handlebars.templates["php.tpl"];

@@ -115,8 +115,9 @@ describe("convert", () => {
             // the example has them there
             for (const q of Object.keys(parsedRequest?.query ?? {})) {
               if (
-                capturedRequest.query[q] == undefined &&
-                capturedRequest.body[q] != undefined
+                (!capturedRequest.query ||
+                  capturedRequest.query === undefined) &&
+                capturedRequest.body !== undefined
               ) {
                 capturedRequest.query[q] = capturedRequest.body[q].toString();
                 delete capturedRequest.body[q];

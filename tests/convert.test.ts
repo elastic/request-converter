@@ -365,7 +365,6 @@ $resp1 = $client->search([
     ],
 ]);
 
-?>
 `,
     );
   });
@@ -381,6 +380,7 @@ $resp1 = $client->search([
 $request = $factory->createRequest(
     "GET",
     "/_internal/desired_balance",
+    [],
 );
 $resp = $client->sendRequest($request);
 

@@ -20,10 +20,10 @@ $client = ClientBuilder::create()
 {{#hasArgs}}
 $resp{{#if @index}}{{@index}}{{/if}} = $client->{{{phpEndpoint this.api}}}([
     {{#each this.params}}
-    "{{alias @key ../this.request.path}}" => "{{{this}}}",
+    "{{@key}}" => "{{{this}}}",
     {{/each}}
     {{#each this.query}}
-    "{{alias @key ../this.request.query}}" => {{{phpprint this}}},
+    "{{@key}}" => {{{phpprint this}}},
     {{/each}}
     {{#if this.body}}
     "body" => {{{phpprint this.body}}},
@@ -37,12 +37,11 @@ $factory = Psr17FactoryDiscovery::findRequestFactory();
 $request = $factory->createRequest(
     "{{this.method}}",
     "{{this.path}}",
-    {{#if this.query}}
-    params={{{phprint this.query}}},
-    {{/if}}
     {{#if this.body}}
-    headers={"Content-Type": "application/json"},
-    body={{{phprint this.body}}},
+    ["Content-Type" => "application/json"],
+    {{{phpprint this.body}}},
+    {{else}}
+    [],
     {{/if}}
 );
 $resp{{#if @index}}{{@index}}{{/if}} = $client->sendRequest($request);
@@ -52,6 +51,3 @@ echo $resp{{#if @index}}{{@index}}{{/if}}->asString();
 {{/if}}
 
 {{/each}}
-{{#if complete}}
-?>
-{{/if}}
