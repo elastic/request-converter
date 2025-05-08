@@ -17,6 +17,18 @@ interface jsonarray extends Array<jsontype> {}
 interface jsonobject extends Record<string, jsontype> {}
 
 function isSupportedAPI(req: ParsedRequest) {
+  const unsupportedApis = [
+    "_internal.prevalidate_node_removal",
+    "indices.create_from",
+    "indices.migrate_reindex",
+    "indices.get_migrate_reindex_status",
+    "indices.cancel_migrate_reindex",
+    "security.delegate_pki",
+  ];
+  if (req.api && unsupportedApis.includes(req.api)) {
+    return false;
+  }
+
   let supported = false;
   if (
     req.availability &&

@@ -33,17 +33,20 @@ $resp{{#if @index}}{{@index}}{{/if}} = $client->{{{phpEndpoint this.api}}}([
 $resp{{#if @index}}{{@index}}{{/if}} = $client->{{{phpEndpoint this.api}}}();
 {{/hasArgs}}
 {{else}}
-$factory = Psr17FactoryDiscovery::findRequestFactory();
-$request = $factory->createRequest(
+$requestFactory = Psr17FactoryDiscovery::findRequestFactory();
+{{#if this.body}}
+$streamFactory = Psr17FactoryDiscovery::findStreamFactory();
+{{/if}}
+$request = $requestFactory->createRequest(
     "{{this.method}}",
-    "{{this.path}}",
-    {{#if this.body}}
-    ["Content-Type" => "application/json"],
-    {{{phpprint this.body}}},
-    {{else}}
-    [],
-    {{/if}}
+    "{{{this.url}}}",
 );
+{{#if this.body}}
+$request = $request->withHeader("Content-Type", "application/json");
+$request = $request->withBody($streamFactory->createStream(
+    json_encode({{{phpprint this.body}}}),
+));
+{{/if}}
 $resp{{#if @index}}{{@index}}{{/if}} = $client->sendRequest($request);
 {{/supportedApi}}
 {{#if ../printResponse}}

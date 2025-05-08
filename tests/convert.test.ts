@@ -376,11 +376,10 @@ $resp1 = $client->search([
         elasticsearchUrl: "https://localhost:9999",
       }),
     ).toEqual(
-      `$factory = Psr17FactoryDiscovery::findRequestFactory();
-$request = $factory->createRequest(
+      `$requestFactory = Psr17FactoryDiscovery::findRequestFactory();
+$request = $requestFactory->createRequest(
     "GET",
     "/_internal/desired_balance",
-    [],
 );
 $resp = $client->sendRequest($request);
 

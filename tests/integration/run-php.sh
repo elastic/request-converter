@@ -27,7 +27,7 @@ EOF
 
 if [[ "$1" == "" ]]; then
     # the `test:setup` command runs this script without arguments to initialize
-    # the venv, so we first delete any previous one
+    # the environment, so we first delete any previous one
     rm -rf $SCRIPT_DIR/.php
 fi
 
