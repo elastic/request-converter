@@ -80,6 +80,19 @@ describe("convert", () => {
     ).toBeFalsy();
   });
 
+  it("checks for ruby", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "ruby", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "ruby", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
+  });
+
   it("errors for unknown language", async () => {
     expect(
       async () =>
@@ -387,7 +400,7 @@ $resp = $client->sendRequest($request);
     );
   });
 
-  it("errors when converting Kibana to Python", async () => {
+  it("errors when converting Kibana to php", async () => {
     expect(
       async () =>
         await convertRequests(kibanaScript, "php", {
