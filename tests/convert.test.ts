@@ -397,6 +397,113 @@ $resp = $client->sendRequest($request);
     ).rejects.toThrowError("Cannot perform conversion");
   });
 
+  it("converts to ruby", async () => {
+    expect(await convertRequests(devConsoleScript, "ruby", {})).toEqual(
+      `response = client.info
+
+response1 = client.search(
+  index: "my-index",
+  from: "40",
+  size: "20",
+  body: {
+    "query": {
+      "term": {
+        "user.id": "kimchy's"
+      }
+    }
+  }
+)
+
+`,
+    );
+  });
+
+  it("converts to ruby and prints the response", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "ruby", {
+        printResponse: true,
+      }),
+    ).toEqual(
+      `response = client.info
+print(resp)
+
+response1 = client.search(
+  index: "my-index",
+  from: "40",
+  size: "20",
+  body: {
+    "query": {
+      "term": {
+        "user.id": "kimchy's"
+      }
+    }
+  }
+)
+print(resp1)
+
+`,
+    );
+  });
+
+  it("converts to a complete ruby script", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "ruby", {
+        complete: true,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `require "elasticsearch"
+
+client = Elasticsearch::Client.new(
+  host: "https://localhost:9999",
+  api_key: ENV["ELASTIC_API_KEY"]
+)
+
+response = client.info
+
+response1 = client.search(
+  index: "my-index",
+  from: "40",
+  size: "20",
+  body: {
+    "query": {
+      "term": {
+        "user.id": "kimchy's"
+      }
+    }
+  }
+)
+
+`,
+    );
+  });
+
+  it("converts an unsupported API to ruby", async () => {
+    expect(
+      await convertRequests("GET /_internal/desired_balance", "ruby", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `response = client.perform_request(
+  "GET",
+  "/_internal/desired_balance",
+)
+
+`,
+    );
+  });
+
+  it("errors when converting Kibana to ruby", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "ruby", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
   it("supports a custom exporter", async () => {
     class MyExporter implements FormatExporter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars

@@ -15,6 +15,7 @@ const TEST_FORMATS: Record<string, string> = {
   javascript: "js",
   php: "php",
   curl: "sh",
+  ruby: "rb",
 };
 
 interface Example {
