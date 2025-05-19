@@ -5,6 +5,7 @@ import { PythonExporter } from "./exporters/python";
 import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
 import util from "util";
+import { JavaExporter } from "./exporters/java";
 
 const isBrowser = typeof window !== "undefined";
 const execAsync = !isBrowser ? util.promisify(childProcess.exec) : undefined;
@@ -41,6 +42,7 @@ const EXPORTERS: Record<string, FormatExporter> = {
   python: new PythonExporter(),
   curl: new CurlExporter(),
   javascript: new JavaScriptExporter(),
+  java: new JavaExporter(),
 };
 
 /**

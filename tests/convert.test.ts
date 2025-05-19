@@ -1,11 +1,11 @@
 import childProcess, { ChildProcess } from "child_process";
 import path from "path";
 import {
-  convertRequests,
-  listFormats,
-  FormatExporter,
   ConvertOptions,
+  convertRequests,
   ExternalExporter,
+  FormatExporter,
+  listFormats,
   SubprocessExporter,
   WebExporter,
 } from "../src/convert";
@@ -65,6 +65,14 @@ describe("convert", () => {
         checkOnly: true,
       }),
     ).toBeFalsy();
+  });
+
+  it("checks for java", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "java", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
   });
 
   it("errors for unknown language", async () => {
@@ -271,12 +279,19 @@ run();
     ).rejects.toThrowError("Cannot perform conversion");
   });
 
+  it("converts to java", async () => {
+    expect(await convertRequests(devConsoleScript, "java", {})).toEqual(
+      `a`,
+    );
+  });
+
   it("supports a custom exporter", async () => {
     class MyExporter implements FormatExporter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async check(requests: ParsedRequest[]): Promise<boolean> {
         return true;
       }
+
       async convert(
         requests: ParsedRequest[],
         options: ConvertOptions, // eslint-disable-line @typescript-eslint/no-unused-vars
