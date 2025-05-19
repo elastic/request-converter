@@ -5,12 +5,24 @@ import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 import "./templates";
 
-// this regex should match the list of APIs that do not have specific handlers
-// in the Ruby client. APIs in this list are rendered with a perform_request()
-// call
-const UNSUPPORTED_APIS = new RegExp("^_internal.*$");
-
 const RUBYCONSTANTS: Record<string, string> = { null: "nil" };
+
+function isSupportedAPI(req: ParsedRequest) {
+  if (
+    req.api?.startsWith("_internal") ||
+    req.api === "knn_search" ||
+    req.api?.startsWith("shutdown.") ||
+    req.api?.startsWith("rollup.") ||
+    req.api?.startsWith("autoscaling.")
+  ) {
+    return false;
+  }
+  let supported = false;
+  if (req.availability && req.availability.stack?.visibility !== "private") {
+    supported = true;
+  }
+  return supported;
+}
 
 export class RubyExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
@@ -85,7 +97,7 @@ export class RubyExporter implements FormatExporter {
       Handlebars.registerHelper(
         "supportedApi",
         function (this: ParsedRequest, options) {
-          if (!UNSUPPORTED_APIS.test(this.api as string) && this.request) {
+          if (isSupportedAPI(this)) {
             return options.fn(this);
           } else {
             return options.inverse(this);

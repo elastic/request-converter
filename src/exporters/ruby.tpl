@@ -13,23 +13,23 @@ client = Elasticsearch::Client.new(
 response{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}(
 {{#if this.body}}
   {{#each this.params}}
-  {{alias @key ../this.request.path}}: "{{{this}}}",
+  {{@key}}: "{{{this}}}",
   {{/each}}
   {{#each this.query}}
-  {{alias @key ../this.request.query}}: {{{rubyprint this}}},
+  {{@key}}: {{{rubyprint this}}},
   {{/each}}
   body: {{{rubyprint this.body}}}
 {{else}}
   {{#if this.query}}
   {{#each this.params}}
-  {{alias @key ../this.request.path}}: "{{{this}}}",
+  {{@key}}: "{{{this}}}",
   {{/each}}
   {{#each this.query}}
-  {{alias @key ../this.request.query}}: {{{rubyprint this}}}{{#unless @last}},{{/unless}}
+  {{@key}}: {{{rubyprint this}}}{{#unless @last}},{{/unless}}
   {{/each}}
   {{else}}
   {{#each this.params}}
-  {{alias @key ../this.request.path}}: "{{{this}}}"{{#unless @last}},{{/unless}}
+  {{@key}}: "{{{this}}}"{{#unless @last}},{{/unless}}
   {{/each}}
   {{/if}}
 {{/if}}
@@ -42,11 +42,13 @@ response{{#if @index}}{{@index}}{{/if}} = client.perform_request(
   "{{this.method}}",
   "{{this.path}}",
   {{#if this.query}}
-  params: {{{rubyprint this.query}}},
+  {{{rubyprint this.query}}},
+  {{else}}
+  {},
   {{/if}}
   {{#if this.body}}
-  headers: { "Content-Type": "application/json" },
-  body: {{{rubyprint this.body}}},
+  {{{rubyprint this.body}}},
+  { "Content-Type": "application/json" },
   {{/if}}
 )
 {{/supportedApi}}

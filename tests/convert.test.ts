@@ -501,6 +501,7 @@ response1 = client.search(
       `response = client.perform_request(
   "GET",
   "/_internal/desired_balance",
+  {},
 )
 
 `,

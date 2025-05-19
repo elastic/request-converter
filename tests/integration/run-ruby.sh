@@ -13,10 +13,10 @@ if [ ! -d "$CLIENT_DIR" ]; then
        git clone -b "main" --depth=1 "https://github.com/elastic/elasticsearch-ruby.git" "$CLIENT_DIR")
   pushd "$CLIENT_DIR"
   bundle install
-  bundle exec rake bundle:install
+  #bundle exec rake bundle:install
   bundle exec rake automation:build_gems
-  gem install build/elasticsearch-api*
-  gem install build/elasticsearch*
+  gem install --local build/elasticsearch-api*
+  gem install --local build/elasticsearch*
   popd
 fi
 

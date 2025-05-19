@@ -39,11 +39,11 @@ const skip: Record<string, SkippedTest> = {
   },
   c2c21e2824fbf6b7198ede30419da82b: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python", "javascript"],
+    formats: ["python", "javascript", "ruby"],
   },
   b94cee0f74f57742b3948f9b784dfdd4: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python", "javascript"],
+    formats: ["python", "javascript", "ruby"],
   },
   ad92a1a8bb1b0f26d1536fe8ba4ffd17: {
     reason: "example puts `id` path attribute in body",
@@ -121,7 +121,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "734e2b1d1ca84a305240a449738f0eba": {
     reason: "client does not implement this endpoint variant",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   fe806011466e7cdc1590da186297edb6: {
     reason: "url cannot be parsed",
@@ -131,19 +131,19 @@ const skip: Record<string, SkippedTest> = {
   },
   e0bbfb368eae307e9508ab8d6e9cf23c: {
     reason: "client does not implement this endpoint variant",
-    formats: ["/upython", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   ef9c29759459904fef162acd223462c4: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   f160561efab38e40c2feebf5a2542ab5: {
     reason: "client does not implement this endpoint variant",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   "0470d7101637568b9d3d1239f06325a7": {
     reason: "example uses invalid URL",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   e9ae959608d128202921b174f4faa7a8: {
     reason: "invalid request syntax",
@@ -222,7 +222,7 @@ const skip: Record<string, SkippedTest> = {
   },
   "3ed79871d956bfb2d6d2721d7272520c": {
     reason: "client does not implement this endpoint variant",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   "3c4d7ef8422d2db423a8f23effcddaa1[3]": {
     reason: "example uses unknown URL",
@@ -357,19 +357,31 @@ const skip: Record<string, SkippedTest> = {
   },
   "4b91ad7c9b44e07db4a4e81390f19ad3": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   "120fcf9f55128d6a81d5e87a9c235bbd": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   "82bb6c61dab959f4446dc5ecab7ecbdf": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
   },
   "45954b8aaedfed57012be8b6538b0a24": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "javascript", "php"],
+    formats: ["python", "javascript", "php", "ruby"],
+  },
+  "114d470e752efa9672ca68d7290fada8": {
+    reason: "the client does not implement this endpoint variant",
+    formats: ["ruby"],
+  },
+  f5140f08f56c64b5789357539f8b9ba8: {
+    reason: "the client does not implement this endpoint variant",
+    formats: ["ruby"],
+  },
+  "66915e95b723ee2f6e5164a94b8f98c1": {
+    reason: "the client does not implement this endpoint variant",
+    formats: ["ruby"],
   },
 };
 
