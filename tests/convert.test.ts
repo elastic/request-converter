@@ -12,7 +12,22 @@ import {
 import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
-const devConsoleScript = `GET /
+const devConsoleScript = `
+
+
+PUT my-index-000002
+{
+  "mappings": {
+    "properties": {
+      "date": {
+        "type": "date_nanos",
+        "on_script_error": "continue"
+      }
+    }
+  }
+}
+
+GET /
 
 POST /my-index/_search?from=40&size=20
 {
@@ -21,7 +36,8 @@ POST /my-index/_search?from=40&size=20
       "user.id": "kimchy's"
     }
   }
-}`;
+}
+`;
 
 const kibanaScript = `GET /
 
