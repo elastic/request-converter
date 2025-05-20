@@ -1,10 +1,14 @@
 import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+import php from 'react-syntax-highlighter/dist/cjs/languages/hljs/php';
 import python from 'react-syntax-highlighter/dist/cjs/languages/hljs/python';
 import javascript from 'react-syntax-highlighter/dist/cjs/languages/hljs/javascript';
+import ruby from 'react-syntax-highlighter/dist/cjs/languages/hljs/ruby';
 import bash from 'react-syntax-highlighter/dist/cjs/languages/hljs/bash';
 
+SyntaxHighlighter.registerLanguage('php', php);
 SyntaxHighlighter.registerLanguage('python', python);
 SyntaxHighlighter.registerLanguage('javascript', javascript);
+SyntaxHighlighter.registerLanguage('ruby', ruby);
 SyntaxHighlighter.registerLanguage('curl', bash);
 
 SyntaxHighlighter.registerLanguage('elasticsearch', (hljs: any) => ({
