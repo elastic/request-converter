@@ -5,7 +5,6 @@ import prettier from "prettier";
 import prettierTypeScript from "prettier/parser-typescript";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
-import "./templates";
 
 const UNSUPPORTED_APIS = new RegExp(
   "^query_rules.*$" +

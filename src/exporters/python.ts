@@ -3,7 +3,6 @@ import path from "path";
 import Handlebars from "handlebars";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
-import "./templates";
 
 // this regex should match the list of APIs that do not have specific handlers
 // in the Python client. APIs in this list are rendered with a perform_request()
