@@ -2,7 +2,7 @@ import { URL } from "url";
 import { readFile } from "fs/promises";
 import path from "path";
 import * as Router from "find-my-way-ts";
-import { Model, Request } from "./metamodel";
+import { Availabilities, Model, Request } from "./metamodel";
 
 const isBrowser = typeof window !== "undefined";
 const httpMethods = ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"];
@@ -24,6 +24,8 @@ export type ParsedRequest = {
   service: string;
   /** The name of the Elasticsearch API this request refers to. */
   api?: string;
+  /** The availability definition from the Elasticsearch specification. */
+  availability?: Availabilities;
   /** The request definition from the Elasticsearch specification that applies to this request. */
   request?: Request;
   /** The dynamic parameters that are part of the request's URL. */
@@ -45,6 +47,7 @@ export type ParsedRequest = {
 
 type ESRoute = {
   name: string;
+  availability: Availabilities;
   request: Request;
 };
 
@@ -319,6 +322,7 @@ export async function loadSchema(filename_or_object: string | object) {
         }
         const r = {
           name: endpoint.name,
+          availability: endpoint.availability,
           request: req as Request,
         };
         router.on(methods, formattedPath as Router.PathInput, r);
@@ -368,6 +372,7 @@ export async function parseRequest(
     try {
       const route = await getAPI(req.method, req.rawPath);
       req.api = route.handler.name;
+      req.availability = route.handler.availability;
       req.request = route.handler.request;
       if (Object.keys(route.params).length > 0) {
         req.params = route.params;

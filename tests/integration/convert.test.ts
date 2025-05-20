@@ -13,7 +13,9 @@ const execAsync = util.promisify(childProcess.exec);
 const TEST_FORMATS: Record<string, string> = {
   python: "py",
   javascript: "js",
+  php: "php",
   curl: "sh",
+  ruby: "rb",
 };
 
 interface Example {
@@ -89,7 +91,7 @@ describe("convert", () => {
           let parsedRequest: ParsedRequest | undefined;
           await writeFile(`.tmp.request.${ext}`, code as string);
 
-          const failureMessage = `Failed code snippet:\n\n${code}\n\n`;
+          const failureMessage = `Failed code snippet:\n\n${source}\n\n${code}\n\n`;
 
           try {
             await execAsync(
@@ -114,8 +116,9 @@ describe("convert", () => {
             // the example has them there
             for (const q of Object.keys(parsedRequest?.query ?? {})) {
               if (
-                capturedRequest.query[q] == undefined &&
-                capturedRequest.body[q] != undefined
+                (!capturedRequest.query ||
+                  capturedRequest.query === undefined) &&
+                capturedRequest.body !== undefined
               ) {
                 capturedRequest.query[q] = capturedRequest.body[q].toString();
                 delete capturedRequest.body[q];

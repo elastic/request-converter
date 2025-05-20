@@ -67,6 +67,32 @@ describe("convert", () => {
     ).toBeFalsy();
   });
 
+  it("checks for php", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "php", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "php", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
+  });
+
+  it("checks for ruby", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "ruby", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "ruby", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
+  });
+
   it("errors for unknown language", async () => {
     expect(
       async () =>
@@ -265,6 +291,227 @@ run();
     expect(
       async () =>
         await convertRequests(kibanaScript, "javascript", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
+  it("converts to php", async () => {
+    expect(await convertRequests(devConsoleScript, "php", {})).toEqual(
+      `$resp = $client->info();
+
+$resp1 = $client->search([
+    "index" => "my-index",
+    "from" => "40",
+    "size" => "20",
+    "body" => [
+        "query" => [
+            "term" => [
+                "user.id" => "kimchy's",
+            ],
+        ],
+    ],
+]);
+
+`,
+    );
+  });
+
+  it("converts to php and prints the response", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "php", {
+        printResponse: true,
+      }),
+    ).toEqual(
+      `$resp = $client->info();
+echo $resp->asString();
+
+$resp1 = $client->search([
+    "index" => "my-index",
+    "from" => "40",
+    "size" => "20",
+    "body" => [
+        "query" => [
+            "term" => [
+                "user.id" => "kimchy's",
+            ],
+        ],
+    ],
+]);
+echo $resp1->asString();
+
+`,
+    );
+  });
+
+  it("converts to a complete PHP script", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "php", {
+        complete: true,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `<?php
+
+require(__DIR__ . "/vendor/autoload.php");
+
+use Elastic\\Elasticsearch\\ClientBuilder;
+
+$client = ClientBuilder::create()
+    ->setHosts(["https://localhost:9999"])
+    ->setApiKey(getenv("ELASTIC_API_KEY"))
+    ->build();
+
+$resp = $client->info();
+
+$resp1 = $client->search([
+    "index" => "my-index",
+    "from" => "40",
+    "size" => "20",
+    "body" => [
+        "query" => [
+            "term" => [
+                "user.id" => "kimchy's",
+            ],
+        ],
+    ],
+]);
+
+`,
+    );
+  });
+
+  it("converts an unsupported API to php", async () => {
+    expect(
+      await convertRequests("GET /_internal/desired_balance", "php", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `$requestFactory = Psr17FactoryDiscovery::findRequestFactory();
+$request = $requestFactory->createRequest(
+    "GET",
+    "/_internal/desired_balance",
+);
+$resp = $client->sendRequest($request);
+
+`,
+    );
+  });
+
+  it("errors when converting Kibana to php", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "php", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
+  it("converts to ruby", async () => {
+    expect(await convertRequests(devConsoleScript, "ruby", {})).toEqual(
+      `response = client.info
+
+response1 = client.search(
+  index: "my-index",
+  from: "40",
+  size: "20",
+  body: {
+    "query": {
+      "term": {
+        "user.id": "kimchy's"
+      }
+    }
+  }
+)
+
+`,
+    );
+  });
+
+  it("converts to ruby and prints the response", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "ruby", {
+        printResponse: true,
+      }),
+    ).toEqual(
+      `response = client.info
+print(resp)
+
+response1 = client.search(
+  index: "my-index",
+  from: "40",
+  size: "20",
+  body: {
+    "query": {
+      "term": {
+        "user.id": "kimchy's"
+      }
+    }
+  }
+)
+print(resp1)
+
+`,
+    );
+  });
+
+  it("converts to a complete ruby script", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "ruby", {
+        complete: true,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `require "elasticsearch"
+
+client = Elasticsearch::Client.new(
+  host: "https://localhost:9999",
+  api_key: ENV["ELASTIC_API_KEY"]
+)
+
+response = client.info
+
+response1 = client.search(
+  index: "my-index",
+  from: "40",
+  size: "20",
+  body: {
+    "query": {
+      "term": {
+        "user.id": "kimchy's"
+      }
+    }
+  }
+)
+
+`,
+    );
+  });
+
+  it("converts an unsupported API to ruby", async () => {
+    expect(
+      await convertRequests("GET /_internal/desired_balance", "ruby", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `response = client.perform_request(
+  "GET",
+  "/_internal/desired_balance",
+  {},
+)
+
+`,
+    );
+  });
+
+  it("errors when converting Kibana to ruby", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "ruby", {
           complete: false,
           elasticsearchUrl: "https://localhost:9999",
         }),
