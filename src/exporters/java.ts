@@ -334,15 +334,40 @@ function handleDataTypes(
         let propMap = new Map(
           request.request.body.properties.map((obj) => [obj.name, obj]),
         );
+        if (methodName == "aggs") methodName = "aggregations"; // TODO have map of aliases
         let typeDetails = propMap.get(methodName)?.type;
         if (typeDetails == undefined) {
           return false; // not there yet
         }
-        if (propMap.get(methodName)?.type.kind == "instance_of") {
-          let typeName = (propMap.get(methodName)?.type as InstanceOf).type
-            .name;
-          let typeDef = specTypeMap.get(typeName);
-          return typeDef;
+        let objectType = propMap.get(methodName)?.type.kind;
+        switch (objectType) {
+          // TODO establish how to get list object?
+          case "instance_of":
+            let typeName = (propMap.get(methodName)?.type as InstanceOf).type
+              .name;
+            let typeDef = specTypeMap.get(typeName);
+            return typeDef;
+          case "array_of":
+            handleList(
+              request,
+              "object",
+              additionalDetails,
+              writer,
+              methodName,
+              "?",
+              inListOrMap,
+            );
+            return true;
+          case "dictionary_of":
+            handleMap(
+              request,
+              object,
+              additionalDetails,
+              writer,
+              methodName,
+              inListOrMap,
+            );
+            return true;
         }
       }
       // we already have the needed info
@@ -605,6 +630,9 @@ export class JavaType {
 
 function getJavaType(type: string): JavaType {
   switch (type) {
+    case "number": {
+      return new JavaType(undefined, "integer"); //TODO need way to calculate other types
+    }
     case "Indices": {
       return new JavaType("list", "string");
       break;

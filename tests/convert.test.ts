@@ -13,6 +13,18 @@ import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `
+GET /my_locations/_search
+{
+  "size" : 0,
+  "aggs" : {
+     "grouped" : {
+        "geohash_grid" : {
+           "field" : "location",
+           "precision" : 2
+        }
+     }
+  }
+}
 
 PUT /my_locationss
 {
