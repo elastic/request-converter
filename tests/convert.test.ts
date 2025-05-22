@@ -13,21 +13,19 @@ import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `
-
-
-PUT my-index-000002
+PUT my-index-2
 {
   "mappings": {
     "properties": {
-      "date": {
-        "type": "date_nanos",
-        "on_script_error": "continue"
+      "age": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "text"
       }
     }
   }
 }
-
-GET /
 
 POST /my-index/_search?from=40&size=20
 {
@@ -37,6 +35,9 @@ POST /my-index/_search?from=40&size=20
     }
   }
 }
+
+GET /
+
 `;
 
 const kibanaScript = `GET /

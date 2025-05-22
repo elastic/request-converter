@@ -2,8 +2,9 @@ import Handlebars from "handlebars";
 
 import { ConvertOptions, FormatExporter } from "../convert";
 
-import { Request } from "../metamodel";
-import { ParsedRequest } from "../parse";
+import { InstanceOf, Interface, Request } from "../metamodel";
+import { ParsedRequest, returnSchema } from "../parse";
+import path from "path";
 
 // this regex should match the list of APIs that the java generator ignores
 
@@ -39,6 +40,7 @@ let takenLambdaNames: string[] = [];
 let imports: string[] = [];
 let DEFAULT_CLIENT_NAME = "client";
 let complete = false; // TODO get from options
+let specTypeMap: Map<any, any>;
 
 export class JavaExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate;
@@ -53,6 +55,8 @@ export class JavaExporter implements FormatExporter {
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
+    let spec = await returnSchema(path.join(__dirname, ".././schema.json"));
+    specTypeMap = new Map(spec.types.map((obj) => [obj.name.name, obj]));
     let writer: string[] = [];
 
     requests.forEach((req) => {
@@ -105,7 +109,6 @@ function buildDslString(
   writer.push(methodName);
   writer.push("(");
 
-  // TODO aren't they all Request?
   if (
     request.body == undefined &&
     Object.keys(correctParams).length < 1 &&
@@ -158,14 +161,22 @@ function buildDslString(
           if (javaType.structure == undefined) {
             handlePrimitive(val, writer, typeName, false);
           } else if (javaType.structure == "list") {
-            handleList(request, val, writer, key, typeName, false);
+            handleList(request, val, false, writer, key, typeName, false);
           }
         }
       }
     }
 
     if (request.body != undefined) {
-      buildRecursive(request.body, request, methodName, writer, 1, false);
+      buildRecursive(
+        request.body,
+        request,
+        false,
+        methodName,
+        writer,
+        1,
+        false,
+      );
     }
   }
 
@@ -176,33 +187,46 @@ function buildDslString(
 function buildRecursive(
   object: Object,
   request: ParsedRequest,
+  additionalDetails: Object,
   methodName: string,
   writer: string[],
   depth: number,
   inListOrMap: boolean,
 ): void {
-  if (
-    // "leaf" case for simple data types
-    handleDataTypes(object, request, methodName, writer, depth, inListOrMap)
-  ) {
-    return;
-  }
+  let dataType = handleDataTypes(
+    object,
+    request,
+    additionalDetails,
+    methodName,
+    writer,
+    depth,
+    inListOrMap,
+  );
+
+  // "leaf" case for simple data types
+  if (dataType == true) return;
+
   // handling all the fields in the class
-  if(depth > 1) {
+  if (depth > 1) {
     generateLambdaCall(writer, methodName);
   }
-  handleAllFields(object, request, writer, depth);
+
+  handleAllFields(object, request, dataType, methodName, writer, depth)
 }
 
 function handleAllFields(
   object: Object,
   request: ParsedRequest,
+  additionalDetails: Object,
+  methodName: string,
   writer: string[],
   depth: number,
 ): boolean {
-  let noFields = false;
+  if (methodName == "") {
+    return true;
+  }
+  let noFields = true;
   for (const [key, value] of Object.entries(object)) {
-
     let finalValue = value;
 
     // term query shortcut
@@ -210,15 +234,14 @@ function handleAllFields(
     if (key == "term") {
       let newValue = new TermQuery();
       for (const [subK, subV] of Object.entries(value)) {
-        if (subK != "case_insensitive" && subK != "boost" && subK != "_name"){
-          newValue.set("field",subK)
-          newValue.set("value",subV);
-        }
-        else{
-          newValue.set(subK,subV);
+        if (subK != "case_insensitive" && subK != "boost" && subK != "_name") {
+          newValue.set("field", subK);
+          newValue.set("value", subV);
+        } else {
+          newValue.set(subK, subV);
         }
       }
-      finalValue = newValue
+      finalValue = newValue;
     }
 
     writer.push("\n");
@@ -226,8 +249,16 @@ function handleAllFields(
     writer.push(".");
     writer.push(key);
     writer.push("(");
-    buildRecursive(finalValue, request, key, writer, depth + 1, false);
-    noFields = true;
+    buildRecursive(
+      finalValue,
+      request,
+      additionalDetails,
+      key,
+      writer,
+      depth + 1,
+      false,
+    );
+    noFields = false;
   }
   if (depth > 1) {
     writer.push(")"); // TODO handle no field case
@@ -239,27 +270,49 @@ function handleAllFields(
 function buildFromRequest(
   object: Object,
   request: ParsedRequest,
+  additionalDetails: Object,
+  originalName: string,
   methodName: string,
   writer: string[],
   depth: number,
 ): void {
-  if (handleDataTypes(object, request, methodName, writer, depth, true)) {
+  if (
+    handleDataTypes(object, request, false, methodName, writer, depth, true)
+  ) {
     return;
   }
   if (complete) {
     imports.push("import " + "ClassName?" + ";"); // TODO need a list of class names generated from java client
   }
-  // TODO handle class names like Query.of()
+  writer.push(capitalizeFirstLetter(originalName)); // TODO still need list of class names
+  writer.push(".of(");
+  generateLambdaCall(writer, originalName);
+  buildRecursive(
+    object,
+    request,
+    additionalDetails,
+    methodName,
+    writer,
+    depth,
+    true,
+  );
+  writer.push(")");
 }
 
+// return true if finds and converts simple type, false if it finds an object,
+// additional info to be used later if it finds a complex nested body
 function handleDataTypes(
   object: Object,
   request: ParsedRequest,
+  additionalDetails: Object,
   methodName: string,
   writer: string[],
   depth: number,
   inListOrMap: boolean,
-): boolean {
+): Object {
+  if (methodName == "") {
+    return false; // empty object early return case
+  }
   let type: string = typeof object;
   if (type == "string") {
     writer.push('"');
@@ -273,8 +326,73 @@ function handleDataTypes(
     let javaType = getJavaType(type);
     handlePrimitive(object.toString(), writer, javaType.primitive, inListOrMap);
     return true;
+  } else if (type == "object") {
+    // there's no info about nested types, preventively getting type info from spec
+    let infoType: string = typeof additionalDetails;
+    if (request.request?.body.kind == "properties") {
+      if (infoType != "object") {
+        let propMap = new Map(
+          request.request.body.properties.map((obj) => [obj.name, obj]),
+        );
+        let typeDetails = propMap.get(methodName)?.type;
+        if (typeDetails == undefined) {
+          return false; // not there yet
+        }
+        if (propMap.get(methodName)?.type.kind == "instance_of") {
+          let typeName = (propMap.get(methodName)?.type as InstanceOf).type
+            .name;
+          let typeDef = specTypeMap.get(typeName);
+          return typeDef;
+        }
+      }
+      // we already have the needed info
+      else {
+        // TODO maybe check before the cast
+        if (methodName == "type") {
+          handleTypeSpecialCase(
+            request,
+            object,
+            additionalDetails,
+            writer,
+            methodName,
+            inListOrMap,
+          );
+          return true;
+        }
+        if (methodName == "term"){
+          return false; //going to term shortcut
+        }
+        let specType = findSpecType(methodName, additionalDetails as Interface);
+        switch (specType) {
+          // TODO establish how to get list object?
+          // we don't need additionalDetails anymore
+          case "list_of":
+            handleList(
+              request,
+              "object",
+              additionalDetails,
+              writer,
+              methodName,
+              "?",
+              inListOrMap,
+            );
+            return true;
+          case "dictionary_of":
+            handleMap(
+              request,
+              object,
+              additionalDetails,
+              writer,
+              methodName,
+              inListOrMap,
+            );
+            return true;
+          default:
+            return false;
+        }
+      }
+    }
   }
-  // TODO need to use request to find out actual type of "objects" (map, list, whatever)
   return false;
 }
 
@@ -319,9 +437,43 @@ function handlePrimitive(
   }
 }
 
+// example: json "type": "integer" in java becomes .integer()
+function handleTypeSpecialCase(
+  request: ParsedRequest,
+  object: Object,
+  additionalDetails: Object,
+  writer: string[],
+  methodName: string, //TODO add depth here
+  inListOrMap: boolean,
+): void {
+  for (const [key, value] of Object.entries(object)) {
+    writer.push("\n");
+    // TODO indent here
+    writer.push(".");
+    writer.push(snakeCaseToCamelCase(value));
+    writer.push("(");
+    generateLambdaCall(writer, value);
+    // TODO the object has to be a copy of the original object, without the "type" field
+    // which was just handled now
+    buildRecursive({}, request, additionalDetails, "", writer, 1, inListOrMap);
+    writer.push(")");
+  }
+}
+
+function findSpecType(name: string, details: Interface): string {
+  let found: string = "unknown";
+  details.properties.forEach((element) => {
+    if (element.name == name) {
+      found = element.type.kind.toString();
+    }
+  });
+  return found;
+}
+
 function handleList(
   request: ParsedRequest,
   object: string,
+  additionalDetails: Object,
   writer: string[],
   methodName: string,
   type: string,
@@ -340,7 +492,15 @@ function handleList(
 
     vals.forEach((element) => {
       let subWriter: string[] = [];
-      buildFromRequest(element, request, methodName, subWriter, 1);
+      buildFromRequest(
+        element,
+        request,
+        additionalDetails,
+        methodName,
+        methodName,
+        subWriter,
+        1,
+      );
       listWriter.push(subWriter.join(""));
     });
 
@@ -353,7 +513,58 @@ function handleList(
   }
   // need to extrapolate single element
   else {
-    buildRecursive(vals[0], request, methodName, writer, 1, inListOrMap);
+    buildRecursive(
+      vals[0],
+      request,
+      additionalDetails,
+      methodName,
+      writer,
+      1,
+      inListOrMap,
+    );
+  }
+}
+
+function handleMap(
+  request: ParsedRequest,
+  object: Object,
+  additionalDetails: Object,
+  writer: string[],
+  methodName: string,
+  inListOrMap: boolean,
+): void {
+  if (Object.entries(object).length > 1) {
+    if (complete) {
+      imports.push("import java.util.Map;");
+    }
+    // handle comma separated java 9 Map.of
+    writer.push("Map.of(");
+    let mapWriter: string[] = [];
+
+    Object.entries(object).forEach((element) => {
+      for (const [key, value] of Object.entries(element[1])) {
+        let subWriter: string[] = [];
+        subWriter.push('"');
+        subWriter.push(element[0]);
+        subWriter.push('"');
+        subWriter.push(",");
+        buildFromRequest(
+          element[1],
+          request,
+          additionalDetails,
+          methodName,
+          key,
+          subWriter,
+          1,
+        );
+        mapWriter.push(subWriter.join(""));
+      }
+    });
+    writer.push(mapWriter.join(","));
+    writer.push(")");
+    if (!inListOrMap) {
+      writer.push(")");
+    }
   }
 }
 
@@ -398,16 +609,21 @@ function snakeCaseToCamelCase(input: string): string {
     );
 }
 
+function capitalizeFirstLetter(val: string) {
+  return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+}
+
 class TermQuery {
-  boost: number
-  _name: string
-  field: string
-  value: object
-  case_insensitive: boolean
+  boost: number;
+  _name: string;
+  field: string;
+  value: object;
+  case_insensitive: boolean;
+
   [k: string]: any;
 
-  public set(k: string, v: any): this  {
-    this[k] = v
+  public set(k: string, v: any): this {
+    this[k] = v;
     return this;
   }
 }

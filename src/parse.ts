@@ -258,6 +258,19 @@ function parseCommand(source: string, options: ParseOptions) {
   }
 }
 
+export async function returnSchema(filename_or_object: string | object): Promise<Model> {
+  let spec: Model;
+
+  if (typeof filename_or_object === "string") {
+    spec = JSON.parse(
+      await readFile(filename_or_object, { encoding: "utf-8" }),
+    ) as Model;
+  } else {
+    spec = filename_or_object as Model;
+  }
+  return spec;
+}
+
 /** Load a schema.json file with the Elasticsearch specification.
  *
  * This function is used internally to load the Elasticsearch specification to
