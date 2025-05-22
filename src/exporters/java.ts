@@ -211,7 +211,7 @@ function buildRecursive(
     generateLambdaCall(writer, methodName);
   }
 
-  handleAllFields(object, request, dataType, methodName, writer, depth)
+  handleAllFields(object, request, dataType, methodName, writer, depth);
 }
 
 function handleAllFields(
@@ -359,7 +359,7 @@ function handleDataTypes(
           );
           return true;
         }
-        if (methodName == "term"){
+        if (methodName == "term") {
           return false; //going to term shortcut
         }
         let specType = findSpecType(methodName, additionalDetails as Interface);
@@ -565,6 +565,31 @@ function handleMap(
     if (!inListOrMap) {
       writer.push(")");
     }
+  } else {
+    writer.push();
+    Object.entries(object).forEach((element) => {
+      for (const [key, value] of Object.entries(element[1])) {
+        //TODO simplify, there is just one element
+        let subWriter: string[] = [];
+        subWriter.push('"');
+        subWriter.push(element[0]);
+        subWriter.push('"');
+        subWriter.push(",");
+        buildFromRequest(
+          element[1],
+          request,
+          additionalDetails,
+          methodName,
+          key,
+          subWriter,
+          1,
+        );
+        writer.push(subWriter.join(""));
+        if (!inListOrMap) {
+          writer.push(")");
+        }
+      }
+    });
   }
 }
 

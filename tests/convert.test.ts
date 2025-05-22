@@ -13,6 +13,18 @@ import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `
+
+PUT /my_locationss
+{
+  "mappings": {
+    "properties": {
+      "location": {
+        "type": "geo_point"
+      }
+    }
+  }
+}
+
 PUT my-index-2
 {
   "mappings": {
