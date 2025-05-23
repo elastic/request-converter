@@ -13,6 +13,34 @@ import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `
+
+POST _search
+{
+  "query": {
+    "function_score": {
+      "functions": [
+        {
+          "gauss": {
+            "@timestamp": {
+              "origin": "2013-09-17",
+              "scale": "10d",
+              "offset": "5d",
+              "decay": 0.5
+            }
+          }
+        }
+      ],
+      "query": {
+        "function_score": {
+          "query": {
+            "match_all": {}
+          }
+        }
+      }
+    }
+  }
+}
+
 GET /my_locations/_search
 {
   "size" : 0,

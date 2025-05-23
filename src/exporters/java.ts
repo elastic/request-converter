@@ -101,12 +101,12 @@ function buildDslString(
 
   // subclient case
   if (clientName != DEFAULT_CLIENT_NAME) {
-    writer.push(clientName);
+    writer.push(snakeCaseToCamelCase(clientName));
     writer.push("().");
   }
 
   // calling request method
-  writer.push(methodName);
+  writer.push(snakeCaseToCamelCase(methodName));
   writer.push("(");
 
   if (
@@ -136,7 +136,7 @@ function buildDslString(
         if (type?.kind == "instance_of") {
           let typeName = type.type.name;
           writer.push(".");
-          writer.push(key);
+          writer.push(snakeCaseToCamelCase(key));
           writer.push("(");
           handlePrimitive(val, writer, typeName, false);
         }
@@ -156,12 +156,12 @@ function buildDslString(
           let typeName = type.type.name;
           let javaType = getJavaType(typeName);
           writer.push(".");
-          writer.push(key);
+          writer.push(snakeCaseToCamelCase(key));
           writer.push("(");
           if (javaType.structure == undefined) {
             handlePrimitive(val, writer, typeName, false);
           } else if (javaType.structure == "list") {
-            handleList(request, val, false, writer, key, typeName, false);
+            handleCommaSeparatedStringList(request, val, false, writer, key, typeName, false);
           }
         }
       }
@@ -212,6 +212,8 @@ function buildRecursive(
   }
 
   handleAllFields(object, request, dataType, methodName, writer, depth);
+  // going up one level of depth, lambda name is again usable
+  takenLambdaNames.pop();
 }
 
 function handleAllFields(
@@ -247,7 +249,7 @@ function handleAllFields(
     writer.push("\n");
     // TODO indent here
     writer.push(".");
-    writer.push(key);
+    writer.push(snakeCaseToCamelCase(key));
     writer.push("(");
     buildRecursive(
       finalValue,
@@ -327,6 +329,18 @@ function handleDataTypes(
     handlePrimitive(object.toString(), writer, javaType.primitive, inListOrMap);
     return true;
   } else if (type == "object") {
+    if (object instanceof Array) {
+      handleList(
+        request,
+        object,
+        additionalDetails,
+        writer,
+        methodName,
+        "?",
+        inListOrMap,
+      );
+      return true;
+    }
     // there's no info about nested types, preventively getting type info from spec
     let infoType: string = typeof additionalDetails;
     if (request.request?.body.kind == "properties") {
@@ -341,7 +355,6 @@ function handleDataTypes(
         }
         let objectType = propMap.get(methodName)?.type.kind;
         switch (objectType) {
-          // TODO establish how to get list object?
           case "instance_of":
             let typeName = (propMap.get(methodName)?.type as InstanceOf).type
               .name;
@@ -350,7 +363,7 @@ function handleDataTypes(
           case "array_of":
             handleList(
               request,
-              "object",
+              object as Array<any>,
               additionalDetails,
               writer,
               methodName,
@@ -389,12 +402,10 @@ function handleDataTypes(
         }
         let specType = findSpecType(methodName, additionalDetails as Interface);
         switch (specType) {
-          // TODO establish how to get list object?
-          // we don't need additionalDetails anymore
           case "list_of":
             handleList(
               request,
-              "object",
+              object as Array<any>,
               additionalDetails,
               writer,
               methodName,
@@ -440,6 +451,8 @@ function generateLambdaCall(writer: string[], methodName: string): void {
   writer.push(subName);
   writer.push(" -> ");
   writer.push(subName);
+
+  takenLambdaNames.push(subName);
 }
 
 function handlePrimitive(
@@ -496,6 +509,61 @@ function findSpecType(name: string, details: Interface): string {
 }
 
 function handleList(
+  request: ParsedRequest,
+  object: Array<any>,
+  additionalDetails: Object,
+  writer: string[],
+  methodName: string,
+  type: string,
+  inListOrMap: boolean,
+): void {
+  if (object.length > 1) {
+  // find out if just one or multi
+    if (complete) {
+      imports.push("import java.util.List;");
+    }
+    // handle comma separated java 9 List.of
+    writer.push("List.of(");
+
+    let listWriter: string[] = [];
+
+    object.forEach((element) => {
+      let subWriter: string[] = [];
+      buildFromRequest(
+        element,
+        request,
+        additionalDetails,
+        methodName,
+        methodName,
+        subWriter,
+        1,
+      );
+      listWriter.push(subWriter.join(""));
+    });
+
+    writer.push(listWriter.join(","));
+
+    writer.push(")");
+    if (!inListOrMap) {
+      writer.push(")");
+    }
+  }
+  // need to extrapolate single element
+  else {
+    generateLambdaCall(writer,methodName);
+    buildRecursive(
+      object[0],
+      request,
+      additionalDetails,
+      methodName,
+      writer,
+      1,
+      inListOrMap,
+    );
+  }
+}
+
+function handleCommaSeparatedStringList(
   request: ParsedRequest,
   object: string,
   additionalDetails: Object,
@@ -649,6 +717,7 @@ function getJavaType(type: string): JavaType {
 }
 
 function snakeCaseToCamelCase(input: string): string {
+  if (input == "aggs") input = "aggregations";
   return input
     .split("_")
     .reduce(
