@@ -2,7 +2,7 @@ import Handlebars from "handlebars";
 
 import { ConvertOptions, FormatExporter } from "../convert";
 
-import { DictionaryOf, InstanceOf, Interface, Property, Request, ValueOf } from "../metamodel";
+import { InstanceOf, Interface, Property, Request } from "../metamodel";
 import { ParsedRequest, returnSchema } from "../parse";
 import path from "path";
 
@@ -289,10 +289,22 @@ function buildFromRequest(
   writer: string[],
   depth: number,
 ): void {
-  if (
-    handleDataTypes(object, request, additionalDetails, methodName, writer, depth, true)
-  ) {
-    return;
+  let type: string = typeof object;
+  if (type != "object") {
+    if (
+      // TODO only want to handle primitives here, use a specialized method
+      handleDataTypes(
+        object,
+        request,
+        additionalDetails,
+        methodName,
+        writer,
+        depth,
+        true,
+      )
+    ) {
+      return;
+    }
   }
   if (complete) {
     imports.push("import " + "ClassName?" + ";"); // TODO need a list of class names generated from java client
@@ -369,7 +381,7 @@ function handleDataTypes(
         // TODO handle all cases
         if (subDetails?.kind == "dictionary_of") {
           detailsObj.set("kind", subDetails.value.kind);
-          detailsObj.set("type", subDetails.value)
+          detailsObj.set("type", subDetails.value);
         }
         let objectType = propMap.get(methodName)?.type.kind;
         switch (objectType) {
@@ -403,7 +415,6 @@ function handleDataTypes(
       }
       // we already have the needed info
       else {
-        // TODO maybe check before the cast
         if (methodName == "type") {
           handleTypeSpecialCase(
             request,
@@ -423,8 +434,11 @@ function handleDataTypes(
         if (additionalDetails instanceof Details) {
           specType = additionalDetails.type;
           specTypeString = additionalDetails.kind;
-        }
-        else {
+        } else {
+          if ((additionalDetails as Interface).properties == undefined) {
+            // not actually an interface, not the correct details, so probably fields? testing if it's a special case first
+            return false;
+          }
           specType = findSpecType(methodName, additionalDetails as Interface);
           specTypeString = (specType as Property).type.kind.toString();
         }
