@@ -2,7 +2,7 @@ import Handlebars from "handlebars";
 
 import { ConvertOptions, FormatExporter } from "../convert";
 
-import { InstanceOf, Interface, Request } from "../metamodel";
+import { DictionaryOf, InstanceOf, Interface, Property, Request, ValueOf } from "../metamodel";
 import { ParsedRequest, returnSchema } from "../parse";
 import path from "path";
 
@@ -132,13 +132,16 @@ function buildDslString(
       for (const key in request.query) {
         const val = request.query[key];
         let type = typeMap.get(key);
-        // only handling primitive query parameters for now
-        if (type?.kind == "instance_of") {
-          let typeName = type.type.name;
-          writer.push(".");
-          writer.push(snakeCaseToCamelCase(key));
-          writer.push("(");
-          handlePrimitive(val, writer, typeName, false);
+        if (key != "typed_keys") {
+          // not supported, always true TODO maybe list of unsupported params/query
+          // only handling primitive query parameters for now
+          if (type?.kind == "instance_of") {
+            let typeName = type.type.name;
+            writer.push(".");
+            writer.push(snakeCaseToCamelCase(key));
+            writer.push("(");
+            handlePrimitive(val, writer, typeName, false);
+          }
         }
       }
     }
@@ -161,7 +164,15 @@ function buildDslString(
           if (javaType.structure == undefined) {
             handlePrimitive(val, writer, typeName, false);
           } else if (javaType.structure == "list") {
-            handleCommaSeparatedStringList(request, val, false, writer, key, typeName, false);
+            handleCommaSeparatedStringList(
+              request,
+              val,
+              false,
+              writer,
+              key,
+              typeName,
+              false,
+            );
           }
         }
       }
@@ -279,7 +290,7 @@ function buildFromRequest(
   depth: number,
 ): void {
   if (
-    handleDataTypes(object, request, false, methodName, writer, depth, true)
+    handleDataTypes(object, request, additionalDetails, methodName, writer, depth, true)
   ) {
     return;
   }
@@ -353,6 +364,13 @@ function handleDataTypes(
         if (typeDetails == undefined) {
           return false; // not there yet
         }
+        let subDetails = propMap.get(methodName)?.type;
+        let detailsObj = new Details();
+        // TODO handle all cases
+        if (subDetails?.kind == "dictionary_of") {
+          detailsObj.set("kind", subDetails.value.kind);
+          detailsObj.set("type", subDetails.value)
+        }
         let objectType = propMap.get(methodName)?.type.kind;
         switch (objectType) {
           case "instance_of":
@@ -364,7 +382,7 @@ function handleDataTypes(
             handleList(
               request,
               object as Array<any>,
-              additionalDetails,
+              detailsObj,
               writer,
               methodName,
               "?",
@@ -375,7 +393,7 @@ function handleDataTypes(
             handleMap(
               request,
               object,
-              additionalDetails,
+              detailsObj,
               writer,
               methodName,
               inListOrMap,
@@ -400,13 +418,22 @@ function handleDataTypes(
         if (methodName == "term") {
           return false; //going to term shortcut
         }
-        let specType = findSpecType(methodName, additionalDetails as Interface);
-        switch (specType) {
+        let specTypeString: string;
+        let specType: {};
+        if (additionalDetails instanceof Details) {
+          specType = additionalDetails.type;
+          specTypeString = additionalDetails.kind;
+        }
+        else {
+          specType = findSpecType(methodName, additionalDetails as Interface);
+          specTypeString = (specType as Property).type.kind.toString();
+        }
+        switch (specTypeString) {
           case "list_of":
             handleList(
               request,
               object as Array<any>,
-              additionalDetails,
+              specType,
               writer,
               methodName,
               "?",
@@ -417,7 +444,7 @@ function handleDataTypes(
             handleMap(
               request,
               object,
-              additionalDetails,
+              specType,
               writer,
               methodName,
               inListOrMap,
@@ -498,14 +525,14 @@ function handleTypeSpecialCase(
   }
 }
 
-function findSpecType(name: string, details: Interface): string {
-  let found: string = "unknown";
+function findSpecType(name: string, details: Interface): Property {
+  let found = {};
   details.properties.forEach((element) => {
     if (element.name == name) {
-      found = element.type.kind.toString();
+      found = element;
     }
   });
-  return found;
+  return <Property>found;
 }
 
 function handleList(
@@ -518,7 +545,7 @@ function handleList(
   inListOrMap: boolean,
 ): void {
   if (object.length > 1) {
-  // find out if just one or multi
+    // find out if just one or multi
     if (complete) {
       imports.push("import java.util.List;");
     }
@@ -550,7 +577,7 @@ function handleList(
   }
   // need to extrapolate single element
   else {
-    generateLambdaCall(writer,methodName);
+    generateLambdaCall(writer, methodName);
     buildRecursive(
       object[0],
       request,
@@ -659,7 +686,6 @@ function handleMap(
       writer.push(")");
     }
   } else {
-    writer.push();
     Object.entries(object).forEach((element) => {
       for (const [key, value] of Object.entries(element[1])) {
         //TODO simplify, there is just one element
@@ -741,6 +767,18 @@ class TermQuery {
   field: string;
   value: object;
   case_insensitive: boolean;
+
+  [k: string]: any;
+
+  public set(k: string, v: any): this {
+    this[k] = v;
+    return this;
+  }
+}
+
+class Details {
+  kind: string;
+  type: object;
 
   [k: string]: any;
 

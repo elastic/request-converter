@@ -13,6 +13,49 @@ import { ParsedRequest } from "../src/parse";
 import wasmRust from "./wasm/wasm-simple/pkg/wasm_simple";
 
 const devConsoleScript = `
+PUT my-index-2
+{
+  "mappings": {
+    "properties": {
+      "age": {
+        "type": "integer"
+      },
+      "name": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+POST /books/_search?typed_keys=true
+{
+  "aggregations": {
+    "sales_per_month": {
+      "aggregations": {
+        "total_sales": {
+          "sum": {
+            "field": "price"
+          }
+        },
+        "sales_bucket_filter": {
+          "bucket_selector": {
+            "buckets_path": {
+              "totalSales": "total_sales"
+            },
+            "script": {
+              "source": "params.totalSales > 200"
+            }
+          }
+        }
+      },
+      "date_histogram": {
+        "calendar_interval": "month",
+        "field": "date"
+      }
+    }
+  },
+  "size": 0
+}
 
 POST _search
 {
@@ -65,19 +108,7 @@ PUT /my_locationss
   }
 }
 
-PUT my-index-2
-{
-  "mappings": {
-    "properties": {
-      "age": {
-        "type": "integer"
-      },
-      "name": {
-        "type": "text"
-      }
-    }
-  }
-}
+
 
 POST /my-index/_search?from=40&size=20
 {
