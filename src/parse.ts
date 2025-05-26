@@ -5,7 +5,7 @@ import * as Router from "find-my-way-ts";
 import { Availabilities, Model, Request } from "./metamodel";
 
 const isBrowser = typeof window !== "undefined";
-const httpMethods = ["HEAD", "GET", "POST", "PUT", "PATCH", "DELETE"];
+export const httpMethods = ["GET", "POST", "PUT", "DELETE", "HEAD"];
 export type JSONValue = string | number | boolean | JSONArray | JSONObject;
 interface JSONArray extends Array<JSONValue> {}
 interface JSONObject {
@@ -55,6 +55,7 @@ let router = Router.make<ESRoute>({
   ignoreTrailingSlash: true,
   maxParamLength: 1000,
 });
+export let spec: Model;
 
 // split Dev Console source code into individual commands
 export function splitSource(source: string): string[] {
@@ -154,7 +155,7 @@ function parseCommand(source: string, options: ParseOptions) {
   skip(" ", "\n");
   const urlStart = index;
   until("{", "\n");
-  if (source[index] == "{" && source[index + 1].match(/[a-z]/i)) {
+  while (source[index] == "{" && source[index + 1].match(/[a-z]/i)) {
     // this is a placeholder element inside the URL (as used in doc examples),
     // so we continue scanning
     index++;
@@ -272,8 +273,6 @@ function parseCommand(source: string, options: ParseOptions) {
  *   object with a loaded schema.
  */
 export async function loadSchema(filename_or_object: string | object) {
-  let spec: Model;
-
   if (typeof filename_or_object === "string") {
     spec = JSON.parse(
       await readFile(filename_or_object, { encoding: "utf-8" }),
@@ -335,7 +334,7 @@ export async function loadSchema(filename_or_object: string | object) {
 }
 
 // use a router to figure out the API name
-async function getAPI(
+export async function getAPI(
   method: string,
   endpointPath: string,
 ): Promise<Router.FindResult<ESRoute>> {

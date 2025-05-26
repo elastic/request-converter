@@ -9,5 +9,5 @@ module.exports = {
     "js",
     "tpl"
   ],
-  testTimeout: 10000
+  testTimeout: 10000,
 };
