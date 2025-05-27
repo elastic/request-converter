@@ -542,7 +542,7 @@ response1 = client.search(
   });
 
   it("returns the list of available formats", () => {
-    expect(listFormats()).toContain("python");
+    expect(listFormats()).toContain("Python");
   });
 
   it("supports a simple external exporter", async () => {

@@ -40,12 +40,13 @@ export interface FormatExporter {
 }
 
 const EXPORTERS: Record<string, FormatExporter> = {
-  python: new PythonExporter(),
-  curl: new CurlExporter(),
   javascript: new JavaScriptExporter(),
   php: new PHPExporter(),
+  python: new PythonExporter(),
   ruby: new RubyExporter(),
+  curl: new CurlExporter(),
 };
+const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl"];
 
 /**
  * Return the list of available export formats.
@@ -54,7 +55,7 @@ const EXPORTERS: Record<string, FormatExporter> = {
  *   to use in the `convertRequests()` function.
  */
 export function listFormats(): string[] {
-  return Object.keys(EXPORTERS);
+  return LANGUAGES;
 }
 
 /**
@@ -78,7 +79,9 @@ export async function convertRequests(
 ): Promise<boolean | string> {
   const requests = await parseRequests(source);
   const exporter =
-    typeof outputFormat == "string" ? EXPORTERS[outputFormat] : outputFormat;
+    typeof outputFormat == "string"
+      ? EXPORTERS[outputFormat.toLowerCase()]
+      : outputFormat;
   if (!exporter) {
     throw new Error("Invalid output format");
   }

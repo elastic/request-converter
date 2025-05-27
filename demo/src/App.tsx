@@ -140,7 +140,7 @@ function App() {
             {error && <Form.Control.Feedback type="invalid">{error}</Form.Control.Feedback>}
           </Col>
           <Col className="col-6">
-            <SyntaxHighlighter wrapLongLines={true} language={language} style={atomOneLight}>{code}</SyntaxHighlighter>
+            <SyntaxHighlighter wrapLongLines={true} language={language.toLowerCase()} style={atomOneLight}>{code}</SyntaxHighlighter>
           </Col>
         </Row>
       </Form>
