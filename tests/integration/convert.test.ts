@@ -42,7 +42,7 @@ afterAll(async () => {
 
 describe("convert", () => {
   const examples: Example[] = JSON.parse(
-    readFileSync("tests/integration/examples.json", "utf-8"),
+    readFileSync(".examples.json", "utf-8"),
   );
   const cases: Case[] = [];
   for (const example of examples) {
@@ -133,6 +133,20 @@ describe("convert", () => {
             );
           }
           */
+
+          for (const param in parsedRequest?.query ?? {}) {
+            if (
+              capturedRequest.query[param] === undefined &&
+              capturedRequest.body[param] !== undefined
+            ) {
+              // the client moved a query argument to the body
+              // we can't be sure this is legal, but since it is in many cases
+              // we allow it
+              capturedRequest.query[param] =
+                capturedRequest.body[param].toString();
+              delete capturedRequest.body[param];
+            }
+          }
 
           expect(
             { result: capturedRequest.path, source },

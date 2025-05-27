@@ -41,6 +41,9 @@ const server = http.createServer((req, res) => {
       if (capturedRequest.query[key] == "") {
         capturedRequest.query[key] = "true";
       }
+      capturedRequest.query[key] = decodeURIComponent(
+        capturedRequest.query[key] as string,
+      );
     }
 
     const body: string[] = [];
