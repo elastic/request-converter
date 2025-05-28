@@ -8,14 +8,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example references a non-existant `remote_indices` body attribute",
     formats: ["python", "javascript"],
   },
-  b24a374c0ad264abbcacb5686f5ed61c: {
-    reason: "example puts attributes in body, spec says they go in query",
-    formats: ["python"],
-  },
-  "42ba7c1d13aee91fe6f0a8a42c30eb74": {
-    reason: "example references a non-existent `lazy` query attribute",
-    formats: ["python"],
-  },
   d0c03847106d23ad632ceb624d647c37: {
     reason: "example has invalid body",
   },
@@ -155,22 +147,6 @@ const skip: Record<string, SkippedTest> = {
   "7c862a20772467e0f5beebbd1b80c4cb": {
     reason: "invalid request syntax",
   },
-  "16985e5b17d2da0955a14fbe02e8dfca": {
-    reason: "client does not implement this endpoint variant",
-    formats: ["python"],
-  },
-  aeaa97939a05f5b2f3f2c43b771f35e3: {
-    reason: "client does not implement this endpoint variant",
-    formats: ["python"],
-  },
-  a1d0603b24a5b048f0959975d8057534: {
-    reason: "client does not implement this endpoint variant",
-    formats: ["python"],
-  },
-  b37919cc438b47477343833b4e522408: {
-    reason: "client does not implement this endpoint variant",
-    formats: ["python"],
-  },
   f0c3235d8fce641d6ff8ce90ab7b7b8b: {
     reason: "example uses undefined `parameters` attribute",
     formats: ["python"],
@@ -181,10 +157,6 @@ const skip: Record<string, SkippedTest> = {
   },
   "6539a04aac4d43e6ce4a769fe8cdf2d8": {
     reason: "example uses unknown URL",
-  },
-  af91019991bee136df5460e2fd4ac72a: {
-    reason: "example uses unknown `lazy` query attribute",
-    formats: ["python"],
   },
   "0a46cc8fe93e372909660a63dc52ae3b": {
     reason: "invalid request syntax",
@@ -347,29 +319,21 @@ const skip: Record<string, SkippedTest> = {
   "31bc93e429ad0de11dd2dd231e8f2c5e": {
     reason: "endpoint does not exist in schema",
   },
-  "3f1fe5f5f99b98d0891f38003e10b636": {
-    reason: "test uses `wait_for_completion_timeout` nonexistant argument",
-    formats: ["python"],
-  },
-  "2a1eece9a59ac1773edcf0a932c26de0": {
-    reason: "test uses `token` nonexistant argument",
-    formats: ["python"],
-  },
   "4b91ad7c9b44e07db4a4e81390f19ad3": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "php", "ruby"],
+    formats: ["python"],
   },
   "120fcf9f55128d6a81d5e87a9c235bbd": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "php", "ruby"],
+    formats: ["python"],
   },
   "82bb6c61dab959f4446dc5ecab7ecbdf": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "php", "ruby"],
+    formats: ["python"],
   },
   "45954b8aaedfed57012be8b6538b0a24": {
     reason: "test uses `stream_inference` which Python does not implement",
-    formats: ["python", "php", "ruby"],
+    formats: ["python"],
   },
   "114d470e752efa9672ca68d7290fada8": {
     reason: "the client does not implement this endpoint variant",
