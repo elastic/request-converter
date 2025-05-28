@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 9.1.0 (2025-05-28)
+* PHP and Ruby support ([#83](https://github.com/elastic/request-converter/pull/83))
+
 ## 9.0.0 (2025-02-24)
 * Update schema for 9.0
 
@@ -50,6 +53,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
