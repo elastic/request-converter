@@ -217,6 +217,31 @@ describe("complete", () => {
       replace: '"m',
       insert: 'inute"',
     });
+    const req18 = await getCompletions('GET /_search {"query":{"bool":{"mu');
+    expect(req18).toContainEqual({
+      replace: "mu",
+      insert: "st",
+      extraBeforeCursor: '": [',
+      extraAfterCursor: "]",
+    });
+    const req19 = await getCompletions(
+      'GET /_search {"query":{"bool":{"must":{"',
+    );
+    expect(req19).toContainEqual({
+      replace: "",
+      insert: "match",
+      extraBeforeCursor: '": {',
+      extraAfterCursor: "}",
+    });
+    const req20 = await getCompletions(
+      'GET /_search {"query":{"bool":{"must":[{"foo":"bar"},{"',
+    );
+    expect(req20).toContainEqual({
+      replace: "",
+      insert: "match",
+      extraBeforeCursor: '": {',
+      extraAfterCursor: "}",
+    });
   });
   it("completes when there are comments", async () => {
     const req = await getCompletions("# foo\nGE");

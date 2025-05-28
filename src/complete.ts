@@ -315,6 +315,24 @@ export async function getCompletions(source: string): Promise<Completion[]> {
               (prop.type.value as InstanceOf).type.namespace,
             );
           }
+        } else if (prop.type.kind === "union_of") {
+          // the only case of unions that is currently supported is when the
+          // union is in the form "type | type[]"
+          if (
+            prop.type.items.length === 2 &&
+            prop.type.items[0].kind === "instance_of" &&
+            prop.type.items[1].kind === "array_of" &&
+            prop.type.items[1].value.kind === "instance_of" &&
+            prop.type.items[0].type.name ===
+              prop.type.items[1].value.type.name &&
+            prop.type.items[0].type.namespace ===
+              prop.type.items[1].value.type.namespace
+          ) {
+            properties = getInterfaceProperties(
+              prop.type.items[0].type.name,
+              prop.type.items[0].type.namespace,
+            );
+          }
         }
         // TODO currently unsupported:
         // - union_of
@@ -350,6 +368,21 @@ export async function getCompletions(source: string): Promise<Completion[]> {
             // for an array we add "[]" at the end
             extraBefore = "[";
             extraAfter = "]";
+          } else if (prop.type.kind === "union_of") {
+            if (
+              prop.type.items.length === 2 &&
+              prop.type.items[0].kind === "instance_of" &&
+              prop.type.items[1].kind === "array_of" &&
+              prop.type.items[1].value.kind === "instance_of" &&
+              prop.type.items[0].type.name ===
+                prop.type.items[1].value.type.name &&
+              prop.type.items[0].type.namespace ===
+                prop.type.items[1].value.type.namespace
+            ) {
+              // for a union of type | type[] we prefer the array form
+              extraBefore = "[";
+              extraAfter = "]";
+            }
           }
           matches.push({
             replace: lastToken.slice(1), // skip the starting quote
