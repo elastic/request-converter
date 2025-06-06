@@ -251,14 +251,22 @@ export async function getCompletions(source: string): Promise<Completion[]> {
       name: string,
       namespace: string,
     ): Property[] => {
+      let props: Property[] = [];
       const type = getType(name, namespace);
       if (type?.kind === "interface") {
-        const i = type as Interface;
-        return i.properties;
+        let i = type as Interface;
+        props = [...i.properties];
+        while (i.inherits) {
+          i = getType(
+            i.inherits.type.name,
+            i.inherits.type.namespace,
+          ) as Interface;
+          props = [...props, ...i.properties];
+        }
       }
       // TODO current unsupported
       // - type_alias
-      return [];
+      return props;
     };
 
     // figure out the type that we need to autocomplete
@@ -380,14 +388,14 @@ export async function getCompletions(source: string): Promise<Completion[]> {
                 prop.type.items[1].value.type.namespace
             ) {
               // for a union of type | type[] we prefer the array form
-              extraBefore = "[";
-              extraAfter = "]";
+              extraBefore = "[{";
+              extraAfter = "}]";
             }
           }
           matches.push({
-            replace: lastToken.slice(1), // skip the starting quote
-            insert: prop.name.slice(lastToken.length - 1),
-            extraBeforeCursor: '": ' + extraBefore,
+            replace: lastToken, // skip the starting quote
+            insert: prop.name.slice(lastToken.length - 1) + '"',
+            extraBeforeCursor: ": " + extraBefore,
             extraAfterCursor: extraAfter,
           });
         }

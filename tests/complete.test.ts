@@ -71,16 +71,16 @@ describe("complete", () => {
     await loadSchema("./src/schema.json");
     const req = await getCompletions('POST /_create_from/src/dst {"');
     expect(req).toContainEqual({
-      replace: "",
-      insert: "mappings_override",
-      extraBeforeCursor: '": {',
+      replace: '"',
+      insert: 'mappings_override"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req2 = await getCompletions('POST /_create_from/src/dst {"ma');
     expect(req2).toContainEqual({
-      replace: "ma",
-      insert: "ppings_override",
-      extraBeforeCursor: '": {',
+      replace: '"ma',
+      insert: 'ppings_override"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req3 = await getCompletions(
@@ -96,9 +96,9 @@ describe("complete", () => {
       'POST /_create_from/src/dst {"foo": "bar","',
     );
     expect(req4).toContainEqual({
-      replace: "",
-      insert: "mappings_override",
-      extraBeforeCursor: '": {',
+      replace: '"',
+      insert: 'mappings_override"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req5 = await getCompletions('POST /_create_from/src/dst {"foo');
@@ -116,74 +116,74 @@ describe("complete", () => {
       'POST /_create_from/src/dst {"mappings_override": { "_m',
     );
     expect(req8).toContainEqual({
-      replace: "_m",
-      insert: "eta",
-      extraBeforeCursor: '": ',
+      replace: '"_m',
+      insert: 'eta"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     const req9 = await getCompletions('GET /_search\n{ "docvalue_field');
     expect(req9).toContainEqual({
-      replace: "docvalue_field",
-      insert: "s",
-      extraBeforeCursor: '": [',
+      replace: '"docvalue_field',
+      insert: 's"',
+      extraBeforeCursor: ": [",
       extraAfterCursor: "]",
     });
     const req10 = await getCompletions(
       'GET /_search\n{ "docvalue_fields": [{"',
     );
     expect(req10).toContainEqual({
-      replace: "",
-      insert: "field",
-      extraBeforeCursor: '": ',
+      replace: '"',
+      insert: 'field"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     expect(req10).toContainEqual({
-      replace: "",
-      insert: "format",
-      extraBeforeCursor: '": ',
+      replace: '"',
+      insert: 'format"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     expect(req10).toContainEqual({
-      replace: "",
-      insert: "include_unmapped",
-      extraBeforeCursor: '": ',
+      replace: '"',
+      insert: 'include_unmapped"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     const req11 = await getCompletions(
       'GET /_search\n{ "docvalue_fields": [{"format": "","f',
     );
     expect(req11).toContainEqual({
-      replace: "f",
-      insert: "ield",
-      extraBeforeCursor: '": ',
+      replace: '"f',
+      insert: 'ield"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     expect(req11).not.toContainEqual({
-      replace: "f",
-      insert: "ormat",
-      extraBeforeCursor: '": ',
+      replace: '"f',
+      insert: 'ormat"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     const req12 = await getCompletions(
       'GET /_search\n{ "docvalue_fields": [{"format": "","field": ""},{"f',
     );
     expect(req12).toContainEqual({
-      replace: "f",
-      insert: "ield",
-      extraBeforeCursor: '": ',
+      replace: '"f',
+      insert: 'ield"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     expect(req12).toContainEqual({
-      replace: "f",
-      insert: "ormat",
-      extraBeforeCursor: '": ',
+      replace: '"f',
+      insert: 'ormat"',
+      extraBeforeCursor: ": ",
       extraAfterCursor: "",
     });
     const req13 = await getCompletions('GET /_search\n{ "highlight": {"fie');
     expect(req13).toContainEqual({
-      replace: "fie",
-      insert: "lds",
-      extraBeforeCursor: '": {',
+      replace: '"fie',
+      insert: 'lds"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req14 = await getCompletions('GET /_search\n{"aggregations": {"fo');
@@ -192,18 +192,18 @@ describe("complete", () => {
       'GET /_search\n{"aggregations": {"foo": {"bo',
     );
     expect(req15).toContainEqual({
-      replace: "bo",
-      insert: "xplot",
-      extraBeforeCursor: '": {',
+      replace: '"bo',
+      insert: 'xplot"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req16 = await getCompletions(
       'GET /_search\n{"aggregations": {"foo": {"aggregations": {"bar":{"bo',
     );
     expect(req16).toContainEqual({
-      replace: "bo",
-      insert: "xplot",
-      extraBeforeCursor: '": {',
+      replace: '"bo',
+      insert: 'xplot"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req17 = await getCompletions(
@@ -219,27 +219,27 @@ describe("complete", () => {
     });
     const req18 = await getCompletions('GET /_search {"query":{"bool":{"mu');
     expect(req18).toContainEqual({
-      replace: "mu",
-      insert: "st",
-      extraBeforeCursor: '": [',
-      extraAfterCursor: "]",
+      replace: '"mu',
+      insert: 'st"',
+      extraBeforeCursor: ": [{",
+      extraAfterCursor: "}]",
     });
     const req19 = await getCompletions(
       'GET /_search {"query":{"bool":{"must":{"',
     );
     expect(req19).toContainEqual({
-      replace: "",
-      insert: "match",
-      extraBeforeCursor: '": {',
+      replace: '"',
+      insert: 'match"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
     const req20 = await getCompletions(
       'GET /_search {"query":{"bool":{"must":[{"foo":"bar"},{"',
     );
     expect(req20).toContainEqual({
-      replace: "",
-      insert: "match",
-      extraBeforeCursor: '": {',
+      replace: '"',
+      insert: 'match"',
+      extraBeforeCursor: ": {",
       extraAfterCursor: "}",
     });
   });
