@@ -89,7 +89,7 @@ export default function Editor({ className, id, value, onChange }: EditorProps) 
     const before = editorRef.current.value.slice(0, editorRef.current.selectionStart || 0);
     const after = editorRef.current.value.slice(editorRef.current.selectionEnd || 0, editorRef.current.value.length);
     let afterOverlap = 0;
-    while (after.length > afterOverlap && after[afterOverlap] === selection.insert[afterOverlap]) {
+    while (after.length > afterOverlap && after.slice(0, afterOverlap + 1) === selection.insert.slice(selection.insert.length - afterOverlap - 1)) {
       afterOverlap++;
     }
     let extra = (selection.extraBeforeCursor) ? selection.extraBeforeCursor + selection.extraAfterCursor : '';
@@ -204,6 +204,20 @@ export default function Editor({ className, id, value, onChange }: EditorProps) 
         editorRef.current.selectionStart = editorRef.current.selectionEnd = cursorPos - 1;
       }
       setTimeout(updateCompletions, 100);
+    }
+    else if (ev.key === "Enter" && before.endsWith("[{") && after.startsWith('}]')) {
+      ev.preventDefault();
+      const lines = before.split("\n");
+      const currentLine = lines[lines.length - 1];
+      const indent = currentLine.split(/[^\s]/, 1)[0];
+      const extra = `\n${indent}${TAB}}\n${indent}`;
+      editorRef.current.value = `${before.slice(0, -1)}\n${indent}${TAB}{\n${indent}${TAB}${TAB}${extra}${after.slice(1)}`;
+      if (onChange) {
+        onChange({target: editorRef.current});
+      }
+      editorRef.current.selectionStart = editorRef.current.selectionEnd = cursorPos + indent.length * 2 + TAB.length * 3 + 2;
+      height += 4;
+      setTimeout(syncScroll, 50);  // in case height changes due to this update
     }
     else if (ev.key === "Enter" && (before.endsWith("{") || before.endsWith("["))) {
       ev.preventDefault();
