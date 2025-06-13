@@ -12,7 +12,7 @@ export class CurlExporter implements FormatExporter {
     options: ConvertOptions,
   ): Promise<string> {
     const escapedSingleQuote = options.windows ? "''" : "'\"'\"'";
-    const envPrefix = options.windows ? "$env:" : "$";
+    const envPrefix = options.windows ? "$Env:" : "$";
     const auth = ` -H "Authorization: ApiKey ${envPrefix}ELASTIC_API_KEY"`;
     const otherUrls = (options.otherUrls as Record<string, string>) ?? {};
     let output = "";
@@ -31,7 +31,7 @@ export class CurlExporter implements FormatExporter {
       const baseUrl =
         (otherUrls[request.service] ?? "").replace(/\/$/, "") ||
         (options.elasticsearchUrl ?? "").replace(/\/$/, "") ||
-        "http://localhost:9200";
+        `${envPrefix}ELASTICSEARCH_URL`;
       output += `curl ${method}${headers}${body} "${baseUrl}${request.url}"\n`;
     }
     return output;
