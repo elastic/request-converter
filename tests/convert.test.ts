@@ -112,14 +112,30 @@ describe("convert", () => {
     );
   });
 
-  it("converts to curl", async () => {
+  it("converts to curl without URL", async () => {
+    expect(await convertRequests(devConsoleScript, "curl", {})).toEqual(
+      'curl -X GET -H "Authorization: ApiKey $ELASTIC_API_KEY" "$ELASTICSEARCH_URL/"\ncurl -X POST -H "Authorization: ApiKey $ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'"\'"\'s"}}}\' "$ELASTICSEARCH_URL/my-index/_search?from=40&size=20"\n',
+    );
+  });
+
+  it("converts to curl on Windows", async () => {
     expect(
       await convertRequests(devConsoleScript, "curl", {
         elasticsearchUrl: "http://localhost:9876",
         windows: true,
       }),
     ).toEqual(
-      'curl -X GET -H "Authorization: ApiKey $env:ELASTIC_API_KEY" "http://localhost:9876/"\ncurl -X POST -H "Authorization: ApiKey $env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
+      'curl -X GET -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" "http://localhost:9876/"\ncurl -X POST -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
+    );
+  });
+
+  it("converts to curl on Windows without URL", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "curl", {
+        windows: true,
+      }),
+    ).toEqual(
+      'curl -X GET -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" "$Env:ELASTICSEARCH_URL/"\ncurl -X POST -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "$Env:ELASTICSEARCH_URL/my-index/_search?from=40&size=20"\n',
     );
   });
 
