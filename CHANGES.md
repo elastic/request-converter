@@ -1,5 +1,9 @@
 # request-converter change log
 
+## 9.1.1 (2025-06-13)
+* Use environment variable for ES host by default in curl exporter ([#85](https://github.com/elastic/request-converter/pull/85))
+* Update schyyema for 9.1
+
 ## 9.1.0 (2025-05-28)
 * PHP and Ruby support ([#83](https://github.com/elastic/request-converter/pull/83))
 
@@ -53,6 +57,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
