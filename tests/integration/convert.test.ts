@@ -4,9 +4,10 @@ import childProcess from "child_process";
 import path from "path";
 import util from "util";
 import { convertRequests } from "../../src/convert";
-import { parseRequest, splitSource, ParsedRequest } from "../../src/parse";
+import { parseRequest, ParsedRequest } from "../../src/parse";
 import { startServer, stopServer } from "./testserver";
 import { shouldBeSkipped } from "./skip";
+import { Model } from "../../src/metamodel";
 
 const execAsync = util.promisify(childProcess.exec);
 
@@ -18,14 +19,13 @@ const TEST_FORMATS: Record<string, string> = {
   ruby: "rb",
 };
 
-interface Example {
-  digest: string;
-  lang: string;
-  source: string;
+interface SchemaExample {
+  method_request: string;
+  value: string;
 }
 
-interface Case {
-  digest: string;
+interface Example {
+  key: string;
   source: string;
 }
 
@@ -41,43 +41,43 @@ afterAll(async () => {
 });
 
 describe("convert", () => {
-  const examples: Example[] = JSON.parse(
-    readFileSync(".examples.json", "utf-8"),
-  );
-  const cases: Case[] = [];
-  for (const example of examples) {
-    if (
-      process.env.ONLY_EXAMPLE &&
-      example.digest != process.env.ONLY_EXAMPLE
-    ) {
-      continue;
-    }
-    if (example.lang == "console") {
-      const sources = splitSource(example.source);
-      if (sources.length == 1) {
-        cases.push({ digest: example.digest, source: example.source });
-      } else {
-        for (let i = 0; i < sources.length; i++) {
-          cases.push({ digest: `${example.digest}[${i}]`, source: sources[i] });
+  const examples: Example[] = [];
+  const schema = JSON.parse(readFileSync("src/schema.json", "utf-8")) as Model;
+  for (const type of schema.types) {
+    if (type.kind === "request" && "examples" in type) {
+      for (const example in type.examples as Record<string, SchemaExample>) {
+        if (process.env.ONLY_EXAMPLE && example != process.env.ONLY_EXAMPLE) {
+          continue;
         }
+        let code = (type.examples as Record<string, SchemaExample>)[example]
+          .method_request;
+        if ((type.examples as Record<string, SchemaExample>)[example].value) {
+          code += `\n${
+            (type.examples as Record<string, SchemaExample>)[example].value
+          }`;
+        }
+        examples.push({
+          key: example,
+          source: code,
+        });
       }
     }
   }
 
-  for (const c of cases) {
-    const { digest, source } = c;
+  for (const example of examples) {
+    const { key, source } = example;
     for (const format of Object.keys(TEST_FORMATS)) {
       if (process.env.ONLY_FORMAT && format != process.env.ONLY_FORMAT) {
         continue;
       }
-      const reason = shouldBeSkipped(digest, format);
+      const reason = shouldBeSkipped(key, format);
       const testOrFail = !reason ? test : test.failing;
       testOrFail.each([
-        [digest, format, reason ? ` (FAIL: ${reason})` : "", source],
+        [key, format, reason ? ` (FAIL: ${reason})` : "", source],
       ])(
         `convert %s to %s%s`,
         async (
-          digest: string,
+          key: string,
           format: string,
           skipReason: string,
           source: string,
@@ -129,7 +129,7 @@ describe("convert", () => {
           /* this is useful for debugging, but too noisy otherwise
           if (parsedRequest?.method != capturedRequest.method) {
             console.log(
-              `Method mismatch in ${digest} expected:${parsedRequest?.method} actual:${capturedRequest.method}`,
+              `Method mismatch in ${key} expected:${parsedRequest?.method} actual:${capturedRequest.method}`,
             );
           }
           */
