@@ -7,6 +7,12 @@ SCRIPT_DIR=/tmp/js-test
 CLIENT_DIR=/tmp/es-client
 BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
 
+if [[ "$1" == "" ]]; then
+    # the `test:setup` command runs this script without arguments to initialize
+    # the venv, so we first delete any previous one
+    rm -rf $SCRIPT_DIR $CLIENT_DIR
+fi
+
 if [ ! -d "$CLIENT_DIR" ]; then
   echo "Installing from branch $BRANCH"
   git clone -b "$BRANCH" --depth=1 "https://github.com/elastic/elasticsearch-js.git" "$CLIENT_DIR" ||
