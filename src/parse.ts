@@ -190,14 +190,6 @@ function parseCommand(source: string, options: ParseOptions) {
     }
   }
 
-  // TODO: this should be an issue in the docs,
-  // the correct url is `<index/_mapping`
-  if (data.path.endsWith("_mappings")) {
-    data.path = data.path.slice(0, -1);
-    data.rawPath = data.rawPath.slice(0, -1);
-    data.url = data.url.replace(data.path + "s", data.path);
-  }
-
   // identify the body
   const body = removeTrailingCommas(
     collapseLiteralStrings(source.slice(index)),
