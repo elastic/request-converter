@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 9.1.2 (2025-07-11)
+* Remove outdated URL patch in console parser ([#86](https://github.com/elastic/request-converter/pull/86))
+
 ## 9.1.1 (2025-06-13)
 * Use environment variable for ES host by default in curl exporter ([#85](https://github.com/elastic/request-converter/pull/85))
 * Update schyyema for 9.1
@@ -57,6 +60,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 

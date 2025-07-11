@@ -1,6 +1,6 @@
 {
   "name": "@elastic/request-converter",
-  "version": "9.1.1",
+  "version": "9.1.2",
   "description": "Elasticsearch request converter",
   "author": "Miguel Grinberg",
   "license": "Apache-2.0",
