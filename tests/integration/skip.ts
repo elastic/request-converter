@@ -53,7 +53,7 @@ const skip: Record<string, SkippedTest> = {
   },
   IndicesRemoveBlockRequestExample1: {
     reason: "client does not have this endpoint yet",
-    formats: ["python", "php", "ruby"],
+    formats: ["python", "php"],
   },
   PostChatCompletionRequestExample1: {
     reason: "client does not have this endpoint yet",
