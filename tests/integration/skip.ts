@@ -37,11 +37,11 @@ const skip: Record<string, SkippedTest> = {
   },
   IndicesGetDataStreamSettingsRequestExample1: {
     reason: "client does not have this endpoint yet",
-    formats: ["python", "php"],
+    formats: ["php"],
   },
   IndicesPutDataStreamSettingsRequestExample1: {
     reason: "client does not have this endpoint yet",
-    formats: ["python", "php"],
+    formats: ["php"],
   },
   indicesPutTemplateRequestExample1: {
     reason: "example passes invalid `properties` field in the body",
@@ -53,7 +53,7 @@ const skip: Record<string, SkippedTest> = {
   },
   IndicesRemoveBlockRequestExample1: {
     reason: "client does not have this endpoint yet",
-    formats: ["python", "php"],
+    formats: ["php"],
   },
   PostChatCompletionRequestExample1: {
     reason: "client does not have this endpoint yet",
