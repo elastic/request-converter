@@ -35,13 +35,9 @@ const skip: Record<string, SkippedTest> = {
     reason: "client uses a different URL alternative",
     formats: ["ruby"],
   },
-  IndicesGetDataStreamSettingsRequestExample1: {
-    reason: "client does not have this endpoint yet",
-    formats: ["python", "php"],
-  },
   IndicesPutDataStreamSettingsRequestExample1: {
     reason: "client does not have this endpoint yet",
-    formats: ["python", "php"],
+    formats: ["php"],
   },
   indicesPutTemplateRequestExample1: {
     reason: "example passes invalid `properties` field in the body",
@@ -50,10 +46,6 @@ const skip: Record<string, SkippedTest> = {
   ReloadSearchAnalyzersRequestExample1: {
     reason: "example passes a body but this endpoint does not define one",
     formats: ["python", "javascript", "php", "ruby"],
-  },
-  IndicesRemoveBlockRequestExample1: {
-    reason: "client does not have this endpoint yet",
-    formats: ["python", "php"],
   },
   PostChatCompletionRequestExample1: {
     reason: "client does not have this endpoint yet",
@@ -114,10 +106,6 @@ const skip: Record<string, SkippedTest> = {
   SecurityPutUserRequestExample1: {
     reason: "client passes user id both in the URL and the body",
     formats: ["javascript"],
-  },
-  SnapshotRepositoryVerifyIntegrityExample1: {
-    reason: "client does not implement this endpoint",
-    formats: ["php"],
   },
   SnapshotRestoreRequestExample2: {
     reason: "example passes invalid `indices` field in the body",
