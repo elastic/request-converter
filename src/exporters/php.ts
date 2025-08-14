@@ -70,7 +70,10 @@ export class PHPExporter implements FormatExporter {
     } else if (data === null || data === undefined) {
       return (startIndented ? indent : "") + "null";
     } else if (typeof data === "string") {
-      return (startIndented ? indent : "") + JSON.stringify(data);
+      return (
+        (startIndented ? indent : "") +
+        JSON.stringify(data).replaceAll("${", "\\${")
+      );
     } else if (Array.isArray(data)) {
       const elements =
         data.length === 0
