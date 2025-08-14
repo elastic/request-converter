@@ -4,9 +4,6 @@ type SkippedTest = {
 };
 
 const skip: Record<string, SkippedTest> = {
-  indicesPutSettingsRequestExample3: {
-    reason: "badly formatted",
-  },
   MultiTermVectorsRequestExample2: {
     reason: "client sends query properties in the body",
     formats: ["python", "javascript"],
@@ -35,10 +32,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client uses a different URL alternative",
     formats: ["ruby"],
   },
-  IndicesGetDataStreamSettingsRequestExample1: {
-    reason: "client does not have this endpoint yet",
-    formats: ["php"],
-  },
   IndicesPutDataStreamSettingsRequestExample1: {
     reason: "client does not have this endpoint yet",
     formats: ["php"],
@@ -47,13 +40,12 @@ const skip: Record<string, SkippedTest> = {
     reason: "example passes invalid `properties` field in the body",
     formats: ["python"],
   },
+  InferencePutExample1: {
+    reason: "badly formatted body",
+  },
   ReloadSearchAnalyzersRequestExample1: {
     reason: "example passes a body but this endpoint does not define one",
     formats: ["python", "javascript", "php", "ruby"],
-  },
-  IndicesRemoveBlockRequestExample1: {
-    reason: "client does not have this endpoint yet",
-    formats: ["php"],
   },
   PostChatCompletionRequestExample1: {
     reason: "client does not have this endpoint yet",
@@ -115,10 +107,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client passes user id both in the URL and the body",
     formats: ["javascript"],
   },
-  SnapshotRepositoryVerifyIntegrityExample1: {
-    reason: "client does not implement this endpoint",
-    formats: ["php"],
-  },
   SnapshotRestoreRequestExample2: {
     reason: "example passes invalid `indices` field in the body",
     formats: ["python"],
@@ -126,10 +114,6 @@ const skip: Record<string, SkippedTest> = {
   SynonymsPutRequestExample1: {
     reason: "example does not pass required `synonyms_set` field in the body",
     formats: ["python", "php", "ruby"],
-  },
-  UpdateTransformRequestExample1: {
-    reason: "example passes invalid `pivot` field in the body",
-    formats: ["python"],
   },
 };
 
