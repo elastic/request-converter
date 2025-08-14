@@ -398,6 +398,24 @@ $resp1 = $client->search([
     );
   });
 
+  it("converts a dollar-variable to php", async () => {
+    expect(
+      await convertRequests('POST /my-index/_doc\n{"key":"${value}"}', "php", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `$resp = $client->index([
+    "index" => "my-index",
+    "body" => [
+        "key" => "\\\${value}",
+    ],
+]);
+
+`,
+    );
+  });
+
   it("converts an unsupported API to php", async () => {
     expect(
       await convertRequests("GET /_internal/desired_balance", "php", {
