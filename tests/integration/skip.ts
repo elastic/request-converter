@@ -4,9 +4,6 @@ type SkippedTest = {
 };
 
 const skip: Record<string, SkippedTest> = {
-  indicesPutSettingsRequestExample3: {
-    reason: "badly formatted",
-  },
   MultiTermVectorsRequestExample2: {
     reason: "client sends query properties in the body",
     formats: ["python", "javascript"],
@@ -42,6 +39,9 @@ const skip: Record<string, SkippedTest> = {
   indicesPutTemplateRequestExample1: {
     reason: "example passes invalid `properties` field in the body",
     formats: ["python"],
+  },
+  InferencePutExample1: {
+    reason: "badly formatted body",
   },
   ReloadSearchAnalyzersRequestExample1: {
     reason: "example passes a body but this endpoint does not define one",
@@ -114,10 +114,6 @@ const skip: Record<string, SkippedTest> = {
   SynonymsPutRequestExample1: {
     reason: "example does not pass required `synonyms_set` field in the body",
     formats: ["python", "php", "ruby"],
-  },
-  UpdateTransformRequestExample1: {
-    reason: "example passes invalid `pivot` field in the body",
-    formats: ["python"],
   },
 };
 
