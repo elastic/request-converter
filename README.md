@@ -107,6 +107,17 @@ Supported options:
 | `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
 | `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use. The default is `http://localhost:9200`. |
 
+### javascript
+
+The JavaScript exporter generates code for the Elasticsearch JavaScript client.
+
+Supported options:
+
+| Option name | Type | Required | Description |
+| ----------- | ---- | -------- | ----------- |
+| `printResponse` | `boolean` | no | If `true`, add code to print the response. The default is `false`. |
+| `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
+| `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use in the generated commands. The default is `http://localhost:9200`. |
 
 ### php
 
