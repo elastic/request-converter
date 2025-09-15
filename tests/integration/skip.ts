@@ -26,7 +26,7 @@ const skip: Record<string, SkippedTest> = {
   },
   IndicesCreateFromExample1: {
     reason: "example does not send a required body",
-    formats: ["python", "ruby"],
+    formats: ["python"],
   },
   IndicesDeleteAliasExample1: {
     reason: "client uses a different URL alternative",
