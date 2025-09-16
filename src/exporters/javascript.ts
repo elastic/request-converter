@@ -7,21 +7,7 @@ import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest } from "../parse";
 import "./templates";
 
-const UNSUPPORTED_APIS = new RegExp(
-  "^query_rules.*$" +
-    "|^connector.update_features$" +
-    "|^connector.sync_job_.*$" +
-    "|^ingest.get_geoip_database$" +
-    "|^ingest.put_geoip_database$" +
-    "|^ingest.delete_geoip_database$" +
-    "|^_internal.*$" +
-    "|^security.create_cross_cluster_api_key$" +
-    "|^security.update_cross_cluster_api_key$" +
-    "|^security.update_settings$" +
-    "|^snapshot.repository_analyze$" +
-    "|^watcher.get_settings$" +
-    "|^watcher.update_settings",
-);
+const UNSUPPORTED_APIS = new RegExp("^_internal.*$");
 
 export class JavaScriptExporter implements FormatExporter {
   _template: Handlebars.TemplateDelegate;
