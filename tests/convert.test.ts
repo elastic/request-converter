@@ -226,6 +226,27 @@ resp1 = client.search(
     );
   });
 
+  it("converts attribute with dashes or dots to python", async () => {
+    expect(
+      await convertRequests(
+        `PUT /_security/settings {"security-profile": {}}
+PUT /_watcher/settings {"index.auto_expand_replicas":"0-4"}`,
+        "python",
+        {},
+      ),
+    ).toEqual(
+      `resp = client.security.update_settings(
+    security_profile={},
+)
+
+resp1 = client.watcher.update_settings(
+    index_auto_expand_replicas="0-4",
+)
+
+`,
+    );
+  });
+
   it("converts an unsupported API to python", async () => {
     expect(
       await convertRequests("GET /_internal/desired_balance", "python", {

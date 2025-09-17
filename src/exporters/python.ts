@@ -121,7 +121,7 @@ export class PythonExporter implements FormatExporter {
             }
           }
         }
-        return name;
+        return name.replaceAll("-", "_").replaceAll(".", "_");
       });
 
       // custom conditional to check for request body kind
