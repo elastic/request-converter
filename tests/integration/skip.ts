@@ -16,10 +16,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client uses a different URL alternative",
     formats: ["python", "javascript", "php", "ruby"],
   },
-  ClusterPutComponentTemplateRequestExample1: {
-    reason: "example passes invalid `settings` field in the body",
-    formats: ["python"],
-  },
   ClusterPutComponentTemplateRequestExample2: {
     reason: "example passes invalid `settings` field in the body",
     formats: ["python"],
@@ -35,17 +31,6 @@ const skip: Record<string, SkippedTest> = {
   IndicesPutDataStreamSettingsRequestExample1: {
     reason: "client does not have this endpoint yet",
     formats: ["php"],
-  },
-  indicesPutTemplateRequestExample1: {
-    reason: "example passes invalid `properties` field in the body",
-    formats: ["python"],
-  },
-  InferencePutExample1: {
-    reason: "badly formatted body",
-  },
-  ReloadSearchAnalyzersRequestExample1: {
-    reason: "example passes a body but this endpoint does not define one",
-    formats: ["python", "javascript", "php", "ruby"],
   },
   PostChatCompletionRequestExample1: {
     reason: "client does not have this endpoint yet",
@@ -114,6 +99,42 @@ const skip: Record<string, SkippedTest> = {
   SynonymsPutRequestExample1: {
     reason: "example does not pass required `synonyms_set` field in the body",
     formats: ["python", "php", "ruby"],
+  },
+  ClusterAllocationExplainRequestExample2: {
+    reason: "client passes query arguments in the body",
+    formats: ["php"],
+  },
+  IndicesPutDataStreamMappingsRequestExample1: {
+    reason: "client does not implement this endpoint yet",
+    formats: ["php"],
+  },
+  IndicesGetDataStreamMappingsRequestExample1: {
+    reason: "client does not implement this endpoint yet",
+    formats: ["php"],
+  },
+  TransformSetUpgradeModeExample1: {
+    reason: "client does not implement this endpoint yet",
+    formats: ["php"],
+  },
+  indicesSimulateIndexTemplateRequestExample1: {
+    reason: "client does not implement `index_template` attribute",
+    formats: ["python"],
+  },
+  TextEmbeddingRequestExample1: {
+    reason: "client does not implement `input_type` attribute",
+    formats: ["python"],
+  },
+  PostStreamsDisableRequestExample1: {
+    reason: "client does not implement this namespace yet",
+    formats: ["python"],
+  },
+  PostStreamsEnableRequestExample1: {
+    reason: "client does not implement this namespace yet",
+    formats: ["python"],
+  },
+  GetStreamsStatusRequestExample1: {
+    reason: "client does not implement this namespace yet",
+    formats: ["python"],
   },
 };
 
