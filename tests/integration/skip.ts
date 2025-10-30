@@ -20,10 +20,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "example passes invalid `settings` field in the body",
     formats: ["python"],
   },
-  IndicesCreateFromExample1: {
-    reason: "example does not send a required body",
-    formats: ["python"],
-  },
   IndicesDeleteAliasExample1: {
     reason: "client uses a different URL alternative",
     formats: ["ruby"],
@@ -115,26 +111,6 @@ const skip: Record<string, SkippedTest> = {
   TransformSetUpgradeModeExample1: {
     reason: "client does not implement this endpoint yet",
     formats: ["php"],
-  },
-  indicesSimulateIndexTemplateRequestExample1: {
-    reason: "client does not implement `index_template` attribute",
-    formats: ["python"],
-  },
-  TextEmbeddingRequestExample1: {
-    reason: "client does not implement `input_type` attribute",
-    formats: ["python"],
-  },
-  PostStreamsDisableRequestExample1: {
-    reason: "client does not implement this namespace yet",
-    formats: ["python"],
-  },
-  PostStreamsEnableRequestExample1: {
-    reason: "client does not implement this namespace yet",
-    formats: ["python"],
-  },
-  GetStreamsStatusRequestExample1: {
-    reason: "client does not implement this namespace yet",
-    formats: ["python"],
   },
 };
 
