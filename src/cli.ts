@@ -8,7 +8,7 @@ async function main() {
     .description("Convert Elasticsearch Dev Console scripts to other languages")
     .addOption(
       new Option("-f, --format <format>", "export format")
-        .choices(listFormats())
+        .choices(listFormats().map((lang) => lang.toLowerCase()))
         .makeOptionMandatory(),
     )
     .option(
