@@ -6,6 +6,7 @@ import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
 import { PHPExporter } from "./exporters/php";
 import { RubyExporter } from "./exporters/ruby";
+import { JavaExporter } from "./exporters/java";
 import util from "util";
 
 const isBrowser = typeof window !== "undefined";
@@ -35,6 +36,7 @@ export type ConvertOptions = {
  * This interface defines the structure of a language exporter.
  */
 export interface FormatExporter {
+  available?(): boolean;
   check(requests: ParsedRequest[]): Promise<boolean>;
   convert(requests: ParsedRequest[], options: ConvertOptions): Promise<string>;
 }
@@ -44,9 +46,10 @@ const EXPORTERS: Record<string, FormatExporter> = {
   php: new PHPExporter(),
   python: new PythonExporter(),
   ruby: new RubyExporter(),
+  java: new JavaExporter(),
   curl: new CurlExporter(),
 };
-const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl"];
+const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "Java", "curl"];
 
 /**
  * Return the list of available export formats.
@@ -55,7 +58,16 @@ const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl"];
  *   to use in the `convertRequests()` function.
  */
 export function listFormats(): string[] {
-  return LANGUAGES;
+  return LANGUAGES.filter((lang) => {
+    const exporter = EXPORTERS[lang.toLowerCase()];
+    if (!exporter) {
+      return false;
+    }
+    if (!exporter.available) {
+      return true;
+    }
+    return exporter.available();
+  });
 }
 
 /**
