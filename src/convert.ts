@@ -6,6 +6,7 @@ import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
 import { PHPExporter } from "./exporters/php";
 import { RubyExporter } from "./exporters/ruby";
+import { JavaExporter } from "./exporters/java";
 import util from "util";
 
 const isBrowser = typeof window !== "undefined";
@@ -44,9 +45,10 @@ const EXPORTERS: Record<string, FormatExporter> = {
   php: new PHPExporter(),
   python: new PythonExporter(),
   ruby: new RubyExporter(),
+  java: new JavaExporter(),
   curl: new CurlExporter(),
 };
-const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl"];
+const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "Java", "curl"];
 
 /**
  * Return the list of available export formats.

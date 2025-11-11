@@ -69,3 +69,28 @@ jobs:
       - name: Tests
         run: |
           npm run test
+  integration-tests-java:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+      - name: Install
+        run: |
+          npm install
+      - name: Build
+        run: |
+          npm run build
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Prepare for testing
+        run: |
+          npm run
+          npm run test:setup-java
+      - name: Integration tests
+        run: |
+          npm run test:integration-java
+
