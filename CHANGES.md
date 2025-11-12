@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 9.0.2 (2025-11-12)
+* Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
+
 ## 9.0.1 (2025-04-04)
 * Updated schema for 9.0
 
@@ -53,6 +56,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
