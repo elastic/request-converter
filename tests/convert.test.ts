@@ -102,7 +102,7 @@ describe("convert", () => {
         windows: true,
       }),
     ).toEqual(
-      'curl -X GET -H "Authorization: ApiKey $env:ELASTIC_API_KEY" "http://localhost:9876/"\ncurl -X POST -H "Authorization: ApiKey $env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
+      'curl -X GET -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" "http://localhost:9876/"\ncurl -X POST -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "http://localhost:9876/my-index/_search?from=40&size=20"\n',
     );
   });
 
