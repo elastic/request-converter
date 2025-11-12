@@ -26,6 +26,8 @@ export type ParsedRequest = {
   api?: string;
   /** The availability definition from the Elasticsearch specification. */
   availability?: Availabilities;
+  /** The media types that are accepted for the request body. */
+  mediaTypes?: string[];
   /** The request definition from the Elasticsearch specification that applies to this request. */
   request?: Request;
   /** The dynamic parameters that are part of the request's URL. */
@@ -49,6 +51,7 @@ type ESRoute = {
   name: string;
   availability: Availabilities;
   request: Request;
+  mediaTypes?: string[];
 };
 
 let router = Router.make<ESRoute>({
@@ -296,6 +299,7 @@ export async function loadSchema(filename_or_object: string | object) {
       // find the request in the spec
       try {
         let req: Request | undefined;
+        let mt: string[] | undefined;
         for (const type of spec.types) {
           if (
             type.name.namespace == endpoint.request?.namespace &&
@@ -308,6 +312,7 @@ export async function loadSchema(filename_or_object: string | object) {
               );
             }
             req = type as Request;
+            mt = endpoint.requestMediaType;
             break;
           }
         }
@@ -315,6 +320,7 @@ export async function loadSchema(filename_or_object: string | object) {
           name: endpoint.name,
           availability: endpoint.availability,
           request: req as Request,
+          mediaTypes: mt,
         };
         router.on(methods, formattedPath as Router.PathInput, r);
       } catch (err) {
@@ -365,6 +371,7 @@ export async function parseRequest(
       req.api = route.handler.name;
       req.availability = route.handler.availability;
       req.request = route.handler.request;
+      req.mediaTypes = route.handler.mediaTypes;
       if (Object.keys(route.params).length > 0) {
         req.params = route.params;
       }
