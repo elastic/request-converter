@@ -169,6 +169,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
       rawPath: "/_bulk",
       query: { foo: "bar" },
       body: [{ name: "John Doe" }, { name: "John Doe" }, { name: "John Doe" }],
+      mediaTypes: ["application/x-ndjson"],
     });
     expect(reqs[6]).toMatchObject({
       source:
@@ -186,6 +187,7 @@ POST\n_ml/anomaly_detectors/it_ops_new_logs/model_snapshots/1491852978/_update\n
         { name: "John\nDoe" },
         { name: "John\nDoe" },
       ],
+      mediaTypes: ["application/x-ndjson"],
     });
     expect(reqs[7]).toMatchObject({
       source: "GET /{customer}/_doc/1",

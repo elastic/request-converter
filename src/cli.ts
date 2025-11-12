@@ -16,6 +16,7 @@ async function main() {
       "output complete code that includes the creation of the client",
       false,
     )
+    .option("--windows", "output a Windows command (curl format only)", false)
     .option(
       "--elasticsearch-url",
       "Elasticsearch endpoint URL. Only needed when --complete is given.",
@@ -34,6 +35,7 @@ async function main() {
 
   const code = (await convertRequests(data, opts.format, {
     complete: opts.complete,
+    windows: opts.windows,
     elasticsearchUrl: opts.elasticsearchUrl,
     debug: opts.debug,
     printResponse: opts.printResponse,
