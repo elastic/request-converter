@@ -9,6 +9,7 @@ async function main() {
     .addOption(
       new Option("-f, --format <format>", "export format")
         .choices(listFormats())
+        .argParser((v) => v.toLowerCase())
         .makeOptionMandatory(),
     )
     .option(
@@ -18,7 +19,7 @@ async function main() {
     )
     .option("--windows", "output a Windows command (curl format only)", false)
     .option(
-      "--elasticsearch-url",
+      "--elasticsearch-url <url>",
       "Elasticsearch endpoint URL. Only needed when --complete is given.",
       "http://localhost:9200",
     )
