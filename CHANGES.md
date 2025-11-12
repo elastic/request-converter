@@ -1,5 +1,10 @@
 # request-converter change log
 
+## 9.1.3 (2025-11-12)
+* Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
+* Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))
+* PHP: escape dollar variables ([#88](https://github.com/elastic/request-converter/pull/88))
+
 ## 9.1.2 (2025-07-11)
 * Remove outdated URL patch in console parser ([#86](https://github.com/elastic/request-converter/pull/86))
 
@@ -60,6 +65,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
