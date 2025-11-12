@@ -23,6 +23,8 @@ export type ParsedRequest = {
   service: string;
   /** The name of the Elasticsearch API this request refers to. */
   api?: string;
+  /** The media types that are accepted for the request body. */
+  mediaTypes?: string[];
   /** The request definition from the Elasticsearch specification that applies to this request. */
   request?: Request;
   /** The dynamic parameters that are part of the request's URL. */
@@ -45,6 +47,7 @@ export type ParsedRequest = {
 type ESRoute = {
   name: string;
   request: Request;
+  mediaTypes?: string[];
 };
 
 const router = Router.make<ESRoute>({
@@ -289,6 +292,7 @@ export async function loadSchema(filename: string) {
       // find the request in the spec
       try {
         let req: Request | undefined;
+        let mt: string[] | undefined;
         for (const type of spec.types) {
           if (
             type.name.namespace == endpoint.request?.namespace &&
@@ -301,12 +305,14 @@ export async function loadSchema(filename: string) {
               );
             }
             req = type as Request;
+            mt = endpoint.requestMediaType;
             break;
           }
         }
         const r = {
           name: endpoint.name,
           request: req as Request,
+          mediaTypes: mt,
         };
         router.on(methods, formattedPath as Router.PathInput, r);
       } catch (err) {
@@ -352,6 +358,7 @@ export async function parseRequest(
       const route = await getAPI(req.method, req.rawPath);
       req.api = route.handler.name;
       req.request = route.handler.request;
+      req.mediaTypes = route.handler.mediaTypes;
       if (Object.keys(route.params).length > 0) {
         req.params = route.params;
       }
