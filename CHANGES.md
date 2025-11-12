@@ -1,11 +1,16 @@
 # request-converter change log
 
+## 9.2.0 (2025-09-19)
+* Update schema for 9.2 ([#95](https://github.com/elastic/request-converter/pull/95))
+* Python: Handle body properties with dashes or dots ([#94](https://github.com/elastic/request-converter/pull/94))
+* PHP: escape dollar variables ([#88](https://github.com/elastic/request-converter/pull/88))
+
 ## 9.1.2 (2025-07-11)
 * Remove outdated URL patch in console parser ([#86](https://github.com/elastic/request-converter/pull/86))
 
 ## 9.1.1 (2025-06-13)
 * Use environment variable for ES host by default in curl exporter ([#85](https://github.com/elastic/request-converter/pull/85))
-* Update schyyema for 9.1
+* Update schema for 9.1
 
 ## 9.1.0 (2025-05-28)
 * PHP and Ruby support ([#83](https://github.com/elastic/request-converter/pull/83))
@@ -60,6 +65,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
