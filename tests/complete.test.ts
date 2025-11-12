@@ -183,8 +183,8 @@ describe("complete", () => {
     expect(req13).toContainEqual({
       replace: '"fie',
       insert: 'lds"',
-      extraBeforeCursor: ": ",
-      extraAfterCursor: "",
+      extraBeforeCursor: ": {",
+      extraAfterCursor: "}",
     });
     const req14 = await getCompletions('GET /_search\n{"aggregations": {"fo');
     expect(req14).toMatchObject([]);
