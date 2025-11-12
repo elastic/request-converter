@@ -9,6 +9,11 @@
 * Python: Handle body properties with dashes or dots ([#94](https://github.com/elastic/request-converter/pull/94))
 * PHP: escape dollar variables ([#88](https://github.com/elastic/request-converter/pull/88))
 
+## 9.1.3 (2025-11-12)
+* Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
+* Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))
+* PHP: escape dollar variables ([#88](https://github.com/elastic/request-converter/pull/88))
+
 ## 9.1.2 (2025-07-11)
 * Remove outdated URL patch in console parser ([#86](https://github.com/elastic/request-converter/pull/86))
 
@@ -18,6 +23,12 @@
 
 ## 9.1.0 (2025-05-28)
 * PHP and Ruby support ([#83](https://github.com/elastic/request-converter/pull/83))
+
+## 9.0.2 (2025-11-12)
+* Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
+
+## 9.0.1 (2025-04-04)
+* Updated schema for 9.0
 
 ## 9.0.0 (2025-02-24)
 * Update schema for 9.0
