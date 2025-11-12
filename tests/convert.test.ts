@@ -23,6 +23,15 @@ POST /my-index/_search?from=40&size=20
   }
 }`;
 
+const devConsoleBulkScript = `POST _bulk
+{ "index" : { "_index" : "test", "_id" : "1" } }
+{ "field1" : "value1" }
+{ "delete" : { "_index" : "test", "_id" : "2" } }
+{ "create" : { "_index" : "test", "_id" : "3" } }
+{ "field1" : "value3" }
+{ "update" : {"_id" : "1", "_index" : "test"} }
+{ "doc" : {"field2" : "value2"} }`;
+
 const kibanaScript = `GET /
 
 GET kbn:/api/saved_objects/_find?type=dashboard`;
@@ -136,6 +145,27 @@ describe("convert", () => {
       }),
     ).toEqual(
       'curl -X GET -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" "$Env:ELASTICSEARCH_URL/"\ncurl -X POST -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" -H "Content-Type: application/json" -d \'{"query":{"term":{"user.id":"kimchy\'\'s"}}}\' "$Env:ELASTICSEARCH_URL/my-index/_search?from=40&size=20"\n',
+    );
+  });
+
+  it("converts a bulk request to curl", async () => {
+    expect(
+      await convertRequests(devConsoleBulkScript, "curl", {
+        elasticsearchUrl: "http://localhost:9876",
+      }),
+    ).toEqual(
+      `curl -X POST -H "Authorization: ApiKey $ELASTIC_API_KEY" -H "Content-Type: application/x-ndjson" -d $'{"index":{"_index":"test","_id":"1"}}\\n{"field1":"value1"}\\n{"delete":{"_index":"test","_id":"2"}}\\n{"create":{"_index":"test","_id":"3"}}\\n{"field1":"value3"}\\n{"update":{"_id":"1","_index":"test"}}\\n{"doc":{"field2":"value2"}}\\n' "http://localhost:9876/_bulk"\n`,
+    );
+  });
+
+  it("converts a bulk request to curl on Windows", async () => {
+    expect(
+      await convertRequests(devConsoleBulkScript, "curl", {
+        elasticsearchUrl: "http://localhost:9876",
+        windows: true,
+      }),
+    ).toEqual(
+      `curl -X POST -H "Authorization: ApiKey $Env:ELASTIC_API_KEY" -H "Content-Type: application/x-ndjson" -d "{""index"":{""_index"":""test"",""_id"":""1""}}\`n{""field1"":""value1""}\`n{""delete"":{""_index"":""test"",""_id"":""2""}}\`n{""create"":{""_index"":""test"",""_id"":""3""}}\`n{""field1"":""value3""}\`n{""update"":{""_id"":""1"",""_index"":""test""}}\`n{""doc"":{""field2"":""value2""}}\`n" "http://localhost:9876/_bulk"\n`,
     );
   });
 

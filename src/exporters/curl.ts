@@ -12,7 +12,9 @@ export class CurlExporter implements FormatExporter {
     options: ConvertOptions,
   ): Promise<string> {
     const escapedSingleQuote = options.windows ? "''" : "'\"'\"'";
+    const escapedDoubleQuote = options.windows ? '""' : '\\"';
     const envPrefix = options.windows ? "$Env:" : "$";
+    const newLineInCmd = options.windows ? "`n" : "\\n";
     const auth = ` -H "Authorization: ApiKey ${envPrefix}ELASTIC_API_KEY"`;
     const otherUrls = (options.otherUrls as Record<string, string>) ?? {};
     let output = "";
@@ -20,11 +22,40 @@ export class CurlExporter implements FormatExporter {
       let headers = auth;
       let body = "";
       if (request.body) {
-        headers += ' -H "Content-Type: application/json"';
-        body =
-          " -d '" +
-          JSON.stringify(request.body).replaceAll("'", escapedSingleQuote) +
-          "'";
+        if (
+          Array.isArray(request.body) &&
+          request.mediaTypes?.includes("application/x-ndjson")
+        ) {
+          // this is a bulk request with ndjson payload
+          headers += ' -H "Content-Type: application/x-ndjson"';
+          if (!options.windows) {
+            body =
+              " -d $'" +
+              request.body
+                .map((line) =>
+                  JSON.stringify(line).replaceAll("'", escapedSingleQuote),
+                )
+                .join(newLineInCmd) +
+              newLineInCmd +
+              "'";
+          } else {
+            body =
+              ' -d "' +
+              request.body
+                .map((line) =>
+                  JSON.stringify(line).replaceAll('"', escapedDoubleQuote),
+                )
+                .join(newLineInCmd) +
+              newLineInCmd +
+              '"';
+          }
+        } else {
+          headers += ' -H "Content-Type: application/json"';
+          body =
+            " -d '" +
+            JSON.stringify(request.body).replaceAll("'", escapedSingleQuote) +
+            "'";
+        }
       }
       const method =
         request.method != "HEAD" ? `-X ${request.method}` : "--head";
