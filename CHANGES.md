@@ -33,6 +33,13 @@
 ## 9.0.0 (2025-02-24)
 * Update schema for 9.0
 
+## 8.19.0 (2025-11-12)
+* Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
+* Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))
+* Python: Handle body properties with dashes or dots ([#94](https://github.com/elastic/request-converter/pull/94))
+* PHP: escape dollar variables ([#88](https://github.com/elastic/request-converter/pull/88))
+* PHP and Ruby support ([#83](https://github.com/elastic/request-converter/pull/83))
+
 ## 8.18.0 (2025-02-24)
 * Support for externally hosted exporters ([#69](https://github.com/elastic/request-converter/pull/69))
 * Update schema for 8.18
@@ -80,6 +87,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
