@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 9.0.3 (2025-11-13)
+* Fix escaping of single quotes in ndjson payloads in the curl exporter
+
 ## 9.0.2 (2025-11-12)
 * Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
 
@@ -56,6 +59,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
