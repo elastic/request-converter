@@ -20,6 +20,18 @@ const skip: Record<string, SkippedTest> = {
     reason: "example passes invalid `settings` field in the body",
     formats: ["python"],
   },
+  indicesPutAliasRequestExample1: {
+    reason: "client uses a different URL alternative",
+    formats: ["ruby"],
+  },
+  indicesPutAliasRequestExample2: {
+    reason: "client uses a different URL alternative",
+    formats: ["ruby"],
+  },
+  indicesPutAliasRequestExample3: {
+    reason: "client uses a different URL alternative",
+    formats: ["ruby", "javascript"],
+  },
   IndicesDeleteAliasExample1: {
     reason: "client uses a different URL alternative",
     formats: ["ruby"],
@@ -109,6 +121,10 @@ const skip: Record<string, SkippedTest> = {
     formats: ["php"],
   },
   TransformSetUpgradeModeExample1: {
+    reason: "client does not implement this endpoint yet",
+    formats: ["php"],
+  },
+  ProjectTagsRequestExample1: {
     reason: "client does not implement this endpoint yet",
     formats: ["php"],
   },
