@@ -11,7 +11,6 @@ export class CurlExporter implements FormatExporter {
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
-    const escapedSingleQuote = options.windows ? "''" : "'\"'\"'";
     const escapedDoubleQuote = options.windows ? '""' : '\\"';
     const envPrefix = options.windows ? "$Env:" : "$";
     const newLineInCmd = options.windows ? "`n" : "\\n";
@@ -28,6 +27,7 @@ export class CurlExporter implements FormatExporter {
         ) {
           // this is a bulk request with ndjson payload
           headers += ' -H "Content-Type: application/x-ndjson"';
+          const escapedSingleQuote = options.windows ? "''" : "'\"'\"$$'";
           if (!options.windows) {
             body =
               " -d $'" +
@@ -51,6 +51,7 @@ export class CurlExporter implements FormatExporter {
           }
         } else {
           headers += ' -H "Content-Type: application/json"';
+          const escapedSingleQuote = options.windows ? "''" : "'\"'\"'";
           body =
             " -d '" +
             JSON.stringify(request.body).replaceAll("'", escapedSingleQuote) +
