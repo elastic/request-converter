@@ -36,10 +36,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client uses a different URL alternative",
     formats: ["ruby"],
   },
-  IndicesPutDataStreamSettingsRequestExample1: {
-    reason: "client does not have this endpoint yet",
-    formats: ["php"],
-  },
   PostChatCompletionRequestExample1: {
     reason: "client does not have this endpoint yet",
     formats: ["python"],
@@ -107,26 +103,6 @@ const skip: Record<string, SkippedTest> = {
   SynonymsPutRequestExample1: {
     reason: "example does not pass required `synonyms_set` field in the body",
     formats: ["python", "php", "ruby"],
-  },
-  ClusterAllocationExplainRequestExample2: {
-    reason: "client passes query arguments in the body",
-    formats: ["php"],
-  },
-  IndicesPutDataStreamMappingsRequestExample1: {
-    reason: "client does not implement this endpoint yet",
-    formats: ["php"],
-  },
-  IndicesGetDataStreamMappingsRequestExample1: {
-    reason: "client does not implement this endpoint yet",
-    formats: ["php"],
-  },
-  TransformSetUpgradeModeExample1: {
-    reason: "client does not implement this endpoint yet",
-    formats: ["php"],
-  },
-  ProjectTagsRequestExample1: {
-    reason: "client does not implement this endpoint yet",
-    formats: ["php"],
   },
 };
 
