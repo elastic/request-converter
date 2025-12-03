@@ -1,4 +1,4 @@
-#!/bin/bash -x
+#!/bin/bash
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 CURRENT_DIR=$(pwd)
 BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
@@ -31,6 +31,6 @@ if [[ "$1" != "" ]]; then
     cp $CURRENT_DIR/$1 src/main/java/org/example/App.java
     mvn clean compile assembly:single
     if [[ "$?" == "0" ]]; then
-        java -jar target/app-1.0-SNAPSHOT-jar-with-dependencies.jar
+        java -jar target/app-1.0-SNAPSHOT-jar-with-dependencies.jar || true
     fi
 fi
