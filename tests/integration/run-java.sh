@@ -6,7 +6,7 @@ BRANCH=$(jq -r .version package.json | grep -Eo "^[0-9]+\.[0-9]+")
 if [[ "$1" == "" ]]; then
     # the `test:setup` command runs this script without arguments to initialize
     # the environment, so we first delete any previous one
-    rm -rf $SCRIPT_DIR/.java-es-request-converter
+    rm -rf $SCRIPT_DIR/.java-request-converter
     rm -rf $SCRIPT_DIR/.java
 fi
 
