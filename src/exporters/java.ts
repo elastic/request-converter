@@ -67,16 +67,18 @@ export class JavaExporter implements FormatExporter {
       }
     }
 
-    const args = [];
-    args.push(JSON.stringify(javaRequests));
-    args.push(options.complete ? "true" : "false");
-    args.push(options.elasticsearchUrl ?? "");
+    // escape single quotes that may appear in the payload
+    // (only for bash-style shells for now)
+    const req = JSON.stringify(javaRequests).replaceAll("'", "'\"'\"'");
+    // other arguments to the Java converter
+    const complete = options.complete ? "true" : "false";
+    const url = options.elasticsearchUrl ?? "";
 
     if (execAsync === undefined) {
       throw new Error("Cannot use exec()");
     }
     const { stdout, stderr } = await execAsync(
-      `java -jar ${process.env.JAVA_ES_REQUEST_CONVERTER_JAR} '${args[0]}' '${args[1]}' '${args[2]}'`,
+      `java -jar ${process.env.JAVA_ES_REQUEST_CONVERTER_JAR} '${req}' '${complete}' '${url}'`,
     );
     if (!stdout) {
       throw new Error(`Could not invoke exporter: ${stderr}`);

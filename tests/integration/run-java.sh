@@ -27,8 +27,8 @@ fi
 
 if [[ "$1" != "" ]]; then
     cd $SCRIPT_DIR/java-app
-    mkdir -p src/main/java/com/example
-    cp $CURRENT_DIR/$1 src/main/java/com/example/App.java
+    mkdir -p src/main/java/org/example
+    cp $CURRENT_DIR/$1 src/main/java/org/example/App.java
     mvn clean compile assembly:single
     if [[ "$?" == "0" ]]; then
         java -jar target/app-1.0-SNAPSHOT-jar-with-dependencies.jar
