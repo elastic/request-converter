@@ -26,8 +26,6 @@ jobs:
           cd demo
           npm install
           npm install .. --install-links
-          rm -rf ../node_modules/java-caller
-          rm -rf node_modules/java-caller
           npm run build
           cd ..
           cp -R docs demo/dist

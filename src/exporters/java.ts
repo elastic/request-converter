@@ -1,7 +1,11 @@
+import childProcess from "child_process";
 import { FormatExporter, ConvertOptions } from "../convert";
 import { ParsedRequest, JSONValue } from "../parse";
 import { Request } from "../metamodel";
-import { JavaCaller } from "java-caller";
+import util from "util";
+
+const isBrowser = typeof window !== "undefined";
+const execAsync = !isBrowser ? util.promisify(childProcess.exec) : undefined;
 
 type JavaRequest = {
   api?: string;
@@ -29,7 +33,7 @@ function getCodeGenParamNames(
 
 export class JavaExporter implements FormatExporter {
   available(): boolean {
-    return !!process.env.JAVA_ES_REQUEST_CONVERTER_JAR;
+    return !isBrowser && !!process.env.JAVA_ES_REQUEST_CONVERTER_JAR;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -68,17 +72,15 @@ export class JavaExporter implements FormatExporter {
     args.push(options.complete ? "true" : "false");
     args.push(options.elasticsearchUrl ?? "");
 
-    // preparing the java caller class to call the java request converter jar
-    const java = new JavaCaller({
-      minimumJavaVersion: 21,
-      jar: process.env.JAVA_ES_REQUEST_CONVERTER_JAR,
-    });
-    const { status, stdout, stderr } = await java.run(args);
-    // error
-    if (status) {
-      throw new Error(stderr);
+    if (execAsync === undefined) {
+      throw new Error("Cannot use exec()");
     }
-    // success!
+    const { stdout, stderr } = await execAsync(
+      `java -jar ${process.env.JAVA_ES_REQUEST_CONVERTER_JAR} '${args[0]}' '${args[1]}' '${args[2]}'`,
+    );
+    if (!stdout) {
+      throw new Error(`Could not invoke exporter: ${stderr}`);
+    }
     return stdout;
   }
 }
