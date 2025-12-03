@@ -11,7 +11,7 @@ if [[ "$1" == "" ]]; then
 fi
 
 if [[ ! -d $SCRIPT_DIR/.java-es-request-converter ]]; then
-    git clone git@github.com:l-trotta/java-es-request-converter $SCRIPT_DIR/.java-es-request-converter
+    git clone git@github.com:elastic/java-request-converter $SCRIPT_DIR/.java-request-converter
     cd $SCRIPT_DIR/.java-es-request-converter
     ./gradlew jar
     cd $CURRENT_DIR
