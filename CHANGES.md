@@ -1,5 +1,7 @@
 # request-converter change log
 
+## 9.3.0 (2025-12-10)
+
 ## 9.2.1 (2025-11-12)
 * Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
 * Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))
@@ -87,6 +89,7 @@
 ## 8.14.0 (2024-06-11)
 
 * Initial release
+
 
 
 
