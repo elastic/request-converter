@@ -104,6 +104,84 @@ const skip: Record<string, SkippedTest> = {
     reason: "example does not pass required `synonyms_set` field in the body",
     formats: ["python", "php", "ruby"],
   },
+
+  // the following examples trigger known bugs in the Java request converter or
+  // the Elasticsearch specification, so for now they are skipped
+  PutScriptRequestExample1: {
+    reason: "spec bug",
+    formats: ["java"],
+  },
+  indicesPutSettingsRequestExample2: {
+    reason: "spec bug",
+    formats: ["java"],
+  },
+  IndicesPutDataLifecycleRequestExample2: {
+    reason: "spec bug",
+    formats: ["java"],
+  },
+  IndicesCreateFromExample1: {
+    reason: "java client bug",
+    formats: ["java"],
+  },
+  indicesSimulateIndexTemplateRequestExample1: {
+    reason: "java client bug",
+    formats: ["java"],
+  },
+
+  // the following examples are not currently supported by the Java request converter
+  // so they are skipped
+  BulkRequestExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  BulkRequestExample2: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  BulkRequestExample3: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  BulkRequestExample4: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  MultiGetRequestExample2: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  MsearchRequestExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  MultiSearchTemplateRequestExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  ConnectorUpdateLastSyncRequestExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  AsyncQueryRequestExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  EsqlAsyncQueryDeleteExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  EsqlAsyncQueryGetExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  EsqlAsyncQueryStopExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
+  FindStructureRequestExample1: {
+    reason: "unsupported",
+    formats: ["java"],
+  },
 };
 
 export function shouldBeSkipped(
