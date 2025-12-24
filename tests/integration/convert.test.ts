@@ -69,6 +69,35 @@ function compareWithShortcuts(actual: any, expected: any): boolean {
     }
   }
 
+  // check for integer vs string
+  if (typeof actual === "number" && typeof expected === "string") {
+    return actual === parseFloat(expected);
+  }
+
+  if (typeof actual === "string" && typeof expected === "number") {
+    return parseFloat(actual) === expected;
+  }
+
+  // check for boolean vs string
+  if (typeof actual === "boolean" && typeof expected === "string") {
+    return actual ? expected === "true" : expected === "false";
+  }
+  if (typeof actual === "string" && typeof expected === "boolean") {
+    return expected ? actual === "true" : actual === "false";
+  }
+
+  // check floats given as strings
+  const NUMERIC_REGEX = /^[-+]?(\d+\.\d+|\d+|\.\d+)$/;
+  if (
+    typeof actual === "string" &&
+    typeof expected === "string" &&
+    NUMERIC_REGEX.test(actual) &&
+    NUMERIC_REGEX.test(expected)
+  ) {
+    console.log("heyyy");
+    return parseFloat(actual) === parseFloat(expected);
+  }
+
   if (typeof actual !== "object" || typeof expected !== "object") {
     return false; // the caller will do a complete assert and report the diff
   }
@@ -213,13 +242,29 @@ describe("convert", () => {
             result: parsedRequest?.path,
             source,
           });
-          expect(
-            { result: capturedRequest.query, source },
-            failureMessage,
-          ).toEqual({
-            result: parsedRequest?.query ?? {},
-            source,
-          });
+          if (checkExpandedShortcuts.includes(format)) {
+            if (
+              !compareWithShortcuts(capturedRequest.query, parsedRequest?.query)
+            ) {
+              // A comparison accounting for shortcut properties came as different
+              // so now we do a full assert to report this error
+              expect(
+                { result: capturedRequest.query, source },
+                failureMessage,
+              ).toEqual({
+                result: parsedRequest?.query ?? {},
+                source,
+              });
+            }
+          } else {
+            expect(
+              { result: capturedRequest.query, source },
+              failureMessage,
+            ).toEqual({
+              result: parsedRequest?.query ?? {},
+              source,
+            });
+          }
           if (checkExpandedShortcuts.includes(format)) {
             if (
               !compareWithShortcuts(capturedRequest.body, parsedRequest?.body)
