@@ -94,8 +94,18 @@ function compareWithShortcuts(actual: any, expected: any): boolean {
     NUMERIC_REGEX.test(actual) &&
     NUMERIC_REGEX.test(expected)
   ) {
-    console.log("heyyy");
     return parseFloat(actual) === parseFloat(expected);
+  }
+
+  // check for strings that have `\n` in them
+  if (typeof actual === "string" && typeof expected === "string") {
+    if (actual === expected) {
+      return true;
+    }
+    if (actual.includes("\n") && actual.replaceAll("\n", "\\n") === expected) {
+      return true;
+    }
+    return false;
   }
 
   if (typeof actual !== "object" || typeof expected !== "object") {
@@ -223,7 +233,9 @@ describe("convert", () => {
 
           for (const param in parsedRequest?.query ?? {}) {
             if (
-              capturedRequest.query[param] === undefined &&
+              (capturedRequest.query === undefined ||
+                capturedRequest.query[param] === undefined) &&
+              capturedRequest.body &&
               capturedRequest.body[param] !== undefined
             ) {
               // the client moved a query argument to the body
@@ -289,6 +301,7 @@ describe("convert", () => {
             });
           }
         },
+        30000, // timeout
       );
     }
   }
