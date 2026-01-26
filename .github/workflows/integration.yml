@@ -2,7 +2,7 @@ name: Daily integration testing
 on:
   workflow_dispatch:
   schedule:
-    - cron: "0 2 * * 1"
+    - cron: "0 2 * * 2"
 jobs:
   integration-tests-curl:
     runs-on: ubuntu-latest
