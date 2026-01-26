@@ -48,14 +48,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client does not have this endpoint yet",
     formats: ["python"],
   },
-  RerankRequestExample2: {
-    reason: "example passes invalid `return_documents` field in the body",
-    formats: ["python"],
-  },
-  RerankRequestExample3: {
-    reason: "example passes invalid `return_documents` field in the body",
-    formats: ["python"],
-  },
   StreamInferenceRequestExample1: {
     reason: "client does not implement streaming endpoints",
     formats: ["python"],
@@ -103,6 +95,14 @@ const skip: Record<string, SkippedTest> = {
   SynonymsPutRequestExample1: {
     reason: "example does not pass required `synonyms_set` field in the body",
     formats: ["python", "php", "ruby"],
+  },
+  MlStartDataFrameAnalyticsExample1: {
+    reason: "client passes argument in URL and in body",
+    formats: ["javascript"],
+  },
+  MlStopDataFrameAnalyticsExample1: {
+    reason: "client passes argument in URL and in body",
+    formats: ["javascript"],
   },
 };
 

@@ -6,6 +6,6 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   eslint.configs.recommended,
   ...tseslint.configs.recommended,
-  {ignores: ["**/.venv/", "**/es-client/", "**/templates.js", "tests/wasm"]},
+  {ignores: ["**/.venv/", "**/es-client/", "**/templates.js", "tests/wasm", "**/.java-request-converter/usage/usage.js"]},
   {languageOptions: {globals: {require: true}}},
 );
