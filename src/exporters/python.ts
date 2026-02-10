@@ -104,6 +104,7 @@ export class PythonExporter implements FormatExporter {
       Handlebars.registerHelper("alias", (name, props) => {
         const aliases: Record<string, string> = {
           from: "from_",
+          if: "if_",
           _meta: "meta",
           _field_names: "field_names",
           _routing: "routing",

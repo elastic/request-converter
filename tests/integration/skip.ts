@@ -16,10 +16,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client uses a different URL alternative",
     formats: ["python", "javascript", "php", "ruby"],
   },
-  ClusterPutComponentTemplateRequestExample2: {
-    reason: "example passes invalid `settings` field in the body",
-    formats: ["python"],
-  },
   indicesPutAliasRequestExample1: {
     reason: "client uses a different URL alternative",
     formats: ["ruby"],
@@ -91,10 +87,6 @@ const skip: Record<string, SkippedTest> = {
   SnapshotRestoreRequestExample2: {
     reason: "example passes invalid `indices` field in the body",
     formats: ["python"],
-  },
-  SynonymsPutRequestExample1: {
-    reason: "example does not pass required `synonyms_set` field in the body",
-    formats: ["python", "php", "ruby"],
   },
   MlStartDataFrameAnalyticsExample1: {
     reason: "client passes argument in URL and in body",
