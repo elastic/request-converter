@@ -96,6 +96,14 @@ const skip: Record<string, SkippedTest> = {
     reason: "client passes argument in URL and in body",
     formats: ["javascript"],
   },
+  PostStreamsDisableRequestExample1: {
+    reason: "example is missing a required `name` argument",
+    formats: ["ruby", "javascript", "python"],
+  },
+  PostStreamsEnableRequestExample1: {
+    reason: "example is missing a required `name` argument",
+    formats: ["ruby", "javascript", "python"],
+  },
 };
 
 export function shouldBeSkipped(
