@@ -102,6 +102,113 @@ describe("convert", () => {
     ).toBeFalsy();
   });
 
+  it("checks for go", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "go", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "go", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
+  });
+
+  it("converts to go", async () => {
+    expect(await convertRequests(devConsoleScript, "go", {})).toEqual(
+      `res, err := es.Info().
+    Do(context.Background())
+
+res1, err := es.Search().
+    Index("my-index").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Query: &types.Query{
+            Term: map[string]types.TermQuery{
+                "user.id": types.TermQuery{Value: "kimchy's"},
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts to a complete go script", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "go", {
+        complete: true,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/elastic/go-elasticsearch/v9"
+    "github.com/elastic/go-elasticsearch/v9/typedapi/core/search"
+    "github.com/elastic/go-elasticsearch/v9/typedapi/types"
+)
+
+func main() {
+    cfg := elasticsearch.Config{
+        Addresses: []string{"https://localhost:9999"},
+    }
+    es, err := elasticsearch.NewTypedClient(cfg)
+    if err != nil {
+        log.Fatalf("Error creating client: %s", err)
+    }
+
+    res, err := es.Info().
+        Do(context.Background())
+
+    res1, err := es.Search().
+        Index("my-index").
+        From(40).
+        Size(20).
+        Request(&search.Request{
+            Query: &types.Query{
+                Term: map[string]types.TermQuery{
+                    "user.id": types.TermQuery{Value: "kimchy's"},
+                },
+            },
+        }).
+        Do(context.Background())
+}
+`,
+    );
+  });
+
+  it("converts an unsupported API to go", async () => {
+    expect(
+      await convertRequests("GET /_internal/desired_balance", "go", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `res, err := es.Transport.Perform(&http.Request{
+    Method: "GET",
+    URL:    &url.URL{Path: "/_internal/desired_balance"},
+    Body:   nil,
+})
+`,
+    );
+  });
+
+  it("errors when converting Kibana to go", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "go", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
   it("errors for unknown language", async () => {
     expect(
       async () =>
