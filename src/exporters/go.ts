@@ -116,10 +116,7 @@ function indent(depth: number): string {
   return "    ".repeat(depth);
 }
 
-function getType(
-  name: string,
-  namespace: string,
-): TypeDefinition | undefined {
+function getType(name: string, namespace: string): TypeDefinition | undefined {
   for (const type of spec.types) {
     if (type.name.name === name && type.name.namespace === namespace) {
       return type;
@@ -128,10 +125,7 @@ function getType(
   return undefined;
 }
 
-function getInterfaceProperties(
-  name: string,
-  namespace: string,
-): Property[] {
+function getInterfaceProperties(name: string, namespace: string): Property[] {
   let props: Property[] = [];
   const type = getType(name, namespace);
   if (type?.kind === "interface") {
@@ -161,16 +155,17 @@ function isNumericType(typeName: TypeName): boolean {
 }
 
 function isBooleanType(typeName: TypeName): boolean {
-  return (
-    typeName.namespace === "_builtins" && typeName.name === "boolean"
-  );
+  return typeName.namespace === "_builtins" && typeName.name === "boolean";
 }
 
 function isStringType(typeName: TypeName): boolean {
   if (typeName.namespace === "_builtins" && typeName.name === "string") {
     return true;
   }
-  if (typeName.namespace === "_types" && STRING_ALIAS_TYPES.has(typeName.name)) {
+  if (
+    typeName.namespace === "_types" &&
+    STRING_ALIAS_TYPES.has(typeName.name)
+  ) {
     return true;
   }
   const type = getType(typeName.name, typeName.namespace);
@@ -262,13 +257,9 @@ class ImportTracker {
     const enumPkgName = typeName.name.toLowerCase();
     const nsParts = typeName.namespace.split(".");
     if (nsParts[0] === "_types") {
-      this.imports.add(
-        `${GO_BASE_IMPORT}/typedapi/types/enums/${enumPkgName}`,
-      );
+      this.imports.add(`${GO_BASE_IMPORT}/typedapi/types/enums/${enumPkgName}`);
     } else {
-      this.imports.add(
-        `${GO_BASE_IMPORT}/typedapi/types/enums/${enumPkgName}`,
-      );
+      this.imports.add(`${GO_BASE_IMPORT}/typedapi/types/enums/${enumPkgName}`);
     }
   }
 
@@ -337,10 +328,13 @@ func main() {
 `;
       const footer = `}
 `;
-      output = header + output
-        .split("\n")
-        .map((line) => (line ? "    " + line : line))
-        .join("\n") + footer;
+      output =
+        header +
+        output
+          .split("\n")
+          .map((line) => (line ? "    " + line : line))
+          .join("\n") +
+        footer;
     }
 
     return output;
@@ -415,10 +409,7 @@ func main() {
     return args.join(", ");
   }
 
-  private renderPathParams(
-    req: ParsedRequest,
-    parts: string[],
-  ): void {
+  private renderPathParams(req: ParsedRequest, parts: string[]): void {
     if (!req.request?.path) return;
     const required = new Set(
       req.request.path.filter((p) => p.required).map((p) => p.name),
@@ -463,7 +454,9 @@ func main() {
             if (member) {
               imports.addEnumPackage(inst.type);
               parts.push(
-                `${indent(1)}${methodName}(${enumPkg}.${toPascalCase(member.name)}).`,
+                `${indent(1)}${methodName}(${enumPkg}.${toPascalCase(
+                  member.name,
+                )}).`,
               );
               continue;
             }
@@ -493,7 +486,10 @@ func main() {
     let properties: Property[];
     if (bodyDef.kind === "properties") {
       properties = bodyDef.properties;
-    } else if (bodyDef.kind === "value" && bodyDef.value.kind === "instance_of") {
+    } else if (
+      bodyDef.kind === "value" &&
+      bodyDef.value.kind === "instance_of"
+    ) {
       const inst = bodyDef.value as InstanceOf;
       properties = getInterfaceProperties(inst.type.name, inst.type.namespace);
     } else {
@@ -535,13 +531,23 @@ func main() {
       if (!prop) {
         const fieldName = resolveGoFieldName(key, properties);
         lines.push(
-          `${indent(depth)}${fieldName}: ${this.renderLiteralValue(value, depth, imports)},`,
+          `${indent(depth)}${fieldName}: ${this.renderLiteralValue(
+            value,
+            depth,
+            imports,
+          )},`,
         );
         continue;
       }
       const fieldName = resolveGoFieldName(key, properties);
       lines.push(
-        `${indent(depth)}${fieldName}: ${this.renderGoValue(value, prop.type, depth, imports, prop)},`,
+        `${indent(depth)}${fieldName}: ${this.renderGoValue(
+          value,
+          prop.type,
+          depth,
+          imports,
+          prop,
+        )},`,
       );
     }
     return lines.join("\n");
@@ -575,12 +581,7 @@ func main() {
           imports,
         );
       case "array_of":
-        return this.renderArrayOf(
-          value,
-          typeInfo as ArrayOf,
-          depth,
-          imports,
-        );
+        return this.renderArrayOf(value, typeInfo as ArrayOf, depth, imports);
       case "union_of":
         return this.renderUnionOf(
           value,
@@ -643,7 +644,11 @@ func main() {
 
     if (typeDef.kind === "interface") {
       const iface = typeDef as Interface;
-      if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      if (
+        typeof value === "object" &&
+        value !== null &&
+        !Array.isArray(value)
+      ) {
         if (iface.variants?.kind === "container") {
           return this.renderContainerVariant(
             value as Record<string, unknown>,
@@ -666,15 +671,27 @@ func main() {
         }
         return `&types.${goName}{\n${fields}\n${indent(depth)}}`;
       }
-      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      if (
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean"
+      ) {
         if (iface.shortcutProperty) {
           const shortcutProp = getInterfaceProperties(name, namespace).find(
             (p) => p.name === iface.shortcutProperty,
           );
           if (shortcutProp) {
             const goName = goTypeName(typeInfo.type);
-            const fieldName = resolveGoFieldName(iface.shortcutProperty, getInterfaceProperties(name, namespace));
-            const renderedVal = this.renderGoValue(value, shortcutProp.type, depth + 1, imports);
+            const fieldName = resolveGoFieldName(
+              iface.shortcutProperty,
+              getInterfaceProperties(name, namespace),
+            );
+            const renderedVal = this.renderGoValue(
+              value,
+              shortcutProp.type,
+              depth + 1,
+              imports,
+            );
             imports.addTypes();
             return `types.${goName}{${fieldName}: ${renderedVal}}`;
           }
@@ -748,13 +765,17 @@ func main() {
         depth + 1,
         imports,
       );
-      entries.push(`${indent(depth + 1)}"${this.escapeGoString(k)}": ${renderedValue},`);
+      entries.push(
+        `${indent(depth + 1)}"${this.escapeGoString(k)}": ${renderedValue},`,
+      );
     }
 
     if (entries.length === 0) {
       return `map[${keyType}]${valueType}{}`;
     }
-    return `map[${keyType}]${valueType}{\n${entries.join("\n")}\n${indent(depth)}}`;
+    return `map[${keyType}]${valueType}{\n${entries.join("\n")}\n${indent(
+      depth,
+    )}}`;
   }
 
   private renderArrayOf(
@@ -771,7 +792,12 @@ func main() {
     const elements: string[] = [];
     for (const item of value) {
       elements.push(
-        `${indent(depth + 1)}${this.renderGoValue(item, typeInfo.value, depth + 1, imports)},`,
+        `${indent(depth + 1)}${this.renderGoValue(
+          item,
+          typeInfo.value,
+          depth + 1,
+          imports,
+        )},`,
       );
     }
 
@@ -794,7 +820,8 @@ func main() {
         a.kind === "instance_of" &&
         b.kind === "array_of" &&
         b.value.kind === "instance_of" &&
-        (a as InstanceOf).type.name === ((b as ArrayOf).value as InstanceOf).type.name
+        (a as InstanceOf).type.name ===
+          ((b as ArrayOf).value as InstanceOf).type.name
       ) {
         if (Array.isArray(value)) {
           return this.renderArrayOf(value, b as ArrayOf, depth, imports);
@@ -815,7 +842,11 @@ func main() {
         if (typeof value === "boolean" && isBooleanType(inst.type)) {
           return this.renderGoValue(value, item, depth, imports);
         }
-        if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+        if (
+          typeof value === "object" &&
+          value !== null &&
+          !Array.isArray(value)
+        ) {
           const typeDef = getType(inst.type.name, inst.type.namespace);
           if (typeDef?.kind === "interface") {
             return this.renderGoValue(value, item, depth, imports);
@@ -925,7 +956,11 @@ func main() {
       if (value.length === 0) return "[]interface{}{}";
       const elements = value.map(
         (item) =>
-          `${indent(depth + 1)}${this.renderLiteralValue(item, depth + 1, imports)},`,
+          `${indent(depth + 1)}${this.renderLiteralValue(
+            item,
+            depth + 1,
+            imports,
+          )},`,
       );
       return `[]interface{}{\n${elements.join("\n")}\n${indent(depth)}}`;
     }
@@ -935,7 +970,9 @@ func main() {
       if (entries.length === 0) return `map[string]interface{}{}`;
       const lines = entries.map(
         ([k, v]) =>
-          `${indent(depth + 1)}"${this.escapeGoString(k)}": ${this.renderLiteralValue(v, depth + 1, imports)},`,
+          `${indent(depth + 1)}"${this.escapeGoString(
+            k,
+          )}": ${this.renderLiteralValue(v, depth + 1, imports)},`,
       );
       return `map[string]interface{}{\n${lines.join("\n")}\n${indent(depth)}}`;
     }
