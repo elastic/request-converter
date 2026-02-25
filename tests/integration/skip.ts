@@ -98,11 +98,11 @@ const skip: Record<string, SkippedTest> = {
   },
   PostStreamsDisableRequestExample1: {
     reason: "example is missing a required `name` argument",
-    formats: ["ruby", "javascript", "python", "php"],
+    formats: ["php"],
   },
   PostStreamsEnableRequestExample1: {
     reason: "example is missing a required `name` argument",
-    formats: ["ruby", "javascript", "python", "php"],
+    formats: ["php"],
   },
 };
 
