@@ -102,6 +102,862 @@ describe("convert", () => {
     ).toBeFalsy();
   });
 
+  it("checks for go", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "go", {
+        checkOnly: true,
+      }),
+    ).toBeTruthy();
+    expect(
+      await convertRequests(kibanaScript, "go", {
+        checkOnly: true,
+      }),
+    ).toBeFalsy();
+  });
+
+  it("converts to go", async () => {
+    expect(await convertRequests(devConsoleScript, "go", {})).toEqual(
+      `res, err := es.Info().
+    Do(context.Background())
+
+res1, err := es.Search().
+    Index("my-index").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Query: &types.Query{
+            Term: map[string]types.TermQuery{
+                "user.id": types.TermQuery{Value: "kimchy's"},
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts to a complete go script", async () => {
+    expect(
+      await convertRequests(devConsoleScript, "go", {
+        complete: true,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `package main
+
+import (
+    "context"
+    "log"
+
+    "github.com/elastic/go-elasticsearch/v9"
+    "github.com/elastic/go-elasticsearch/v9/typedapi/core/search"
+    "github.com/elastic/go-elasticsearch/v9/typedapi/types"
+)
+
+func main() {
+    cfg := elasticsearch.Config{
+        Addresses: []string{"https://localhost:9999"},
+    }
+    es, err := elasticsearch.NewTypedClient(cfg)
+    if err != nil {
+        log.Fatalf("Error creating client: %s", err)
+    }
+
+    res, err := es.Info().
+        Do(context.Background())
+
+    res1, err := es.Search().
+        Index("my-index").
+        From(40).
+        Size(20).
+        Request(&search.Request{
+            Query: &types.Query{
+                Term: map[string]types.TermQuery{
+                    "user.id": types.TermQuery{Value: "kimchy's"},
+                },
+            },
+        }).
+        Do(context.Background())
+}
+`,
+    );
+  });
+
+  it("converts an unsupported API to go", async () => {
+    expect(
+      await convertRequests("GET /_internal/desired_balance", "go", {
+        complete: false,
+        elasticsearchUrl: "https://localhost:9999",
+      }),
+    ).toEqual(
+      `res, err := es.Transport.Perform(&http.Request{
+    Method: "GET",
+    URL:    &url.URL{Path: "/_internal/desired_balance"},
+    Body:   nil,
+})
+`,
+    );
+  });
+
+  it("errors when converting Kibana to go", async () => {
+    expect(
+      async () =>
+        await convertRequests(kibanaScript, "go", {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        }),
+    ).rejects.toThrowError("Cannot perform conversion");
+  });
+
+  it("converts subclient call with enum query param to go", async () => {
+    expect(
+      await convertRequests(
+        `GET /_settings?expand_wildcards=all&filter_path=*.settings.index.*.slowlog`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Indices.GetSettings().
+    ExpandWildcards("all").
+    FilterPath("*.settings.index.*.slowlog").
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts cluster reroute with commands to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_cluster/reroute?metric=none
+{"commands":[{"move":{"index":"test","shard":0,"from_node":"node1","to_node":"node2"}},{"allocate_replica":{"index":"test","shard":1,"node":"node3"}}]}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Cluster.Reroute().
+    Metric("none").
+    Request(&reroute.Request{
+        Commands: []types.Command{
+            types.Command{
+                Move: &types.CommandMoveAction{
+                    Index: "test",
+                    Shard: 0,
+                    FromNode: "node1",
+                    ToNode: "node2",
+                },
+            },
+            types.Command{
+                AllocateReplica: &types.CommandAllocateReplicaAction{
+                    Index: "test",
+                    Shard: 1,
+                    Node: "node3",
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts string params that are actually numbers to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /_ml/trained_models/elastic__distilbert-base-uncased-finetuned-conll03-english/definition/0
+{"definition":"...","total_definition_length":265632637,"total_parts":64}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Ml.PutTrainedModelDefinitionPart("elastic__distilbert-base-uncased-finetuned-conll03-english", "0").
+    Request(&put_trained_model_definition_part.Request{
+        Definition: "...",
+        TotalDefinitionLength: 265632637,
+        TotalParts: 64,
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts infer trained model to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_ml/trained_models/test/_infer
+{"docs":[{"text":"The fool doth think he is wise, but the wise man knows himself to be a fool."}]}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Ml.InferTrainedModel("test").
+    Request(&infer_trained_model.Request{
+        Docs: []map[string]interface{}{
+            map[string]interface{}{
+                "text": "The fool doth think he is wise, but the wise man knows himself to be a fool.",
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts deeply nested role mapping rules to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /_security/role_mapping/mapping8
+{"roles":["superuser"],"enabled":true,"rules":{"all":[{"any":[{"field":{"dn":"*,ou=admin,dc=example,dc=com"}},{"field":{"username":["es-admin","es-system"]}}]},{"field":{"groups":"cn=people,dc=example,dc=com"}},{"except":{"field":{"metadata.terminated_date":null}}}]}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Security.PutRoleMapping("mapping8").
+    Request(&put_role_mapping.Request{
+        Roles: []string{
+            "superuser",
+        },
+        Enabled: true,
+        Rules: &types.RoleMappingRule{
+            All: []types.RoleMappingRule{
+                types.RoleMappingRule{
+                    Any: []types.RoleMappingRule{
+                        types.RoleMappingRule{
+                            Field: map[string]types.FieldValue{
+                                "dn": "*,ou=admin,dc=example,dc=com",
+                            },
+                        },
+                        types.RoleMappingRule{
+                            Field: map[string]types.FieldValue{
+                                "username": []types.FieldValue{
+                                    "es-admin",
+                                    "es-system",
+                                },
+                            },
+                        },
+                    },
+                },
+                types.RoleMappingRule{
+                    Field: map[string]types.FieldValue{
+                        "groups": "cn=people,dc=example,dc=com",
+                    },
+                },
+                types.RoleMappingRule{
+                    Except: &types.RoleMappingRule{
+                        Field: map[string]types.FieldValue{
+                            "metadata.terminated_date": nil,
+                        },
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts match_all with enum and multi-index to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /my-index-000001,my-index-000002/_search?from=40&size=20&default_operator=AND
+{"query":{"match_all":{}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Index("my-index-000001,my-index-000002").
+    From(40).
+    Size(20).
+    DefaultOperator(operator.And).
+    Request(&search.Request{
+        Query: &types.Query{
+            MatchAll: &types.MatchAllQuery{},
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts range query with aggregation to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /my-index-000001/_search?from=40&size=20
+{"query":{"range":{"@timestamp":{"gte":"now-1d/d","lt":"now/d"}}},"aggs":{"my-agg-name":{"terms":{"field":"my-field"}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Index("my-index-000001").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Query: &types.Query{
+            Range: map[string]types.RangeQuery{
+                "@timestamp": types.UntypedRangeQuery{
+                    Gte: "now-1d/d",
+                    Lt: "now/d",
+                },
+            },
+        },
+        Aggregations: map[string]types.Aggregations{
+            "my-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts nested aggregation to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_search
+{"aggs":{"my-agg-name":{"terms":{"field":"my-field"},"aggs":{"my-sub-agg-name":{"avg":{"field":"my-other-field"}}}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Request(&search.Request{
+        Aggregations: map[string]types.Aggregations{
+            "my-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
+                },
+                Aggregations: map[string]types.Aggregations{
+                    "my-sub-agg-name": types.Aggregations{
+                        Avg: &types.AverageAggregation{
+                            Field: "my-other-field",
+                        },
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts aggregation with metadata to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_search
+{"aggs":{"my-agg-name":{"terms":{"field":"my-field"},"meta":{"my-metadata-field":"foo"}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Request(&search.Request{
+        Aggregations: map[string]types.Aggregations{
+            "my-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
+                },
+                Meta: "[object Object]",
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts runtime mappings with script to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_search
+{"runtime_mappings":{"message.length":{"type":"long","script":"emit(doc['message.keyword'].value.length())"}},"aggs":{"message_length":{"histogram":{"interval":10,"field":"message.length"}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Request(&search.Request{
+        RuntimeMappings: map[string]types.RuntimeField{
+            "message.length": types.RuntimeField{
+                Type: runtimefieldtype.Long,
+                Script: "emit(doc['message.keyword'].value.length())",
+            },
+        },
+        Aggregations: map[string]types.Aggregations{
+            "message_length": types.Aggregations{
+                Histogram: &types.HistogramAggregation{
+                    Interval: some.Int(10),
+                    Field: "message.length",
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts function score query to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_search
+{"size":10,"query":{"function_score":{"query":{"bool":{"filter":[{"terms":{"tags.keyword":["Monkey","Lion"]}}]}},"functions":[{"filter":{"term":{"mustHaveTags.keyword":{"value":"Monkey"}}},"weight":1}],"score_mode":"sum","boost_mode":"sum"}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Request(&search.Request{
+        Size: some.Int(10),
+        Query: &types.Query{
+            FunctionScore: &types.FunctionScoreQuery{
+                Query: &types.Query{
+                    Bool: &types.BoolQuery{
+                        Filter: []types.Query{
+                            types.Query{
+                                Terms: &types.TermsQuery{
+                                    Tags.keyword: []interface{}{
+                                        "Monkey",
+                                        "Lion",
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                Functions: []types.FunctionScore{
+                    types.FunctionScore{
+                        Filter: &types.Query{
+                            Term: map[string]types.TermQuery{
+                                "mustHaveTags.keyword": types.TermQuery{
+                                    Value: "Monkey",
+                                },
+                            },
+                        },
+                        Weight: some.Int(1),
+                    },
+                },
+                ScoreMode: functionscoremode.Sum,
+                BoostMode: functionboostmode.Sum,
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts ingest pipeline with processors to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /_ingest/pipeline/my-pipeline
+{"description":"My optional pipeline description","processors":[{"set":{"description":"My optional processor description","field":"my-long-field","value":10}},{"set":{"description":"Set 'my-boolean-field' to true","field":"my-boolean-field","value":true}},{"lowercase":{"field":"my-keyword-field"}}]}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Ingest.PutPipeline("my-pipeline").
+    Request(&put_pipeline.Request{
+        Description: "My optional pipeline description",
+        Processors: []types.Processor{
+            types.Processor{
+                Set: &types.SetProcessor{
+                    Description: "My optional processor description",
+                    Field: "my-long-field",
+                    Value: 10,
+                },
+            },
+            types.Processor{
+                Set: &types.SetProcessor{
+                    Description: "Set 'my-boolean-field' to true",
+                    Field: "my-boolean-field",
+                    Value: true,
+                },
+            },
+            types.Processor{
+                Lowercase: &types.LowercaseProcessor{
+                    Field: "my-keyword-field",
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts simulate ingest to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_ingest/pipeline/my-pipeline/_simulate?verbose=true
+{"docs":[{"_index":"index","_id":"id","_source":{"my-keyword-field":"bar"}},{"_index":"index","_id":"id","_source":{"my-long-field":10}}]}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Ingest.Simulate().
+    Id("my-pipeline").
+    Verbose(true).
+    Request(&simulate.Request{
+        Docs: []types.Document{
+            types.Document{
+                Index_: "index",
+                Id_: "id",
+                Source_: map[string]interface{}{
+                    "my-keyword-field": "bar",
+                },
+            },
+            types.Document{
+                Index_: "index",
+                Id_: "id",
+                Source_: map[string]interface{}{
+                    "my-long-field": 10,
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts index creation with analyzers to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /arabic_example
+{"settings":{"analysis":{"filter":{"arabic_stop":{"type":"stop","stopwords":"_arabic_"},"arabic_keywords":{"type":"keyword_marker","keywords":["مثال"]},"arabic_stemmer":{"type":"stemmer","language":"arabic"}},"analyzer":{"rebuilt_arabic":{"tokenizer":"standard","filter":["lowercase","decimal_digit","arabic_stop","arabic_normalization","arabic_keywords","arabic_stemmer"]}}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Indices.Create("arabic_example").
+    Request(&create.Request{
+        Settings: &types.IndexSettings{
+            Analysis: &types.IndexSettingsAnalysis{
+                Filter: map[string]types.TokenFilter{
+                    "arabic_stop": map[string]interface{}{
+                        "type": "stop",
+                        "stopwords": "_arabic_",
+                    },
+                    "arabic_keywords": map[string]interface{}{
+                        "type": "keyword_marker",
+                        "keywords": []interface{}{
+                            "\u0645\u062B\u0627\u0644",
+                        },
+                    },
+                    "arabic_stemmer": map[string]interface{}{
+                        "type": "stemmer",
+                        "language": "arabic",
+                    },
+                },
+                Analyzer: map[string]types.Analyzer{
+                    "rebuilt_arabic": types.CustomAnalyzer{
+                        Tokenizer: "standard",
+                        Filter: []string{
+                            "lowercase",
+                            "decimal_digit",
+                            "arabic_stop",
+                            "arabic_normalization",
+                            "arabic_keywords",
+                            "arabic_stemmer",
+                        },
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts multiple aggregations to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /my-index-000001/_search?from=40&size=20
+{"aggs":{"my-first-agg-name":{"terms":{"field":"my-field"}},"my-second-agg-name":{"avg":{"field":"my-other-field"}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Index("my-index-000001").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Aggregations: map[string]types.Aggregations{
+            "my-first-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
+                },
+            },
+            "my-second-agg-name": types.Aggregations{
+                Avg: &types.AverageAggregation{
+                    Field: "my-other-field",
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts KNN search with rescore to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /my-index-000001/_search?from=40&size=20
+{"knn":{"field":"image-vector","query_vector":[0.1,-2],"k":15,"num_candidates":100},"fields":["title"],"rescore":{"window_size":10,"query":{"rescore_query":{"script_score":{"query":{"match_all":{}},"script":{"source":"cosineSimilarity(params.query_vector, 'image-vector') + 1.0","params":{"query_vector":[0.1,-2]}}}}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Index("my-index-000001").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Knn: &types.KnnSearch{
+            Field: "image-vector",
+            QueryVector: []int{
+                0.1,
+                -2,
+            },
+            K: some.Int(15),
+            NumCandidates: some.Int(100),
+        },
+        Fields: []types.FieldAndFormat{
+            types.FieldAndFormat{Field: "title"},
+        },
+        Rescore: &types.Rescore{
+            WindowSize: some.Int(10),
+            Query: &types.RescoreQuery{
+                Query: types.Query{
+                    ScriptScore: &types.ScriptScoreQuery{
+                        Query: types.Query{
+                            MatchAll: &types.MatchAllQuery{},
+                        },
+                        Script: "[object Object]",
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts deeply nested queries (6 levels) to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /my-index-000001/_search?from=40&size=20
+{"query":{"nested":{"path":"driver","query":{"nested":{"path":"driver.vehicle","query":{"nested":{"path":"driver.vehicle.wheel","query":{"nested":{"path":"driver.vehicle.wheel.nut","query":{"nested":{"path":"driver.vehicle.wheel.nut.metal","query":{"nested":{"path":"driver.vehicle.wheel.nut.metal.atom","query":{"match_all":{}}}}}}}}}}}}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Index("my-index-000001").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Query: &types.Query{
+            Nested: &types.NestedQuery{
+                Path: "driver",
+                Query: types.Query{
+                    Nested: &types.NestedQuery{
+                        Path: "driver.vehicle",
+                        Query: types.Query{
+                            Nested: &types.NestedQuery{
+                                Path: "driver.vehicle.wheel",
+                                Query: types.Query{
+                                    Nested: &types.NestedQuery{
+                                        Path: "driver.vehicle.wheel.nut",
+                                        Query: types.Query{
+                                            Nested: &types.NestedQuery{
+                                                Path: "driver.vehicle.wheel.nut.metal",
+                                                Query: types.Query{
+                                                    Nested: &types.NestedQuery{
+                                                        Path: "driver.vehicle.wheel.nut.metal.atom",
+                                                        Query: types.Query{
+                                                            MatchAll: &types.MatchAllQuery{},
+                                                        },
+                                                    },
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts distance feature query to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /my-index-000001/_search?from=40&size=20
+{"query":{"bool":{"must":{"match":{"name":"chocolate"}},"should":{"distance_feature":{"field":"location","pivot":"1000m","origin":[-71.3,41.15]}}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Index("my-index-000001").
+    From(40).
+    Size(20).
+    Request(&search.Request{
+        Query: &types.Query{
+            Bool: &types.BoolQuery{
+                Must: &types.Query{
+                    Match: map[string]types.MatchQuery{
+                        "name": types.MatchQuery{Query: "chocolate"},
+                    },
+                },
+                Should: &types.Query{
+                    DistanceFeature: types.UntypedDistanceFeatureQuery{
+                        Field: "location",
+                        Pivot: "1000m",
+                        Origin: []interface{}{
+                            -71.3,
+                            41.15,
+                        },
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts complex sub-aggregation with ordering to go", async () => {
+    expect(
+      await convertRequests(
+        `POST /_search
+{"size":0,"query":{"bool":{"filter":[{"term":{"is_sold":true}},{"term":{"lender_id":4477943}}]}},"aggs":{"group_by_summaryGroup":{"terms":{"field":"group.keyword","order":{"_key":"desc"}},"aggs":{"note_count":{"value_count":{"field":"id"}},"invested_sum":{"sum":{"field":"amount_participation"}},"outstanding_principal_sum":{"sum":{"field":"principal_balance"}},"principal_repaid_sum":{"sum":{"field":"principal_repaid"}},"interest_paid_sum":{"sum":{"field":"interest_paid"}}}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+    Request(&search.Request{
+        Size: some.Int(0),
+        Query: &types.Query{
+            Bool: &types.BoolQuery{
+                Filter: []types.Query{
+                    types.Query{
+                        Term: map[string]types.TermQuery{
+                            "is_sold": types.TermQuery{Value: true},
+                        },
+                    },
+                    types.Query{
+                        Term: map[string]types.TermQuery{
+                            "lender_id": types.TermQuery{Value: 4477943},
+                        },
+                    },
+                },
+            },
+        },
+        Aggregations: map[string]types.Aggregations{
+            "group_by_summaryGroup": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "group.keyword",
+                    Order: map[string]interface{}{
+                        "_key": "desc",
+                    },
+                },
+                Aggregations: map[string]types.Aggregations{
+                    "note_count": types.Aggregations{
+                        ValueCount: &types.ValueCountAggregation{
+                            Field: "id",
+                        },
+                    },
+                    "invested_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "amount_participation",
+                        },
+                    },
+                    "outstanding_principal_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "principal_balance",
+                        },
+                    },
+                    "principal_repaid_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "principal_repaid",
+                        },
+                    },
+                    "interest_paid_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "interest_paid",
+                        },
+                    },
+                },
+            },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts cat health with boolean query param from behavior to go", async () => {
+    expect(
+      await convertRequests(
+        `GET /_cat/health?v`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Cat.Health().
+    V(true).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts index doc with user_defined_value body to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /my-index/_doc/1
+{"title":"Hello World","tags":["intro","welcome"],"metadata":{"author":"test","version":2}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Index("my-index").
+    Id("1").
+    Request(map[string]interface{}{
+        "title": "Hello World",
+        "tags": []interface{}{
+            "intro",
+            "welcome",
+        },
+        "metadata": map[string]interface{}{
+            "author": "test",
+            "version": 2,
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
   it("errors for unknown language", async () => {
     expect(
       async () =>
