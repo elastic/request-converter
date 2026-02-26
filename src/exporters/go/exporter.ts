@@ -164,7 +164,13 @@ func main() {
   ): void {
     if (!req.query) return;
     for (const [name, value] of Object.entries(req.query)) {
-      const specParam = req.request?.query?.find((q) => q.name === name);
+      let specParam = req.request?.query?.find((q) => q.name === name);
+      if (!specParam && req.request?.attachedBehaviors) {
+        const behaviorProps = ctx.resolver.getBehaviorProperties(
+          req.request.attachedBehaviors,
+        );
+        specParam = behaviorProps.find((p) => p.name === name);
+      }
       const methodName = toPascalCase(name);
       if (specParam) {
         const typeInfo = specParam.type;
@@ -221,6 +227,27 @@ func main() {
     if (Object.keys(body).length === 0) return;
 
     const bodyDef = req.request.body;
+
+    if (
+      bodyDef.kind === "value" &&
+      bodyDef.value.kind === "instance_of" &&
+      ctx.resolver.isUserDefinedValueBody(
+        req.request.name.name,
+        req.request.name.namespace,
+      )
+    ) {
+      const lines: string[] = [];
+      for (const [key, value] of Object.entries(body)) {
+        lines.push(
+          `${ctx.indent()}"${renderer.escapeGoString(key)}": ${renderer.renderLiteralValue(value, ctx)},`,
+        );
+      }
+      parts.push(`${indent(1)}Request(map[string]interface{}{`);
+      parts.push(lines.join("\n"));
+      parts.push(`${indent(1)}}).`);
+      return;
+    }
+
     let properties: Property[];
     if (bodyDef.kind === "properties") {
       properties = bodyDef.properties;

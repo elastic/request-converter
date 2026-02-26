@@ -238,7 +238,7 @@ func main() {
     Metric("none").
     Request(&reroute.Request{
         Commands: []types.Command{
-            &types.Command{
+            types.Command{
                 Move: &types.CommandMoveAction{
                     Index: "test",
                     Shard: 0,
@@ -246,7 +246,7 @@ func main() {
                     ToNode: "node2",
                 },
             },
-            &types.Command{
+            types.Command{
                 AllocateReplica: &types.CommandAllocateReplicaAction{
                     Index: "test",
                     Shard: 1,
@@ -319,16 +319,16 @@ func main() {
         Enabled: true,
         Rules: &types.RoleMappingRule{
             All: []types.RoleMappingRule{
-                &types.RoleMappingRule{
+                types.RoleMappingRule{
                     Any: []types.RoleMappingRule{
-                        &types.RoleMappingRule{
-                            Field: map[string]int{
+                        types.RoleMappingRule{
+                            Field: map[string]types.FieldValue{
                                 "dn": "*,ou=admin,dc=example,dc=com",
                             },
                         },
-                        &types.RoleMappingRule{
-                            Field: map[string]int{
-                                "username": []int{
+                        types.RoleMappingRule{
+                            Field: map[string]types.FieldValue{
+                                "username": []types.FieldValue{
                                     "es-admin",
                                     "es-system",
                                 },
@@ -336,14 +336,14 @@ func main() {
                         },
                     },
                 },
-                &types.RoleMappingRule{
-                    Field: map[string]int{
+                types.RoleMappingRule{
+                    Field: map[string]types.FieldValue{
                         "groups": "cn=people,dc=example,dc=com",
                     },
                 },
-                &types.RoleMappingRule{
+                types.RoleMappingRule{
                     Except: &types.RoleMappingRule{
-                        Field: map[string]int{
+                        Field: map[string]types.FieldValue{
                             "metadata.terminated_date": nil,
                         },
                     },
@@ -395,17 +395,17 @@ func main() {
     Size(20).
     Request(&search.Request{
         Query: &types.Query{
-            Range: map[string]types.UntypedRangeQuery{
-                "@timestamp": &types.UntypedRangeQuery{
+            Range: map[string]types.RangeQuery{
+                "@timestamp": types.UntypedRangeQuery{
                     Gte: "now-1d/d",
                     Lt: "now/d",
                 },
             },
         },
-        Aggs: map[string]interface{}{
-            "my-agg-name": map[string]interface{}{
-                "terms": map[string]interface{}{
-                    "field": "my-field",
+        Aggregations: map[string]types.Aggregations{
+            "my-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
                 },
             },
         },
@@ -426,15 +426,15 @@ func main() {
     ).toEqual(
       `res, err := es.Search().
     Request(&search.Request{
-        Aggs: map[string]interface{}{
-            "my-agg-name": map[string]interface{}{
-                "terms": map[string]interface{}{
-                    "field": "my-field",
+        Aggregations: map[string]types.Aggregations{
+            "my-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
                 },
-                "aggs": map[string]interface{}{
-                    "my-sub-agg-name": map[string]interface{}{
-                        "avg": map[string]interface{}{
-                            "field": "my-other-field",
+                Aggregations: map[string]types.Aggregations{
+                    "my-sub-agg-name": types.Aggregations{
+                        Avg: &types.AverageAggregation{
+                            Field: "my-other-field",
                         },
                     },
                 },
@@ -457,14 +457,12 @@ func main() {
     ).toEqual(
       `res, err := es.Search().
     Request(&search.Request{
-        Aggs: map[string]interface{}{
-            "my-agg-name": map[string]interface{}{
-                "terms": map[string]interface{}{
-                    "field": "my-field",
+        Aggregations: map[string]types.Aggregations{
+            "my-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
                 },
-                "meta": map[string]interface{}{
-                    "my-metadata-field": "foo",
-                },
+                Meta: "[object Object]",
             },
         },
     }).
@@ -485,16 +483,16 @@ func main() {
       `res, err := es.Search().
     Request(&search.Request{
         RuntimeMappings: map[string]types.RuntimeField{
-            "message.length": &types.RuntimeField{
+            "message.length": types.RuntimeField{
                 Type: runtimefieldtype.Long,
                 Script: "emit(doc['message.keyword'].value.length())",
             },
         },
-        Aggs: map[string]interface{}{
-            "message_length": map[string]interface{}{
-                "histogram": map[string]interface{}{
-                    "interval": 10,
-                    "field": "message.length",
+        Aggregations: map[string]types.Aggregations{
+            "message_length": types.Aggregations{
+                Histogram: &types.HistogramAggregation{
+                    Interval: some.Int(10),
+                    Field: "message.length",
                 },
             },
         },
@@ -521,7 +519,7 @@ func main() {
                 Query: &types.Query{
                     Bool: &types.BoolQuery{
                         Filter: []types.Query{
-                            &types.Query{
+                            types.Query{
                                 Terms: &types.TermsQuery{
                                     Tags.keyword: []interface{}{
                                         "Monkey",
@@ -533,10 +531,10 @@ func main() {
                     },
                 },
                 Functions: []types.FunctionScore{
-                    &types.FunctionScore{
+                    types.FunctionScore{
                         Filter: &types.Query{
                             Term: map[string]types.TermQuery{
-                                "mustHaveTags.keyword": &types.TermQuery{
+                                "mustHaveTags.keyword": types.TermQuery{
                                     Value: "Monkey",
                                 },
                             },
@@ -567,21 +565,21 @@ func main() {
     Request(&put_pipeline.Request{
         Description: "My optional pipeline description",
         Processors: []types.Processor{
-            &types.Processor{
+            types.Processor{
                 Set: &types.SetProcessor{
                     Description: "My optional processor description",
                     Field: "my-long-field",
                     Value: 10,
                 },
             },
-            &types.Processor{
+            types.Processor{
                 Set: &types.SetProcessor{
                     Description: "Set 'my-boolean-field' to true",
                     Field: "my-boolean-field",
                     Value: true,
                 },
             },
-            &types.Processor{
+            types.Processor{
                 Lowercase: &types.LowercaseProcessor{
                     Field: "my-keyword-field",
                 },
@@ -603,20 +601,20 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Ingest.Simulate().
-    ID("my-pipeline").
+    Id("my-pipeline").
     Verbose(true).
     Request(&simulate.Request{
         Docs: []types.Document{
-            &types.Document{
+            types.Document{
                 Index_: "index",
-                ID_: "id",
+                Id_: "id",
                 Source_: map[string]interface{}{
                     "my-keyword-field": "bar",
                 },
             },
-            &types.Document{
+            types.Document{
                 Index_: "index",
-                ID_: "id",
+                Id_: "id",
                 Source_: map[string]interface{}{
                     "my-long-field": 10,
                 },
@@ -641,7 +639,7 @@ func main() {
     Request(&create.Request{
         Settings: &types.IndexSettings{
             Analysis: &types.IndexSettingsAnalysis{
-                Filter: map[string]string{
+                Filter: map[string]types.TokenFilter{
                     "arabic_stop": map[string]interface{}{
                         "type": "stop",
                         "stopwords": "_arabic_",
@@ -657,8 +655,8 @@ func main() {
                         "language": "arabic",
                     },
                 },
-                Analyzer: map[string]types.CustomAnalyzer{
-                    "rebuilt_arabic": &types.CustomAnalyzer{
+                Analyzer: map[string]types.Analyzer{
+                    "rebuilt_arabic": types.CustomAnalyzer{
                         Tokenizer: "standard",
                         Filter: []string{
                             "lowercase",
@@ -692,15 +690,15 @@ func main() {
     From(40).
     Size(20).
     Request(&search.Request{
-        Aggs: map[string]interface{}{
-            "my-first-agg-name": map[string]interface{}{
-                "terms": map[string]interface{}{
-                    "field": "my-field",
+        Aggregations: map[string]types.Aggregations{
+            "my-first-agg-name": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "my-field",
                 },
             },
-            "my-second-agg-name": map[string]interface{}{
-                "avg": map[string]interface{}{
-                    "field": "my-other-field",
+            "my-second-agg-name": types.Aggregations{
+                Avg: &types.AverageAggregation{
+                    Field: "my-other-field",
                 },
             },
         },
@@ -739,9 +737,9 @@ func main() {
         Rescore: &types.Rescore{
             WindowSize: some.Int(10),
             Query: &types.RescoreQuery{
-                Query: &types.Query{
+                Query: types.Query{
                     ScriptScore: &types.ScriptScoreQuery{
-                        Query: &types.Query{
+                        Query: types.Query{
                             MatchAll: &types.MatchAllQuery{},
                         },
                         Script: "[object Object]",
@@ -772,22 +770,22 @@ func main() {
         Query: &types.Query{
             Nested: &types.NestedQuery{
                 Path: "driver",
-                Query: &types.Query{
+                Query: types.Query{
                     Nested: &types.NestedQuery{
                         Path: "driver.vehicle",
-                        Query: &types.Query{
+                        Query: types.Query{
                             Nested: &types.NestedQuery{
                                 Path: "driver.vehicle.wheel",
-                                Query: &types.Query{
+                                Query: types.Query{
                                     Nested: &types.NestedQuery{
                                         Path: "driver.vehicle.wheel.nut",
-                                        Query: &types.Query{
+                                        Query: types.Query{
                                             Nested: &types.NestedQuery{
                                                 Path: "driver.vehicle.wheel.nut.metal",
-                                                Query: &types.Query{
+                                                Query: types.Query{
                                                     Nested: &types.NestedQuery{
                                                         Path: "driver.vehicle.wheel.nut.metal.atom",
-                                                        Query: &types.Query{
+                                                        Query: types.Query{
                                                             MatchAll: &types.MatchAllQuery{},
                                                         },
                                                     },
@@ -830,7 +828,7 @@ func main() {
                     },
                 },
                 Should: &types.Query{
-                    DistanceFeature: &types.UntypedDistanceFeatureQuery{
+                    DistanceFeature: types.UntypedDistanceFeatureQuery{
                         Field: "location",
                         Pivot: "1000m",
                         Origin: []interface{}{
@@ -862,12 +860,12 @@ func main() {
         Query: &types.Query{
             Bool: &types.BoolQuery{
                 Filter: []types.Query{
-                    &types.Query{
+                    types.Query{
                         Term: map[string]types.TermQuery{
                             "is_sold": types.TermQuery{Value: true},
                         },
                     },
-                    &types.Query{
+                    types.Query{
                         Term: map[string]types.TermQuery{
                             "lender_id": types.TermQuery{Value: 4477943},
                         },
@@ -875,42 +873,84 @@ func main() {
                 },
             },
         },
-        Aggs: map[string]interface{}{
-            "group_by_summaryGroup": map[string]interface{}{
-                "terms": map[string]interface{}{
-                    "field": "group.keyword",
-                    "order": map[string]interface{}{
+        Aggregations: map[string]types.Aggregations{
+            "group_by_summaryGroup": types.Aggregations{
+                Terms: &types.TermsAggregation{
+                    Field: "group.keyword",
+                    Order: map[string]interface{}{
                         "_key": "desc",
                     },
                 },
-                "aggs": map[string]interface{}{
-                    "note_count": map[string]interface{}{
-                        "value_count": map[string]interface{}{
-                            "field": "id",
+                Aggregations: map[string]types.Aggregations{
+                    "note_count": types.Aggregations{
+                        ValueCount: &types.ValueCountAggregation{
+                            Field: "id",
                         },
                     },
-                    "invested_sum": map[string]interface{}{
-                        "sum": map[string]interface{}{
-                            "field": "amount_participation",
+                    "invested_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "amount_participation",
                         },
                     },
-                    "outstanding_principal_sum": map[string]interface{}{
-                        "sum": map[string]interface{}{
-                            "field": "principal_balance",
+                    "outstanding_principal_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "principal_balance",
                         },
                     },
-                    "principal_repaid_sum": map[string]interface{}{
-                        "sum": map[string]interface{}{
-                            "field": "principal_repaid",
+                    "principal_repaid_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "principal_repaid",
                         },
                     },
-                    "interest_paid_sum": map[string]interface{}{
-                        "sum": map[string]interface{}{
-                            "field": "interest_paid",
+                    "interest_paid_sum": types.Aggregations{
+                        Sum: &types.SumAggregation{
+                            Field: "interest_paid",
                         },
                     },
                 },
             },
+        },
+    }).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts cat health with boolean query param from behavior to go", async () => {
+    expect(
+      await convertRequests(
+        `GET /_cat/health?v`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Cat.Health().
+    V(true).
+    Do(context.Background())
+`,
+    );
+  });
+
+  it("converts index doc with user_defined_value body to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /my-index/_doc/1
+{"title":"Hello World","tags":["intro","welcome"],"metadata":{"author":"test","version":2}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Index("my-index").
+    Id("1").
+    Request(map[string]interface{}{
+        "title": "Hello World",
+        "tags": []interface{}{
+            "intro",
+            "welcome",
+        },
+        "metadata": map[string]interface{}{
+            "author": "test",
+            "version": 2,
         },
     }).
     Do(context.Background())

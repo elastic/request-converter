@@ -4,9 +4,12 @@ import {
   Model,
   TypeDefinition,
   Interface,
+  Request,
   Property,
   ValueOf,
   InstanceOf,
+  ArrayOf,
+  UnionOf,
   TypeAlias,
   Enum,
   TypeName,
@@ -105,6 +108,87 @@ export class TypeResolver {
       if (alias.type.kind === "instance_of") {
         return this.isEnumType((alias.type as InstanceOf).type);
       }
+    }
+    return undefined;
+  }
+
+  classifyUnion(union: UnionOf): "integer_string" | "any" | null {
+    if (union.items.length === 2) {
+      const [a, b] = union.items;
+      if (
+        a.kind === "instance_of" &&
+        b.kind === "array_of" &&
+        (b as ArrayOf).value.kind === "instance_of" &&
+        (a as InstanceOf).type.name ===
+          ((b as ArrayOf).value as InstanceOf).type.name
+      ) {
+        return null;
+      }
+      if (
+        a.kind === "array_of" &&
+        b.kind === "instance_of" &&
+        (a as ArrayOf).value.kind === "instance_of" &&
+        (b as InstanceOf).type.name ===
+          ((a as ArrayOf).value as InstanceOf).type.name
+      ) {
+        return null;
+      }
+
+      let hasNumeric = false;
+      let hasString = false;
+      for (const item of union.items) {
+        if (item.kind === "instance_of") {
+          const inst = item as InstanceOf;
+          if (this.isNumericType(inst.type)) hasNumeric = true;
+          if (
+            this.isStringType(inst.type) ||
+            (inst.type.namespace === "_builtins" && inst.type.name === "string")
+          ) {
+            hasString = true;
+          }
+        }
+      }
+      if (hasNumeric && hasString) return "integer_string";
+    }
+
+    if (union.items.length > 1) return "any";
+    return null;
+  }
+
+  getBehaviorProperties(behaviorNames: string[]): Property[] {
+    const props: Property[] = [];
+    for (const bName of behaviorNames) {
+      for (const type of this.schema.types) {
+        if (type.name.name === bName && type.kind === "interface") {
+          props.push(...(type as Interface).properties);
+        }
+      }
+    }
+    return props;
+  }
+
+  isUserDefinedValueBody(name: string, namespace: string): boolean {
+    const type = this.getType(name, namespace);
+    if (type?.kind === "request") {
+      const req = type as Request;
+      if (
+        req.body.kind === "value" &&
+        req.body.value.kind === "user_defined_value"
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getAdditionalPropertyBehavior(
+    iface: Interface,
+  ): { key: ValueOf; value: ValueOf } | undefined {
+    const behavior = iface.behaviors?.find(
+      (b) => b.type.name === "AdditionalProperty",
+    );
+    if (behavior?.generics && behavior.generics.length === 2) {
+      return { key: behavior.generics[0], value: behavior.generics[1] };
     }
     return undefined;
   }

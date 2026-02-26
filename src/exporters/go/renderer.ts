@@ -7,6 +7,7 @@ import {
   Interface,
   Property,
   Enum,
+  TypeAlias,
   TypeName,
 } from "../../metamodel";
 import { RenderContext } from "./context";
@@ -48,7 +49,9 @@ export class GoValueRenderer {
   ): string {
     const lines: string[] = [];
     for (const [key, value] of Object.entries(obj)) {
-      const prop = properties.find((p) => p.name === key);
+      const prop = properties.find(
+        (p) => p.name === key || p.aliases?.includes(key),
+      );
       const fieldName = resolveGoFieldName(key, properties);
       if (!prop) {
         lines.push(
@@ -132,6 +135,21 @@ export class GoValueRenderer {
           ctx.imports.addTypes();
           return `types.${goTypeName(inst.type)}`;
         }
+        if (typeDef?.kind === "type_alias") {
+          const alias = typeDef as TypeAlias;
+          if (alias.type.kind === "union_of") {
+            const classification = ctx.resolver.classifyUnion(
+              alias.type as UnionOf,
+            );
+            if (classification === "any") {
+              ctx.imports.addTypes();
+              return `types.${goTypeName(inst.type)}`;
+            }
+            if (classification === "integer_string") {
+              return "string";
+            }
+          }
+        }
         const resolved = ctx.resolver.resolveTypeAlias(typeInfo);
         if (resolved !== typeInfo) {
           return this.goTypeString(resolved, ctx);
@@ -152,10 +170,11 @@ export class GoValueRenderer {
       }
       case "union_of": {
         const union = typeInfo as UnionOf;
-        if (union.items.length > 0) {
-          return this.goTypeString(union.items[0], ctx);
-        }
-        return "interface{}";
+        if (union.items.length === 0) return "interface{}";
+        const classification = ctx.resolver.classifyUnion(union);
+        if (classification === "integer_string") return "string";
+        if (classification === "any") return "interface{}";
+        return this.goTypeString(union.items[0], ctx);
       }
       case "user_defined_value":
         return "interface{}";
@@ -212,6 +231,19 @@ export class GoValueRenderer {
 
     const resolved = ctx.resolver.resolveTypeAlias(typeInfo);
     if (resolved !== typeInfo) {
+      if (resolved.kind === "union_of") {
+        const classification = ctx.resolver.classifyUnion(
+          resolved as UnionOf,
+        );
+        if (classification === "integer_string") {
+          const strValue = String(value);
+          if (prop && !prop.required) {
+            ctx.imports.addSome();
+            return `some.String("${this.escapeGoString(strValue)}")`;
+          }
+          return `"${this.escapeGoString(strValue)}"`;
+        }
+      }
       return this.renderGoValue(value, resolved, ctx, prop);
     }
 
@@ -227,11 +259,14 @@ export class GoValueRenderer {
         value !== null &&
         !Array.isArray(value)
       ) {
+        const usePointer = prop && !prop.required;
+        const prefix = usePointer ? "&" : "";
         if (iface.variants?.kind === "container") {
           return this.renderContainerVariant(
             value as Record<string, unknown>,
             iface,
             ctx,
+            prefix,
           );
         }
         const props = ctx.resolver.getInterfaceProperties(name, namespace);
@@ -244,9 +279,9 @@ export class GoValueRenderer {
           nested,
         );
         if (!fields.trim()) {
-          return `&types.${goName}{}`;
+          return `${prefix}types.${goName}{}`;
         }
-        return `&types.${goName}{\n${fields}\n${ctx.indent()}}`;
+        return `${prefix}types.${goName}{\n${fields}\n${ctx.indent()}}`;
       }
       if (
         typeof value === "string" ||
@@ -306,6 +341,7 @@ export class GoValueRenderer {
     obj: Record<string, unknown>,
     iface: Interface,
     ctx: RenderContext,
+    prefix: string,
   ): string {
     const props = ctx.resolver.getInterfaceProperties(
       iface.name.name,
@@ -314,12 +350,59 @@ export class GoValueRenderer {
     const goName = goTypeName(iface.name);
     ctx.imports.addTypes();
 
-    const nested = ctx.nested();
-    const fields = this.renderStructFields(obj, props, nested);
-    if (!fields.trim()) {
-      return `&types.${goName}{}`;
+    const additionalProp = ctx.resolver.getAdditionalPropertyBehavior(iface);
+
+    const knownEntries: Record<string, unknown> = {};
+    const additionalEntries: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const isKnown = props.some(
+        (p) => p.name === key || p.aliases?.includes(key),
+      );
+      if (isKnown) {
+        knownEntries[key] = value;
+      } else if (additionalProp) {
+        additionalEntries[key] = value;
+      } else {
+        knownEntries[key] = value;
+      }
     }
-    return `&types.${goName}{\n${fields}\n${ctx.indent()}}`;
+
+    const nested = ctx.nested();
+    const lines: string[] = [];
+
+    const knownFields = this.renderStructFields(knownEntries, props, nested);
+    if (knownFields.trim()) {
+      lines.push(knownFields);
+    }
+
+    if (
+      additionalProp &&
+      Object.keys(additionalEntries).length > 0
+    ) {
+      const keyType = this.goTypeString(additionalProp.key, ctx);
+      const valueType = this.goTypeString(additionalProp.value, ctx);
+      const mapNested = nested.nested();
+      const mapEntries: string[] = [];
+      for (const [k, v] of Object.entries(additionalEntries)) {
+        const renderedValue = this.renderGoValue(
+          v,
+          additionalProp.value,
+          mapNested,
+        );
+        mapEntries.push(
+          `${mapNested.indent()}"${this.escapeGoString(k)}": ${renderedValue},`,
+        );
+      }
+      const mapLiteral = `map[${keyType}]${valueType}{\n${mapEntries.join(
+        "\n",
+      )}\n${nested.indent()}}`;
+      lines.push(`${nested.indent()}${goName}: ${mapLiteral},`);
+    }
+
+    if (lines.length === 0) {
+      return `${prefix}types.${goName}{}`;
+    }
+    return `${prefix}types.${goName}{\n${lines.join("\n")}\n${ctx.indent()}}`;
   }
 
   private renderDictionaryOf(
@@ -386,6 +469,16 @@ export class GoValueRenderer {
     ctx: RenderContext,
     prop?: Property,
   ): string {
+    const classification = ctx.resolver.classifyUnion(typeInfo);
+    if (classification === "integer_string") {
+      const strValue = String(value);
+      if (prop && !prop.required) {
+        ctx.imports.addSome();
+        return `some.String("${this.escapeGoString(strValue)}")`;
+      }
+      return `"${this.escapeGoString(strValue)}"`;
+    }
+
     if (typeInfo.items.length === 2) {
       const [a, b] = typeInfo.items;
       if (

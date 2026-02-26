@@ -6,8 +6,6 @@ export function toPascalCase(name: string): string {
     .split("_")
     .map((part) => {
       if (part.length === 0) return "";
-      if (part.toLowerCase() === "id") return "ID";
-      if (part.toLowerCase() === "ip") return "IP";
       return part.charAt(0).toUpperCase() + part.slice(1);
     })
     .join("");
@@ -32,8 +30,15 @@ export function apiToGoMethod(api: string): {
 export function resolveGoFieldName(name: string, props?: Property[]): string {
   if (props) {
     for (const prop of props) {
-      if (prop.name === name && prop.codegenName != undefined) {
-        return toPascalCase(prop.codegenName);
+      if (prop.name === name || prop.aliases?.includes(name)) {
+        if (prop.codegenName != undefined) {
+          return toPascalCase(prop.codegenName);
+        }
+        const canonical = prop.name;
+        if (canonical.startsWith("_")) {
+          return toPascalCase(canonical.slice(1)) + "_";
+        }
+        return toPascalCase(canonical);
       }
     }
   }
