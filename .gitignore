@@ -59,3 +59,4 @@ tests/integration/es-client/
 .tmp.request.*
 __pycache__
 src/exporters/templates.js
+src/schema-no-generics.json
