@@ -239,7 +239,9 @@ func main() {
       const lines: string[] = [];
       for (const [key, value] of Object.entries(body)) {
         lines.push(
-          `${ctx.indent()}"${renderer.escapeGoString(key)}": ${renderer.renderLiteralValue(value, ctx)},`,
+          `${ctx.indent()}"${renderer.escapeGoString(
+            key,
+          )}": ${renderer.renderLiteralValue(value, ctx)},`,
         );
       }
       parts.push(`${indent(1)}Request(map[string]interface{}{`);
