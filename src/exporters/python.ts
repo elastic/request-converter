@@ -89,7 +89,23 @@ export class PythonExporter implements FormatExporter {
       Handlebars.registerHelper(
         "supportedApi",
         function (this: ParsedRequest, options) {
-          if (!UNSUPPORTED_APIS.test(this.api as string) && this.request) {
+          let supported = true;
+          if (this.availability) {
+            if (this.availability.stack) {
+              if (this.availability.stack.visibility == "feature_flag") {
+                supported = false;
+              }
+            } else if (this.availability.serverless) {
+              if (this.availability.serverless.visibility !== "feature_flag") {
+                supported = false;
+              }
+            }
+          }
+          if (
+            !UNSUPPORTED_APIS.test(this.api as string) &&
+            this.request &&
+            supported
+          ) {
             return options.fn(this);
           } else {
             return options.inverse(this);

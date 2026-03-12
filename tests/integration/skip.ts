@@ -96,13 +96,29 @@ const skip: Record<string, SkippedTest> = {
     reason: "client passes argument in URL and in body",
     formats: ["javascript"],
   },
-  PostStreamsDisableRequestExample1: {
-    reason: "example is missing a required `name` argument",
-    formats: ["ruby", "javascript", "python"],
+  IndicesDeleteSampleConfigurationRequest1: {
+    reason: "removed endpoint",
+    formats: ["ruby"],
   },
-  PostStreamsEnableRequestExample1: {
-    reason: "example is missing a required `name` argument",
-    formats: ["ruby", "javascript", "python"],
+  IndicesGetAllSampleConfigurationRequest1: {
+    reason: "removed endpoint",
+    formats: ["ruby", "javascript"],
+  },
+  GetRandomSampleRequest1: {
+    reason: "removed endpoint",
+    formats: ["ruby", "javascript"],
+  },
+  IndicesGetSampleConfigurationRequest1: {
+    reason: "removed endpoint",
+    formats: ["ruby", "javascript"],
+  },
+  GetRandomSampleStatsRequest1: {
+    reason: "removed endpoint",
+    formats: ["ruby", "javascript"],
+  },
+  IndicesPutSampleConfigurationRequest1: {
+    reason: "removed endpoint",
+    formats: ["ruby", "javascript"],
   },
 };
 

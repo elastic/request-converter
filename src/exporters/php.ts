@@ -30,13 +30,27 @@ function isSupportedAPI(req: ParsedRequest) {
   }
 
   let supported = false;
-  if (
-    req.availability &&
-    (req.availability.stack?.visibility !== "private" ||
-      req.availability.stack?.stability !== "experimental" ||
-      (req.availability.serverless &&
-        req.availability.serverless.visibility !== "private"))
-  ) {
+  if (req.availability) {
+    if (req.availability.stack) {
+      if (
+        req.availability.stack.visibility === "public" ||
+        req.availability.stack.visibility === undefined ||
+        (req.availability.stack.visibility === "private" &&
+          req.availability.stack.stability !== "experimental")
+      ) {
+        supported = true;
+      }
+    } else if (req.availability.serverless) {
+      if (
+        req.availability.serverless.visibility === "public" ||
+        req.availability.serverless.visibility === undefined
+      ) {
+        supported = true;
+      }
+    } else {
+      supported = true;
+    }
+  } else {
     supported = true;
   }
   return supported;
