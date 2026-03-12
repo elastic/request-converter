@@ -917,13 +917,7 @@ func main() {
   });
 
   it("converts cat health with boolean query param from behavior to go", async () => {
-    expect(
-      await convertRequests(
-        `GET /_cat/health?v`,
-        "go",
-        {},
-      ),
-    ).toEqual(
+    expect(await convertRequests(`GET /_cat/health?v`, "go", {})).toEqual(
       `res, err := es.Cat.Health().
     V(true).
     Do(context.Background())

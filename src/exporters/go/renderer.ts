@@ -232,9 +232,7 @@ export class GoValueRenderer {
     const resolved = ctx.resolver.resolveTypeAlias(typeInfo);
     if (resolved !== typeInfo) {
       if (resolved.kind === "union_of") {
-        const classification = ctx.resolver.classifyUnion(
-          resolved as UnionOf,
-        );
+        const classification = ctx.resolver.classifyUnion(resolved as UnionOf);
         if (classification === "integer_string") {
           const strValue = String(value);
           if (prop && !prop.required) {
@@ -375,10 +373,7 @@ export class GoValueRenderer {
       lines.push(knownFields);
     }
 
-    if (
-      additionalProp &&
-      Object.keys(additionalEntries).length > 0
-    ) {
+    if (additionalProp && Object.keys(additionalEntries).length > 0) {
       const keyType = this.goTypeString(additionalProp.key, ctx);
       const valueType = this.goTypeString(additionalProp.value, ctx);
       const mapNested = nested.nested();
