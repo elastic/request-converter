@@ -25,6 +25,8 @@ jobs:
       - run: npm test
   publish:
     runs-on: ubuntu-latest
+    needs:
+      - build
     permissions:
       contents: read
       id-token: write
