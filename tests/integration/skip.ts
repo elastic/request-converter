@@ -44,6 +44,10 @@ const skip: Record<string, SkippedTest> = {
     reason: "client does not have this endpoint yet",
     formats: ["python"],
   },
+  PostChatCompletionRequestExample4: {
+    reason: "client does not have this endpoint yet",
+    formats: ["python"],
+  },
   StreamInferenceRequestExample1: {
     reason: "client does not implement streaming endpoints",
     formats: ["python"],
