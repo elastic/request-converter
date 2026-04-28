@@ -48,6 +48,10 @@ const skip: Record<string, SkippedTest> = {
     reason: "client does not have this endpoint yet",
     formats: ["python"],
   },
+  PostChatCompletionRequestExample5: {
+    reason: "client does not have this endpoint yet",
+    formats: ["python"],
+  },
   StreamInferenceRequestExample1: {
     reason: "client does not implement streaming endpoints",
     formats: ["python"],
@@ -68,10 +72,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client converts string to a number",
     formats: ["javascript"],
   },
-  MlPutJobRequestExample1: {
-    reason: "client passes job id both in the URL and the body",
-    formats: ["javascript"],
-  },
   MlGetRecordsExample1: {
     reason: "client converts string to a number",
     formats: ["javascript"],
@@ -84,21 +84,9 @@ const skip: Record<string, SkippedTest> = {
     reason: "example passes boolean in string format",
     formats: ["python"],
   },
-  SecurityPutUserRequestExample1: {
-    reason: "client passes user id both in the URL and the body",
-    formats: ["javascript"],
-  },
   SnapshotRestoreRequestExample2: {
     reason: "example passes invalid `indices` field in the body",
     formats: ["python"],
-  },
-  MlStartDataFrameAnalyticsExample1: {
-    reason: "client passes argument in URL and in body",
-    formats: ["javascript"],
-  },
-  MlStopDataFrameAnalyticsExample1: {
-    reason: "client passes argument in URL and in body",
-    formats: ["javascript"],
   },
   IndicesDeleteSampleConfigurationRequest1: {
     reason: "removed endpoint",
