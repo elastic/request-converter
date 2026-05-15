@@ -32,5 +32,7 @@ if [[ "$1" != "" ]]; then
     mvn compile assembly:single
     if [[ "$?" == "0" ]]; then
         java -jar target/app-1.0-SNAPSHOT-jar-with-dependencies.jar || true
+    else
+        exit 1
     fi
 fi
