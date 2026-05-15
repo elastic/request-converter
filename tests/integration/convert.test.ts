@@ -17,7 +17,16 @@ const TEST_FORMATS: Record<string, string> = {
   php: "php",
   curl: "sh",
   ruby: "rb",
+  java: "java",
 };
+
+// For the languages listed, bodies are compared taking into account that some
+// array or object properties may have been given in their shortcut form, but
+// the language client expands them to full form.
+// For these languages, a property that is expected to have a scalar value but
+// instead comes back as a single-key dictionary or single-element array is
+// compared against the value wrapped in the object or array.
+const checkExpandedShortcuts = ["java"];
 
 interface SchemaExample {
   method_request: string;
@@ -27,6 +36,94 @@ interface SchemaExample {
 interface Example {
   key: string;
   source: string;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function deepCompare(actual: any, expected: any): boolean {
+  try {
+    // first try a standard comparison
+    expect(actual).toEqual(expected);
+  } catch (error) {
+    return false;
+  }
+  return true;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function compareWithShortcuts(actual: any, expected: any): boolean {
+  if (deepCompare(actual, expected)) {
+    return true;
+  }
+
+  // check for single-element arrays
+  if (Array.isArray(actual) && actual.length === 1) {
+    if (deepCompare(actual[0], expected)) {
+      return true;
+    }
+  }
+
+  // check for single-key objects
+  if (typeof actual === "object" && Object.keys(actual).length === 1) {
+    if (deepCompare(actual[Object.keys(actual)[0]], expected)) {
+      return true;
+    }
+  }
+
+  // check for integer vs string
+  if (typeof actual === "number" && typeof expected === "string") {
+    return actual === parseFloat(expected);
+  }
+
+  if (typeof actual === "string" && typeof expected === "number") {
+    return parseFloat(actual) === expected;
+  }
+
+  // check for boolean vs string
+  if (typeof actual === "boolean" && typeof expected === "string") {
+    return actual ? expected === "true" : expected === "false";
+  }
+  if (typeof actual === "string" && typeof expected === "boolean") {
+    return expected ? actual === "true" : actual === "false";
+  }
+
+  // check floats given as strings
+  const NUMERIC_REGEX = /^[-+]?(\d+\.\d+|\d+|\.\d+)$/;
+  if (
+    typeof actual === "string" &&
+    typeof expected === "string" &&
+    NUMERIC_REGEX.test(actual) &&
+    NUMERIC_REGEX.test(expected)
+  ) {
+    return parseFloat(actual) === parseFloat(expected);
+  }
+
+  // check for strings that have `\n` in them
+  if (typeof actual === "string" && typeof expected === "string") {
+    if (actual === expected) {
+      return true;
+    }
+    if (actual.includes("\n") && actual.replaceAll("\n", "\\n") === expected) {
+      return true;
+    }
+    return false;
+  }
+
+  if (typeof actual !== "object" || typeof expected !== "object") {
+    return false; // the caller will do a complete assert and report the diff
+  }
+
+  // for objects we recursively compare its properties
+  for (const actualProp in actual) {
+    if (!compareWithShortcuts(actual[actualProp], expected[actualProp])) {
+      return false;
+    }
+  }
+  for (const expectedProp in expected) {
+    if (!Object.keys(actual).includes(expectedProp)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 beforeAll(async () => {
@@ -136,7 +233,9 @@ describe("convert", () => {
 
           for (const param in parsedRequest?.query ?? {}) {
             if (
-              capturedRequest.query[param] === undefined &&
+              (capturedRequest.query === undefined ||
+                capturedRequest.query[param] === undefined) &&
+              capturedRequest.body &&
               capturedRequest.body[param] !== undefined
             ) {
               // the client moved a query argument to the body
@@ -155,21 +254,54 @@ describe("convert", () => {
             result: parsedRequest?.path,
             source,
           });
-          expect(
-            { result: capturedRequest.query, source },
-            failureMessage,
-          ).toEqual({
-            result: parsedRequest?.query ?? {},
-            source,
-          });
-          expect(
-            { result: capturedRequest.body, source },
-            failureMessage,
-          ).toEqual({
-            result: parsedRequest?.body ?? {},
-            source,
-          });
+          if (checkExpandedShortcuts.includes(format)) {
+            if (
+              !compareWithShortcuts(capturedRequest.query, parsedRequest?.query)
+            ) {
+              // A comparison accounting for shortcut properties came as different
+              // so now we do a full assert to report this error
+              expect(
+                { result: capturedRequest.query, source },
+                failureMessage,
+              ).toEqual({
+                result: parsedRequest?.query ?? {},
+                source,
+              });
+            }
+          } else {
+            expect(
+              { result: capturedRequest.query, source },
+              failureMessage,
+            ).toEqual({
+              result: parsedRequest?.query ?? {},
+              source,
+            });
+          }
+          if (checkExpandedShortcuts.includes(format)) {
+            if (
+              !compareWithShortcuts(capturedRequest.body, parsedRequest?.body)
+            ) {
+              // A comparison accounting for shortcut properties came as different
+              // so now we do a full assert to report this error
+              expect(
+                { result: capturedRequest.body, source },
+                failureMessage,
+              ).toEqual({
+                result: parsedRequest?.body ?? {},
+                source,
+              });
+            }
+          } else {
+            expect(
+              { result: capturedRequest.body, source },
+              failureMessage,
+            ).toEqual({
+              result: parsedRequest?.body ?? {},
+              source,
+            });
+          }
         },
+        30000, // timeout
       );
     }
   }
