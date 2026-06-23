@@ -60,10 +60,6 @@ const skip: Record<string, SkippedTest> = {
     reason: "client converts string to a number",
     formats: ["javascript"],
   },
-  MlGetInfluencersExample1: {
-    reason: "client passes query properties in the body",
-    formats: ["python", "javascript"],
-  },
   MlGetModelSnapshotsExample1: {
     reason: "client converts string to a number",
     formats: ["javascript"],
