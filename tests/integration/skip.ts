@@ -108,6 +108,34 @@ const skip: Record<string, SkippedTest> = {
     reason: "removed endpoint",
     formats: ["ruby", "javascript"],
   },
+  CancelReindexRequestExample1: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  CancelReindexRequestExample2: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  GetReindexRequestExample1: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  GetReindexRequestExample2: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  ListReindexRequestExample1: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  ListReindexRequestExample2: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  MlGetInfluencersExample1: {
+    reason: "example includes quotes in query argument",
+    formats: ["curl"],
+  },
 };
 
 export function shouldBeSkipped(
