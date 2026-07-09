@@ -212,11 +212,9 @@ npm run watch:test
 
 ### Integration tests
 
-The integration tests run the examples stored in the schema.json file through the conversion process, execute the generated code, captures the request that the generated code issues, and compares it against the initial example, with some amount of flexibility due to difference in how each language client interprets requests. This is a fairly complex process that works well for the majority of the examples.
+The integration tests run the examples stored in the schema.json file through the conversion process, execute the generated code, capture the requests that the generated code issues, and compare them against the initial examples, with some amount of flexibility due to differences in how each language client interprets requests. This is a fairly complex process that works well for the majority but not all of the examples. Examples that are known to fail can be noted in the `tests/integration/skip.ts` file.
 
-Examples that are known to fail can be noted in the `tests/integration/skip.ts` file.
-
-The entire integration test suite runs every Tuesday at 2AM UTC in a GitHub Actions workflow. It is also possible to trigger a run on demand from the [workflow page](https://github.com/elastic/request-converter/actions/workflows/integration.yml). It currently takes about 5 minutes for the full run, with all the languages running in parallel.
+The entire integration test suite runs every Tuesday at 2AM UTC in a GitHub Actions scheduled workflow. It is also possible to trigger a run on demand from the [workflow page](https://github.com/elastic/request-converter/actions/workflows/integration.yml). It currently takes about 5 minutes for the full run, with all the languages running in parallel. A local run with languages running back to back takes can be expected to take 15-20 minutes to complete.
 
 To run the integration tests locally, first install dependencies needed for all supported languages:
 
