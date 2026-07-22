@@ -758,6 +758,21 @@ response1 = client.search(
         convertRequests(kibanaScript, new CSharpExporter(fixture), {}),
       ).rejects.toThrowError("Cannot perform conversion");
     });
+
+    const realBundle = process.env.CSHARP_REQUEST_CONVERTER_BUNDLE;
+    (realBundle ? it : it.skip)(
+      "converts a search request with the real bundle",
+      async () => {
+        const code = await convertRequests(
+          'GET /my-index-000001/_search?from=40&size=20\n{"query":{"term":{"user.id":{"value":"kimchy"}}}}',
+          "csharp",
+          {},
+        );
+        expect(code).toContain("new SearchRequestDescriptor<MyDocument>()");
+        expect(code).toContain(".Field(x => x.User.Id)");
+      },
+      30_000,
+    );
   });
 
   describe("web external exporter tests", () => {

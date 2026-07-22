@@ -78,6 +78,14 @@
     "handlebars": "^4.7.8",
     "prettier": "^2.8.8"
   },
+  "peerDependencies": {
+    "@elastic/request-converter-dotnet": ">=8.19.0"
+  },
+  "peerDependenciesMeta": {
+    "@elastic/request-converter-dotnet": {
+      "optional": true
+    }
+  },
   "directories": {
     "test": "tests"
   },
