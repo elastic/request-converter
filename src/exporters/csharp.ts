@@ -40,6 +40,9 @@ export class CSharpExporter implements FormatExporter {
     requests: ParsedRequest[],
     options: ConvertOptions,
   ): Promise<string> {
+    if (!requests.every((request) => request.service === "es")) {
+      throw new Error("Cannot perform conversion");
+    }
     return (await this.getExporter()).convert(requests, {
       document_type_name: "MyDocument",
       syntax_mode: "descriptor",

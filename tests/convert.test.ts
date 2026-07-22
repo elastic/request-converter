@@ -751,6 +751,13 @@ response1 = client.search(
         ),
       ).rejects.toThrow(/request-converter-dotnet/);
     });
+
+    it("errors when converting Kibana to C#", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      await expect(
+        convertRequests(kibanaScript, new CSharpExporter(fixture), {}),
+      ).rejects.toThrowError("Cannot perform conversion");
+    });
   });
 
   describe("web external exporter tests", () => {
