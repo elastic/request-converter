@@ -712,6 +712,47 @@ response1 = client.search(
     ).toEqual("search,info");
   });
 
+  describe("csharp exporter", () => {
+    const fixture = "tests/fixtures/csharp-bundle/main.mjs";
+
+    it("applies typed-document descriptor defaults", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        {},
+      );
+      expect(code).toContain('"syntax_mode":"descriptor"');
+      expect(code).toContain('"use_strongly_typed_document":true');
+      expect(code).toContain('"document_type_name":"MyDocument"');
+    });
+
+    it("lets callers override the defaults", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        { syntax_mode: "object_initializer" },
+      );
+      expect(code).toContain('"syntax_mode":"object_initializer"');
+    });
+
+    it("is listed as a format", () => {
+      expect(listFormats()).toContain("C#");
+    });
+
+    it("fails with a helpful error when the bundle is missing", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      await expect(
+        convertRequests(
+          "GET /_search\n{}",
+          new CSharpExporter("./does-not-exist.mjs"),
+          {},
+        ),
+      ).rejects.toThrow(/request-converter-dotnet/);
+    });
+  });
+
   describe("web external exporter tests", () => {
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const baseUrl = "http://127.0.0.1:5000";
