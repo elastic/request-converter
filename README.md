@@ -160,6 +160,16 @@ To use a locally built bundle instead (for example while developing the
 bundle itself), set the `CSHARP_REQUEST_CONVERTER_BUNDLE` environment
 variable to the path of its entry point before running the converter.
 
+Supported options (snake_case, matching the .NET bundle's wire contract):
+
+| Option name | Type | Required | Description |
+| ----------- | ---- | -------- | ----------- |
+| `syntax_mode` | `string` | no | `"descriptor"` for fluent descriptor chains, or `"object_initializer"` for object initializers. The default is `"descriptor"`. |
+| `use_strongly_typed_document` | `boolean` | no | If `true`, field accessors use lambdas on an illustrative document type. The default is `true`. |
+| `document_type_name` | `string` | no | The document type name used in generated code. The default is `"MyDocument"`. |
+| `type_name_style` | `string` | no | `"Simplified"`, `"Fqn"`, or `"GlobalFqn"` type-name rendering. The default is `"Simplified"`. |
+| `debug` | `boolean` | no | If `true`, append converter diagnostics to error messages. The default is `false`. |
+
 ## Command-Line Interface
 
 For convenience, a CLI that wraps the `convertRequests` function is also available.

@@ -11,12 +11,24 @@ import { ParsedRequest } from "../parse";
 
 const BUNDLE_PACKAGE = "@elastic/request-converter-dotnet";
 
-// This package compiles to CommonJS, where tsc downlevels `import()` to
-// `require()`, which cannot load the ES-module WASM bundle. The indirection
-// keeps a true dynamic import.
-const dynamicImport = new Function("specifier", "return import(specifier)") as (
+type DynamicImport = (
   specifier: string,
 ) => Promise<{ boot?: () => Promise<ExternalFormatExporter> }>;
+
+let dynamicImport: DynamicImport | undefined;
+
+// This package compiles to CommonJS, where tsc downlevels `import()` to
+// `require()`, which cannot load the ES-module WASM bundle. The indirection
+// keeps a true dynamic import. Built lazily, on first use, so that merely
+// importing this module does not run an eval-family construct under a CSP
+// that forbids it (e.g. a host embedding the converter for other languages).
+function getDynamicImport(): DynamicImport {
+  dynamicImport ??= new Function(
+    "specifier",
+    "return import(specifier)",
+  ) as DynamicImport;
+  return dynamicImport;
+}
 
 /** Converts requests to C# code for the .NET Elasticsearch client.
  *
@@ -67,7 +79,7 @@ export class CSharpExporter implements FormatExporter {
       const importSpecifier = existsSync(specifier)
         ? pathToFileURL(resolve(specifier)).href
         : specifier;
-      module = await dynamicImport(importSpecifier);
+      module = await getDynamicImport()(importSpecifier);
     } catch (error) {
       throw new Error(
         `The C# exporter requires the optional ${BUNDLE_PACKAGE} package ` +

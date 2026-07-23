@@ -741,6 +741,44 @@ response1 = client.search(
       expect(listFormats()).toContain("C#");
     });
 
+    it("does not build the dynamic-import shim until a conversion loads the bundle", async () => {
+      const originalFunction = global.Function;
+      // Fails only the exact construction the shim performs, so unrelated
+      // Function/eval usage elsewhere in the module graph is unaffected.
+      global.Function = new Proxy(originalFunction, {
+        construct(target, args) {
+          if (
+            args[0] === "specifier" &&
+            args[1] === "return import(specifier)"
+          ) {
+            throw new Error("new Function must not run at import time");
+          }
+          return Reflect.construct(target, args);
+        },
+      });
+      try {
+        // isolateModulesAsync gives this import its own registry, so loading
+        // src/convert.ts (which eagerly imports csharp.ts) here re-runs
+        // module-scope code under the patched Function above.
+        await jest.isolateModulesAsync(async () => {
+          const freshConvert: typeof import("../src/convert") = await import(
+            "../src/convert"
+          );
+          const { CSharpExporter }: typeof import("../src/exporters/csharp") =
+            await import("../src/exporters/csharp");
+          global.Function = originalFunction;
+          const code = await freshConvert.convertRequests(
+            "GET /my-index/_search\n{}",
+            new CSharpExporter(fixture),
+            {},
+          );
+          expect(code).toContain('"syntax_mode":"descriptor"');
+        });
+      } finally {
+        global.Function = originalFunction;
+      }
+    });
+
     it("fails with a helpful error when the bundle is missing", async () => {
       const { CSharpExporter } = await import("../src/exporters/csharp");
       await expect(
