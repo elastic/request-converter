@@ -79,7 +79,7 @@ const { convertRequests, listFormats } = require("@elastic/request-converter");
 
 ## Available Formats
 
-At this time the converter supports `curl`, `python`, `javascript`, `php` and `ruby`. Work is currently in
+At this time the converter supports `curl`, `python`, `javascript`, `php`, `ruby` and `csharp`. Work is currently in
 progress to add support for more languages.
 
 ### curl
@@ -142,6 +142,33 @@ Supported options:
 | `printResponse` | `boolean` | no | If `true`, add code to print the response. The default is `false`. |
 | `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
 | `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use. The default is `http://localhost:9200`. |
+
+### csharp
+
+The C# exporter generates code for the Elasticsearch .NET client. Unlike the
+other exporters, code generation runs inside a .NET WASM bundle shipped
+separately as the `@elastic/request-converter-dotnet` package, since the .NET
+client's code model isn't available in JavaScript. Install it alongside this
+package, choosing the major.minor version that matches your target
+Elasticsearch version:
+
+```bash
+npm install @elastic/request-converter-dotnet
+```
+
+To use a locally built bundle instead (for example while developing the
+bundle itself), set the `CSHARP_REQUEST_CONVERTER_BUNDLE` environment
+variable to the path of its entry point before running the converter.
+
+Supported options (snake_case, matching the .NET bundle's wire contract):
+
+| Option name | Type | Required | Description |
+| ----------- | ---- | -------- | ----------- |
+| `syntax_mode` | `string` | no | `"descriptor"` for fluent descriptor chains, or `"object_initializer"` for object initializers. The default is `"descriptor"`. |
+| `use_strongly_typed_document` | `boolean` | no | If `true`, field accessors use lambdas on an illustrative document type. The default is `true`. |
+| `document_type_name` | `string` | no | The document type name used in generated code. The default is `"MyDocument"`. |
+| `type_name_style` | `string` | no | `"Simplified"`, `"Fqn"`, or `"GlobalFqn"` type-name rendering. The default is `"Simplified"`. |
+| `debug` | `boolean` | no | If `true`, append converter diagnostics to error messages. The default is `false`. |
 
 ## Command-Line Interface
 
