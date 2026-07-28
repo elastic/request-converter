@@ -79,7 +79,7 @@
     "prettier": "^2.8.8"
   },
   "peerDependencies": {
-    "@elastic/request-converter-dotnet": ">=8.19.0"
+    "@elastic/request-converter-dotnet": "latest-9.5"
   },
   "peerDependenciesMeta": {
     "@elastic/request-converter-dotnet": {
