@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 8.19.2 (2026-07-29)
+* Add C# exporter backed by the .NET WASM converter ([#107](https://github.com/elastic/request-converter/pull/107))
+
 ## 8.19.1 (2025-11-13)
 * Fix escaping of single quotes in ndjson payloads in the curl exporter
 
