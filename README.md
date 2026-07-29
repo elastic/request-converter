@@ -153,7 +153,7 @@ package, choosing the major.minor version that matches your target
 Elasticsearch version:
 
 ```bash
-npm install @elastic/request-converter-dotnet@latest-8.19
+npm install @elastic/request-converter-dotnet@8.19
 ```
 
 To use a locally built bundle instead (for example while developing the
