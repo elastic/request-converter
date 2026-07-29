@@ -8,6 +8,10 @@
   "bin": {
     "es-request-converter": "dist/es-request-converter.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/elastic/request-converter"
+  },
   "scripts": {
     "update-schema": "node scripts/update-schema.mjs",
     "release": "./scripts/release.sh",
