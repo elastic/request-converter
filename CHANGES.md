@@ -1,5 +1,8 @@
 # request-converter change log
 
+## 9.4.1 (2026-07-29)
+* Add C# exporter backed by the .NET WASM converter ([#107](https://github.com/elastic/request-converter/pull/107))
+
 ## 9.2.1 (2025-11-12)
 * Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
 * Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))
