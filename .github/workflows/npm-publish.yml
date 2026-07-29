@@ -24,4 +24,21 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm test
-      - run: npm publish --access public
+      # npm refuses to publish a version lower than the current "latest" without
+      # an explicit dist-tag (it won't move "latest" backwards). Tag "latest" only
+      # for the highest version; otherwise use "latest-<branch>". The "latest-"
+      # prefix avoids a bare branch name like "9.4", which npm rejects as a
+      # dist-tag because it parses as a semver range.
+      - name: Compute dist-tag
+        id: dist-tag
+        run: |
+          CURRENT_LATEST=$(npm view @elastic/request-converter version 2>/dev/null || echo "0.0.0")
+          NEW_VERSION=$(jq -r .version package.json)
+          if [ "$(printf '%s\n%s\n' "$CURRENT_LATEST" "$NEW_VERSION" | sort -V | tail -n1)" = "$NEW_VERSION" ]; then
+            TAG="latest"
+          else
+            TAG="latest-${{ github.event.inputs.branch }}"
+          fi
+          echo "Publishing ${NEW_VERSION} with dist-tag ${TAG} (current latest: ${CURRENT_LATEST})"
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+      - run: npm publish --access public --tag "${{ steps.dist-tag.outputs.tag }}"
