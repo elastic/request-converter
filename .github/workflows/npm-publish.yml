@@ -5,12 +5,21 @@ on:
       branch:
         description: "Git branch to build and publish"
         required: true
+
+permissions:
+  contents: read
+  id-token: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      branch: ${{ github.event.inputs.branch }}
+      dist-tag: ${{ steps.dist-tag.outputs.tag }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -24,6 +33,9 @@ jobs:
       - run: npm install
       - run: npm run build
       - run: npm test
+      - name: Resolve version
+        id: version
+        run: echo "version=$(jq -r .version package.json)" >> "$GITHUB_OUTPUT"
       # npm refuses to publish a version lower than the current "latest" without
       # an explicit dist-tag (it won't move "latest" backwards). Tag "latest" only
       # for the highest version; otherwise use "latest-<branch>". The "latest-"
@@ -42,3 +54,16 @@ jobs:
           echo "Publishing ${NEW_VERSION} with dist-tag ${TAG} (current latest: ${CURRENT_LATEST})"
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
       - run: npm publish --access public --tag "${{ steps.dist-tag.outputs.tag }}"
+
+  # After a successful publish, open a bump PR in elasticsearch-specification targeting
+  # the matching major.minor branch (and main when this publish moved the "latest" tag).
+  bump-spec:
+    needs: build
+    if: ${{ needs.build.result == 'success' }}
+    uses: ./.github/workflows/bump-elasticsearch-specification.yml
+    with:
+      version: ${{ needs.build.outputs.version }}
+      branch: ${{ needs.build.outputs.branch }}
+      dist-tag: ${{ needs.build.outputs.dist-tag }}
+      package: "@elastic/request-converter"
+      dry-run: false
