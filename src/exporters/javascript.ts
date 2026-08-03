@@ -11,6 +11,7 @@ const UNSUPPORTED_APIS = new RegExp("^_internal.*$");
 
 export class JavaScriptExporter implements FormatExporter {
   _template: Handlebars.TemplateDelegate;
+  _helpers: Record<string, Handlebars.HelperDelegate> | undefined;
 
   async check(requests: ParsedRequest[]): Promise<boolean> {
     // only return true if all requests are for Elasticsearch
@@ -26,29 +27,37 @@ export class JavaScriptExporter implements FormatExporter {
     if (!(await this.check(requests))) {
       throw new Error("Cannot perform conversion");
     }
-    const output = this.template({ requests, ...options });
+    const output = this.template(
+      { requests, ...options },
+      { helpers: this.helpers },
+    );
     return prettier.format(output, {
       parser: "typescript",
       plugins: [prettierTypeScript],
     });
   }
 
-  get template(): Handlebars.TemplateDelegate {
-    if (!this._template) {
-      Handlebars.registerHelper("json", function (context) {
-        const val = JSON.stringify(context ?? null, null, 2);
+  // Helpers are handed to the template at render time instead of being
+  // registered on the global Handlebars environment, because every exporter
+  // defines helpers under the same names but with different behavior.
+  get helpers(): Record<string, Handlebars.HelperDelegate> {
+    if (!this._helpers) {
+      this._helpers = {
+        json: function (context) {
+          const val = JSON.stringify(context ?? null, null, 2);
 
-        // turn number strings into numbers
-        if (val.match(/^"\d+"$/)) {
-          return parseInt(val.replaceAll('"', ""), 10);
-        }
-        return val;
-      });
+          // turn number strings into numbers
+          if (val.match(/^"\d+"$/)) {
+            return parseInt(val.replaceAll('"', ""), 10);
+          }
+          return val;
+        },
 
-      // custom conditional for requests without any arguments
-      Handlebars.registerHelper(
-        "hasArgs",
-        function (this: ParsedRequest, options) {
+        // custom conditional for requests without any arguments
+        hasArgs: function (
+          this: ParsedRequest,
+          options: Handlebars.HelperOptions,
+        ) {
           if (
             Object.keys(this.params ?? {}).length +
               Object.keys(this.query ?? {}).length +
@@ -60,40 +69,41 @@ export class JavaScriptExporter implements FormatExporter {
             return options.inverse(this);
           }
         },
-      );
 
-      // custom conditional to separate supported vs unsupported APIs
-      Handlebars.registerHelper(
-        "supportedApi",
-        function (this: ParsedRequest, options) {
+        // custom conditional to separate supported vs unsupported APIs
+        supportedApi: function (
+          this: ParsedRequest,
+          options: Handlebars.HelperOptions,
+        ) {
           if (!UNSUPPORTED_APIS.test(this.api as string) && this.request) {
             return options.fn(this);
           } else {
             return options.inverse(this);
           }
         },
-      );
 
-      // attribute name renderer that considers aliases and code-specific names
-      // arguments:
-      //   name: the name of the attribute
-      //   props: the list of schema properties this attribute belongs to
-      Handlebars.registerHelper("alias", (name, props) => {
-        if (props) {
-          for (const prop of props) {
-            if (prop.name == name && prop.codegenName != undefined) {
-              return prop.codegenName;
+        // attribute name renderer that considers aliases and code-specific names
+        // arguments:
+        //   name: the name of the attribute
+        //   props: the list of schema properties this attribute belongs to
+        alias: (name, props) => {
+          if (props) {
+            for (const prop of props) {
+              if (prop.name == name && prop.codegenName != undefined) {
+                return prop.codegenName;
+              }
             }
           }
-        }
-        return name;
-      });
+          return name;
+        },
 
-      // custom conditional to check for request body kind
-      // the argument can be "properties" or "value"
-      Handlebars.registerHelper(
-        "ifRequestBodyKind",
-        function (this: ParsedRequest, kind: string, options) {
+        // custom conditional to check for request body kind
+        // the argument can be "properties" or "value"
+        ifRequestBodyKind: function (
+          this: ParsedRequest,
+          kind: string,
+          options: Handlebars.HelperOptions,
+        ) {
           const bodyKind = this.request?.body?.kind ?? "value";
 
           if (bodyKind == kind) {
@@ -102,10 +112,15 @@ export class JavaScriptExporter implements FormatExporter {
             return options.inverse(this);
           }
         },
-      );
 
-      Handlebars.registerHelper("camelCase", (text) => toCamelCase(text));
+        camelCase: (text) => toCamelCase(text),
+      };
+    }
+    return this._helpers;
+  }
 
+  get template(): Handlebars.TemplateDelegate {
+    if (!this._template) {
       if (process.env.NODE_ENV !== "test") {
         this._template = Handlebars.templates["javascript.tpl"];
       } else {
