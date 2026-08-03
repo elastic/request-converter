@@ -603,6 +603,28 @@ response1 = client.search(
     ).rejects.toThrowError("Cannot perform conversion");
   });
 
+  it("converts each language independently of conversion order", async () => {
+    // Every template exporter defines helpers under the same names ("alias",
+    // "supportedApi", "hasArgs", ...) but with language specific behavior, so
+    // converting one language must not affect the output of any other.
+    const formats = ["python", "javascript", "php", "ruby"];
+    const expected: Record<string, string> = {};
+    for (const format of formats) {
+      expected[format] = (await convertRequests(
+        devConsoleScript,
+        format,
+        {},
+      )) as string;
+    }
+
+    // convert again, now that every exporter has been initialized
+    for (const format of formats) {
+      expect(await convertRequests(devConsoleScript, format, {})).toEqual(
+        expected[format],
+      );
+    }
+  });
+
   it("supports a custom exporter", async () => {
     class MyExporter implements FormatExporter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
