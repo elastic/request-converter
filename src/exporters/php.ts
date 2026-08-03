@@ -44,6 +44,7 @@ function isSupportedAPI(req: ParsedRequest) {
 
 export class PHPExporter implements FormatExporter {
   template: Handlebars.TemplateDelegate | undefined;
+  helpers: Record<string, Handlebars.HelperDelegate> | undefined;
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async check(requests: ParsedRequest[]): Promise<boolean> {
@@ -60,7 +61,8 @@ export class PHPExporter implements FormatExporter {
     if (!(await this.check(requests))) {
       throw new Error("Cannot perform conversion");
     }
-    return (await this.getTemplate())({ requests, ...options });
+    const template = await this.getTemplate();
+    return template({ requests, ...options }, { helpers: this.getHelpers() });
   }
 
   phpprint(data: jsontype, indent: string, startIndented: boolean): string {
@@ -113,19 +115,20 @@ export class PHPExporter implements FormatExporter {
     }
   }
 
-  async getTemplate(): Promise<Handlebars.TemplateDelegate> {
-    if (!this.template) {
-      // custom data renderer for Python
-      Handlebars.registerHelper("phpprint", (context) => {
-        return this.phpprint(context, "", false);
-      });
+  // Helpers are handed to the template at render time instead of being
+  // registered on the global Handlebars environment, because every exporter
+  // defines helpers under the same names but with different behavior.
+  getHelpers(): Record<string, Handlebars.HelperDelegate> {
+    if (!this.helpers) {
+      this.helpers = {
+        // custom data renderer for PHP
+        phpprint: (context) => {
+          return this.phpprint(context, "", false);
+        },
 
-      //
-      Handlebars.registerHelper(
-        "needsRequestFactory",
-        function (
+        needsRequestFactory: function (
           this: { requests: ParsedRequest[] } & ConvertOptions,
-          options,
+          options: Handlebars.HelperOptions,
         ) {
           let anyUnsupported = false;
           for (const request of this.requests) {
@@ -140,12 +143,12 @@ export class PHPExporter implements FormatExporter {
             return options.inverse(this);
           }
         },
-      );
 
-      // custom conditional for requests without any arguments
-      Handlebars.registerHelper(
-        "hasArgs",
-        function (this: ParsedRequest, options) {
+        // custom conditional for requests without any arguments
+        hasArgs: function (
+          this: ParsedRequest,
+          options: Handlebars.HelperOptions,
+        ) {
           if (
             Object.keys(this.params ?? {}).length +
               Object.keys(this.query ?? {}).length +
@@ -157,34 +160,43 @@ export class PHPExporter implements FormatExporter {
             return options.inverse(this);
           }
         },
-      );
 
-      // custom conditional to separate supported vs unsupported APIs
-      Handlebars.registerHelper(
-        "supportedApi",
-        function (this: ParsedRequest, options) {
+        // custom conditional to separate supported vs unsupported APIs
+        supportedApi: function (
+          this: ParsedRequest,
+          options: Handlebars.HelperOptions,
+        ) {
           if (isSupportedAPI(this)) {
             return options.fn(this);
           } else {
             return options.inverse(this);
           }
         },
-      );
 
-      Handlebars.registerHelper("phpEndpoint", (name) => {
-        const snakeToCamel = (str: string) =>
-          str
-            .toLowerCase()
-            .replace(/([-_][a-z])/g, (group) =>
-              group.toUpperCase().replace("-", "").replace("_", ""),
-            );
+        phpEndpoint: (name) => {
+          const snakeToCamel = (str: string) =>
+            str
+              .toLowerCase()
+              .replace(/([-_][a-z])/g, (group) =>
+                group.toUpperCase().replace("-", "").replace("_", ""),
+              );
 
-        const parts = name.split(".").map((part: string) => snakeToCamel(part));
-        const phpParts = parts.slice(0, -1).map((part: string) => part + "()");
-        phpParts.push(parts.slice(-1));
-        return phpParts.join("->");
-      });
+          const parts = name
+            .split(".")
+            .map((part: string) => snakeToCamel(part));
+          const phpParts = parts
+            .slice(0, -1)
+            .map((part: string) => part + "()");
+          phpParts.push(parts.slice(-1));
+          return phpParts.join("->");
+        },
+      };
+    }
+    return this.helpers;
+  }
 
+  async getTemplate(): Promise<Handlebars.TemplateDelegate> {
+    if (!this.template) {
       if (process.env.NODE_ENV !== "test") {
         this.template = Handlebars.templates["php.tpl"];
       } else {
