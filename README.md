@@ -164,11 +164,13 @@ Supported options (snake_case, matching the .NET bundle's wire contract):
 
 | Option name | Type | Required | Description |
 | ----------- | ---- | -------- | ----------- |
-| `syntax_mode` | `string` | no | `"descriptor"` for fluent descriptor chains, or `"object_initializer"` for object initializers. The default is `"descriptor"`. |
-| `use_strongly_typed_document` | `boolean` | no | If `true`, field accessors use lambdas on an illustrative document type. The default is `true`. |
-| `document_type_name` | `string` | no | The document type name used in generated code. The default is `"MyDocument"`. |
-| `type_name_style` | `string` | no | `"Simplified"`, `"Fqn"`, or `"GlobalFqn"` type-name rendering. The default is `"Simplified"`. |
+| `client_call_format` | `string` | no | `"none"`, `"statement"`, or `"inline"`: whether and how the client invocation that executes the request is emitted. The default is `"none"`. |
+| `client_call_style` | `string` | no | `"async"` or `"sync"` invocation flavor when `client_call_format` is not `"none"`. The default is `"async"`. |
 | `debug` | `boolean` | no | If `true`, append converter diagnostics to error messages. The default is `false`. |
+| `document_type_name` | `string` | no | The document type name used in generated code. The default is `"MyDocument"`. |
+| `syntax_mode` | `string` | no | `"descriptor"` for fluent descriptor chains, or `"object_initializer"` for object initializers. The default is `"descriptor"`. |
+| `type_name_style` | `string` | no | `"Simplified"`, `"Fqn"`, or `"GlobalFqn"` type-name rendering. The default is `"Simplified"`. |
+| `use_strongly_typed_document` | `boolean` | no | If `true`, field accessors use lambdas on an illustrative document type. The default is `true`. |
 
 ## Command-Line Interface
 
