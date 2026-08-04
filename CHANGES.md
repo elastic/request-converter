@@ -1,5 +1,9 @@
 # request-converter change log
 
+## Unreleased
+
+- Document and test pass-through of the C# exporter's `client_call_format` and `client_call_style` options
+
 ## 9.2.1 (2025-11-12)
 * Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
 * Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))

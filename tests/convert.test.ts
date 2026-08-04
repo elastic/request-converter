@@ -759,6 +759,28 @@ response1 = client.search(
       expect(code).toContain('"syntax_mode":"object_initializer"');
     });
 
+    it("passes the client call options through", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        { client_call_format: "inline", client_call_style: "sync" },
+      );
+      expect(code).toContain('"client_call_format":"inline"');
+      expect(code).toContain('"client_call_style":"sync"');
+    });
+
+    it("sends no client call options by default", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        {},
+      );
+      expect(code).not.toContain("client_call_format");
+      expect(code).not.toContain("client_call_style");
+    });
+
     it("is listed as a format", () => {
       expect(listFormats()).toContain("C#");
     });
