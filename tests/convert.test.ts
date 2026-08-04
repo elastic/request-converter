@@ -781,6 +781,26 @@ response1 = client.search(
       expect(code).not.toContain("client_call_style");
     });
 
+    it("passes the emit usings option through", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        { emit_usings: false },
+      );
+      expect(code).toContain('"emit_usings":false');
+    });
+
+    it("sends no emit usings option by default", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        {},
+      );
+      expect(code).not.toContain("emit_usings");
+    });
+
     it("is listed as a format", () => {
       expect(listFormats()).toContain("C#");
     });
