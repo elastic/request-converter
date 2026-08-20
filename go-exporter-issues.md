@@ -14,8 +14,10 @@ ONLY_FORMAT=go npx jest tests/integration/convert.test.ts   # omit --bail to see
 
 ## Current state
 
-561 / 734 examples pass (up from 69 before this audit). The exporter now produces
-Go that compiles for the large majority of APIs.
+634 / 734 examples pass (up from 69 before this audit): 561 convert exactly, and 73
+are documented in `tests/integration/skip.ts` as unavoidable typed-client differences.
+100 real gaps remain (see below). The exporter now produces Go that compiles for the
+large majority of APIs.
 
 ## Fixed in this audit
 
@@ -46,21 +48,22 @@ Go that compiles for the large majority of APIs.
 - **Union-alias bodies**: request types that alias a union (e.g. `createrepository.Request`
   = `types.Repository`) render via `.Raw(...)`.
 
-## Remaining failures (173), by category
+## Documented as skips (73, in `tests/integration/skip.ts`)
 
-These are candidates for future work or `skip.ts` entries. Two kinds:
-
-**Unavoidable typed-client differences** (semantically faithful, byte-different — the
-typed client cannot reproduce the shorthand). Same situation the other five clients
-document in `tests/integration/skip.ts`:
+Unavoidable typed-client differences: semantically faithful, byte-different — the typed
+client cannot reproduce the input verbatim. Same situation the other five clients
+document. Categories:
 
 - Query DSL shorthand canonicalization: `{"term": {"f": "v"}}` sends
-  `{"term": {"f": {"value": "v"}}}` (typed structs have no shortcut marshaling). (~13)
-- Settings represented as `*string`: numeric/boolean inputs send as strings
-  (`number_of_shards: "1"`). (~30)
-- `typed_keys=true` auto-added to search-family requests. (~12)
+  `{"term": {"f": {"value": "v"}}}` (typed structs have no shortcut marshaling).
+- Value coercion: numeric/boolean/date inputs sent as strings (`number_of_shards: "1"`),
+  single values sent as arrays (`index` → `[index]`) — go-es field types force this.
+- `typed_keys=true` auto-added to search-family requests.
+- Endpoints removed from go-elasticsearch.
 
-**Exporter gaps** (fixable, not yet handled):
+## Remaining exporter gaps (100), by category
+
+Fixable, not yet handled — future work:
 
 - Flattened dotted setting keys (`index.number_of_replicas`) rendered as invalid
   struct field names.
