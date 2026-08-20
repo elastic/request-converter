@@ -2,7 +2,7 @@ import { FormatExporter, ConvertOptions } from "../../convert";
 import { ParsedRequest } from "../../parse";
 import { InstanceOf, Property } from "../../metamodel";
 import { UNSUPPORTED_APIS } from "./constants";
-import { toPascalCase, apiToGoMethod, indent } from "./naming";
+import { toPascalCase, apiToGoMethod, indent, enumMemberName } from "./naming";
 import { TypeResolver } from "./schema";
 import { ImportTracker } from "./imports";
 import { RenderContext } from "./context";
@@ -84,32 +84,49 @@ func main() {
   ): string {
     const varName = index === 0 ? "res" : `res${index}`;
 
+    let statement: string;
     if (!req.api || UNSUPPORTED_APIS.test(req.api) || !req.request) {
-      return this.renderUnsupportedRequest(req, varName, imports);
+      statement = this.renderUnsupportedRequest(req, varName, imports);
+    } else {
+      const { subclient, method } = apiToGoMethod(req.api);
+      const caller = subclient ? `es.${subclient}.${method}` : `es.${method}`;
+
+      const parts: string[] = [];
+
+      const requiredPathParams = this.getRequiredPathArgs(req, ctx);
+      parts.push(`${varName}, err := ${caller}(${requiredPathParams}).`);
+
+      this.renderPathParams(req, parts);
+      this.renderQueryParams(req, parts, ctx);
+      this.renderBody(req, parts, ctx, renderer, imports);
+
+      parts.push(`${indent(1)}Do(context.Background())`);
+      statement = parts.join("\n");
     }
 
-    const { subclient, method } = apiToGoMethod(req.api);
-    const caller = subclient ? `es.${subclient}.${method}` : `es.${method}`;
+    return (
+      statement + this.renderResultHandling(varName, options, imports) + "\n"
+    );
+  }
 
-    const parts: string[] = [];
-
-    const requiredPathParams = this.getRequiredPathArgs(req);
-    parts.push(`${varName}, err := ${caller}(${requiredPathParams}).`);
-
-    this.renderPathParams(req, parts);
-    this.renderQueryParams(req, parts, ctx);
-    this.renderBody(req, parts, ctx, renderer, imports);
-
-    parts.push(`${indent(1)}Do(context.Background())`);
-
-    let result = parts.join("\n");
-
+  private renderResultHandling(
+    varName: string,
+    options: ConvertOptions,
+    imports: ImportTracker,
+  ): string {
+    let suffix = "";
+    if (options.complete) {
+      suffix += `\nif err != nil {\n${indent(
+        1,
+      )}log.Fatalf("Error: %s", err)\n}`;
+    }
     if (options.printResponse) {
       imports.addFmt();
-      result += `\nfmt.Println(${varName})`;
+      suffix += `\nfmt.Println(${varName})`;
+    } else if (options.complete) {
+      suffix += `\n_ = ${varName}`;
     }
-
-    return result + "\n";
+    return suffix;
   }
 
   private renderUnsupportedRequest(
@@ -117,6 +134,8 @@ func main() {
     varName: string,
     imports: ImportTracker,
   ): string {
+    imports.add("net/http");
+    imports.add("net/url");
     let body = "nil";
     if (req.body) {
       body = `strings.NewReader(\`${JSON.stringify(req.body)}\`)`;
@@ -126,17 +145,25 @@ func main() {
     Method: "${req.method}",
     URL:    &url.URL{Path: "${req.path}"},
     Body:   ${body},
-})
-`;
+})`;
   }
 
-  private getRequiredPathArgs(req: ParsedRequest): string {
+  private getRequiredPathArgs(req: ParsedRequest, ctx: RenderContext): string {
     if (!req.request?.path || Object.keys(req.params).length === 0) {
       return "";
     }
     const required = req.request.path.filter((p) => p.required);
+    const order = req.api ? ctx.resolver.getPathParamOrder(req.api) : [];
+    const ordered =
+      order.length > 0
+        ? [...required].sort((a, b) => {
+            const ia = order.indexOf(a.name);
+            const ib = order.indexOf(b.name);
+            return (ia < 0 ? order.length : ia) - (ib < 0 ? order.length : ib);
+          })
+        : required;
     const args: string[] = [];
-    for (const param of required) {
+    for (const param of ordered) {
       const value = req.params[param.name];
       if (value !== undefined) {
         args.push(`"${value}"`);
@@ -184,22 +211,21 @@ func main() {
             parts.push(`${indent(1)}${methodName}(${value === "true"}).`);
             continue;
           }
-          const enumType = ctx.resolver.isEnumType(inst.type);
-          if (enumType) {
-            const enumPkg = inst.type.name.toLowerCase();
-            const member = enumType.members.find(
-              (m) =>
-                m.name === value ||
-                m.aliases?.includes(value) ||
-                m.name.toLowerCase() === value.toLowerCase(),
-            );
-            if (member) {
-              ctx.imports.addEnumPackage(inst.type);
-              parts.push(
-                `${indent(1)}${methodName}(${enumPkg}.${toPascalCase(
-                  member.name,
-                )}).`,
+          const resolvedEnum = ctx.resolver.resolveEnum(inst.type);
+          if (resolvedEnum) {
+            const enumPkg = resolvedEnum.typeName.name.toLowerCase();
+            const members = value.split(",").map((v) => {
+              const m = resolvedEnum.enum.members.find(
+                (mm) =>
+                  mm.name === v ||
+                  mm.aliases?.includes(v) ||
+                  mm.name.toLowerCase() === v.toLowerCase(),
               );
+              return m ? `${enumPkg}.${enumMemberName(m.name)}` : undefined;
+            });
+            if (members.every((m) => m !== undefined)) {
+              ctx.imports.addEnumPackage(resolvedEnum.typeName);
+              parts.push(`${indent(1)}${methodName}(${members.join(", ")}).`);
               continue;
             }
           }
@@ -216,7 +242,15 @@ func main() {
     renderer: GoValueRenderer,
     imports: ImportTracker,
   ): void {
-    if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    if (!req.body || typeof req.body !== "object") {
+      return;
+    }
+    if (Array.isArray(req.body)) {
+      const lines = (req.body as unknown[])
+        .map((item) => JSON.stringify(item))
+        .join("\n");
+      imports.add("strings");
+      parts.push(`${indent(1)}Raw(strings.NewReader(\`${lines}\`)).`);
       return;
     }
     if (!req.request?.body || req.request.body.kind === "no_body") {
@@ -236,17 +270,7 @@ func main() {
         req.request.name.namespace,
       )
     ) {
-      const lines: string[] = [];
-      for (const [key, value] of Object.entries(body)) {
-        lines.push(
-          `${ctx.indent()}"${renderer.escapeGoString(
-            key,
-          )}": ${renderer.renderLiteralValue(value, ctx)},`,
-        );
-      }
-      parts.push(`${indent(1)}Request(map[string]interface{}{`);
-      parts.push(lines.join("\n"));
-      parts.push(`${indent(1)}}).`);
+      this.renderUntypedBody(body, parts, ctx, renderer);
       return;
     }
 
@@ -274,9 +298,16 @@ func main() {
       properties = [...properties, ...parentProps];
     }
 
+    if (properties.length === 0) {
+      imports.add("strings");
+      parts.push(
+        `${indent(1)}Raw(strings.NewReader(\`${JSON.stringify(body)}\`)).`,
+      );
+      return;
+    }
+
     const apiPkg = this.getApiPackageName(req.api!);
     imports.addApiPackage(req.api!);
-    imports.addTypes();
 
     const bodyLines = renderer.renderStructFields(body, properties, ctx);
     parts.push(`${indent(1)}Request(&${apiPkg}.Request{`);
@@ -284,8 +315,27 @@ func main() {
     parts.push(`${indent(1)}}).`);
   }
 
+  private renderUntypedBody(
+    body: Record<string, unknown>,
+    parts: string[],
+    ctx: RenderContext,
+    renderer: GoValueRenderer,
+  ): void {
+    const lines: string[] = [];
+    for (const [key, value] of Object.entries(body)) {
+      lines.push(
+        `${ctx.indent()}"${renderer.escapeGoString(
+          key,
+        )}": ${renderer.renderLiteralValue(value, ctx)},`,
+      );
+    }
+    parts.push(`${indent(1)}Request(map[string]interface{}{`);
+    parts.push(lines.join("\n"));
+    parts.push(`${indent(1)}}).`);
+  }
+
   private getApiPackageName(api: string): string {
     const parts = api.split(".");
-    return parts[parts.length - 1];
+    return parts[parts.length - 1].replace(/_/g, "");
   }
 }

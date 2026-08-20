@@ -33,7 +33,7 @@ export class ImportTracker {
   }
 
   addApiPackage(api: string): void {
-    const parts = api.split(".");
+    const parts = api.split(".").map((p) => p.replace(/_/g, ""));
     let pkgPath: string;
     if (parts.length === 1) {
       pkgPath = `${GO_BASE_IMPORT}/typedapi/core/${parts[0]}`;

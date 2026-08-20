@@ -42,7 +42,6 @@ export const STRING_ALIAS_TYPES = new Set([
   "Host",
   "Password",
   "Username",
-  "Metadata",
   "Uri",
   "Uuid",
   "SequenceNumber",
@@ -53,8 +52,6 @@ export const STRING_ALIAS_TYPES = new Set([
   "MultiTermQueryRewrite",
   "GeoHash",
   "GeoTilePrecision",
-  "Script",
-  "ScriptLanguage",
 ]);
 
 /**

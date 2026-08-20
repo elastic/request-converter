@@ -11,7 +11,12 @@ import {
   TypeName,
 } from "../../metamodel";
 import { RenderContext } from "./context";
-import { toPascalCase, resolveGoFieldName, goTypeName } from "./naming";
+import {
+  toPascalCase,
+  resolveGoFieldName,
+  goTypeName,
+  enumMemberName,
+} from "./naming";
 
 export class GoValueRenderer {
   renderGoValue(
@@ -34,7 +39,7 @@ export class GoValueRenderer {
       case "union_of":
         return this.renderUnionOf(value, typeInfo as UnionOf, ctx, prop);
       case "user_defined_value":
-        return this.renderLiteralValue(value, ctx);
+        return this.renderRawMessage(value, ctx);
       case "literal_value":
         return JSON.stringify(value);
       default:
@@ -119,7 +124,13 @@ export class GoValueRenderer {
               return "interface{}";
           }
         }
-        if (ctx.resolver.isNumericType(inst.type)) return "int";
+        const numKind = ctx.resolver.numericGoKind(inst.type);
+        if (numKind === "float64") {
+          ctx.imports.addTypes();
+          return "types.Float64";
+        }
+        if (numKind === "int64") return "int64";
+        if (numKind === "int") return "int";
         if (ctx.resolver.isStringType(inst.type)) return "string";
         const enumType = ctx.resolver.isEnumType(inst.type);
         if (enumType) {
@@ -174,10 +185,27 @@ export class GoValueRenderer {
         const classification = ctx.resolver.classifyUnion(union);
         if (classification === "integer_string") return "string";
         if (classification === "any") return "interface{}";
+        if (union.items.length === 2) {
+          const arr = union.items.find((i) => i.kind === "array_of") as
+            | ArrayOf
+            | undefined;
+          const inst = union.items.find((i) => i.kind === "instance_of") as
+            | InstanceOf
+            | undefined;
+          if (
+            arr &&
+            inst &&
+            arr.value.kind === "instance_of" &&
+            (arr.value as InstanceOf).type.name === inst.type.name
+          ) {
+            return `[]${this.goTypeString(arr.value, ctx)}`;
+          }
+        }
         return this.goTypeString(union.items[0], ctx);
       }
       case "user_defined_value":
-        return "interface{}";
+        ctx.imports.add("encoding/json");
+        return "json.RawMessage";
       default:
         return "interface{}";
     }
@@ -187,6 +215,17 @@ export class GoValueRenderer {
     if (typeof value === "number") return value;
     if (typeof value === "string") return parseInt(value, 10) || 0;
     return 0;
+  }
+
+  toGoFloat(value: unknown): number {
+    if (typeof value === "number") return value;
+    if (typeof value === "string") return parseFloat(value) || 0;
+    return 0;
+  }
+
+  renderRawMessage(value: unknown, ctx: RenderContext): string {
+    ctx.imports.add("encoding/json");
+    return `json.RawMessage(${JSON.stringify(JSON.stringify(value))})`;
   }
 
   escapeGoString(s: string): string {
@@ -206,27 +245,47 @@ export class GoValueRenderer {
     const { name, namespace } = typeInfo.type;
 
     if (namespace === "_builtins") {
-      return this.renderBuiltin(value, name, ctx);
+      return this.renderBuiltin(value, name, ctx, prop);
     }
 
-    if (ctx.resolver.isNumericType(typeInfo.type)) {
-      if (prop && !prop.required) {
-        ctx.imports.addSome();
-        return `some.Int(${this.toGoNumber(value)})`;
+    const numKind = ctx.resolver.numericGoKind(typeInfo.type);
+    if (numKind) {
+      const optional = prop != undefined && !prop.required;
+      if (numKind === "float64") {
+        const n = this.toGoFloat(value);
+        if (optional) {
+          ctx.imports.addSome();
+          return `some.Float64(${n})`;
+        }
+        return String(n);
       }
-      return String(this.toGoNumber(value));
+      const n = this.toGoNumber(value);
+      if (optional) {
+        ctx.imports.addSome();
+        return numKind === "int64" ? `some.Int64(${n})` : `some.Int(${n})`;
+      }
+      return String(n);
     }
 
     if (ctx.resolver.isStringType(typeInfo.type)) {
-      if (typeof value === "string") {
-        return `"${this.escapeGoString(value)}"`;
+      const str =
+        typeof value === "string" ? this.escapeGoString(value) : String(value);
+      if (prop && !prop.required) {
+        ctx.imports.addSome();
+        return `some.String("${str}")`;
       }
-      return `"${value}"`;
+      return `"${str}"`;
     }
 
-    const enumType = ctx.resolver.isEnumType(typeInfo.type);
-    if (enumType) {
-      return this.renderEnumValue(value, typeInfo.type, enumType, ctx);
+    const resolvedEnum = ctx.resolver.resolveEnum(typeInfo.type);
+    if (resolvedEnum) {
+      return this.renderEnumValue(
+        value,
+        resolvedEnum.typeName,
+        resolvedEnum.enum,
+        ctx,
+        prop,
+      );
     }
 
     const resolved = ctx.resolver.resolveTypeAlias(typeInfo);
@@ -259,7 +318,10 @@ export class GoValueRenderer {
       ) {
         const usePointer = prop && !prop.required;
         const prefix = usePointer ? "&" : "";
-        if (iface.variants?.kind === "container") {
+        if (
+          iface.variants?.kind === "container" ||
+          ctx.resolver.getAdditionalPropertyBehavior(iface) !== undefined
+        ) {
           return this.renderContainerVariant(
             value as Record<string, unknown>,
             iface,
@@ -303,7 +365,8 @@ export class GoValueRenderer {
               nested,
             );
             ctx.imports.addTypes();
-            return `types.${goName}{${fieldName}: ${renderedVal}}`;
+            const prefix = prop && !prop.required ? "&" : "";
+            return `${prefix}types.${goName}{${fieldName}: ${renderedVal}}`;
           }
         }
         return this.renderLiteralValue(value, ctx);
@@ -317,16 +380,32 @@ export class GoValueRenderer {
     value: unknown,
     name: string,
     ctx: RenderContext,
+    prop?: Property,
   ): string {
+    const optional = prop != undefined && !prop.required;
     switch (name) {
-      case "string":
-        if (typeof value === "string") {
-          return `"${this.escapeGoString(value)}"`;
+      case "string": {
+        const str =
+          typeof value === "string"
+            ? this.escapeGoString(value)
+            : String(value);
+        if (optional) {
+          ctx.imports.addSome();
+          return `some.String("${str}")`;
         }
-        return `"${value}"`;
+        return `"${str}"`;
+      }
       case "boolean":
+        if (optional) {
+          ctx.imports.addSome();
+          return `some.Bool(${!!value})`;
+        }
         return String(!!value);
       case "number":
+        if (optional) {
+          ctx.imports.addSome();
+          return `some.Int(${this.toGoNumber(value)})`;
+        }
         return String(value);
       case "null":
         return "nil";
@@ -436,7 +515,12 @@ export class GoValueRenderer {
     ctx: RenderContext,
   ): string {
     if (!Array.isArray(value)) {
-      return this.renderGoValue(value, typeInfo.value, ctx);
+      const singleElemType = this.goTypeString(typeInfo.value, ctx);
+      return `[]${singleElemType}{${this.renderGoValue(
+        value,
+        typeInfo.value,
+        ctx,
+      )}}`;
     }
 
     const elemType = this.goTypeString(typeInfo.value, ctx);
@@ -476,17 +560,25 @@ export class GoValueRenderer {
 
     if (typeInfo.items.length === 2) {
       const [a, b] = typeInfo.items;
+      const arrayItem =
+        a.kind === "array_of"
+          ? (a as ArrayOf)
+          : b.kind === "array_of"
+          ? (b as ArrayOf)
+          : undefined;
+      const instItem =
+        a.kind === "instance_of"
+          ? (a as InstanceOf)
+          : b.kind === "instance_of"
+          ? (b as InstanceOf)
+          : undefined;
       if (
-        a.kind === "instance_of" &&
-        b.kind === "array_of" &&
-        b.value.kind === "instance_of" &&
-        (a as InstanceOf).type.name ===
-          ((b as ArrayOf).value as InstanceOf).type.name
+        arrayItem &&
+        instItem &&
+        arrayItem.value.kind === "instance_of" &&
+        (arrayItem.value as InstanceOf).type.name === instItem.type.name
       ) {
-        if (Array.isArray(value)) {
-          return this.renderArrayOf(value, b as ArrayOf, ctx);
-        }
-        return this.renderGoValue(value, a, ctx, prop);
+        return this.renderArrayOf(value, arrayItem, ctx);
       }
     }
 
@@ -535,6 +627,7 @@ export class GoValueRenderer {
     typeName: TypeName,
     enumType: Enum,
     ctx: RenderContext,
+    prop?: Property,
   ): string {
     const strValue = String(value);
     const member = enumType.members.find(
@@ -546,7 +639,8 @@ export class GoValueRenderer {
     if (member) {
       ctx.imports.addEnumPackage(typeName);
       const enumPkg = typeName.name.toLowerCase();
-      return `${enumPkg}.${toPascalCase(member.name)}`;
+      const prefix = prop && !prop.required ? "&" : "";
+      return `${prefix}${enumPkg}.${enumMemberName(member.name)}`;
     }
     return `"${this.escapeGoString(strValue)}"`;
   }

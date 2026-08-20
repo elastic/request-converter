@@ -11,6 +11,12 @@ export function toPascalCase(name: string): string {
     .join("");
 }
 
+export function enumMemberName(name: string): string {
+  const joined = name.replace(/_/g, "");
+  if (joined.length === 0) return "";
+  return joined.charAt(0).toUpperCase() + joined.slice(1);
+}
+
 export function apiToGoMethod(api: string): {
   subclient: string;
   method: string;
@@ -54,11 +60,7 @@ export function goTypeName(typeName: TypeName): string {
     const renamed = nsMap[typeName.name];
     if (renamed) return renamed;
   }
-  let name = toPascalCase(typeName.name);
-  if (name.endsWith("Container")) {
-    name = name.slice(0, -"Container".length);
-  }
-  return name;
+  return toPascalCase(typeName.name);
 }
 
 export function indent(depth: number): string {

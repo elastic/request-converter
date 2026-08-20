@@ -78,6 +78,18 @@ export class TypeResolver {
     return typeName.namespace === "_builtins" && typeName.name === "boolean";
   }
 
+  numericGoKind(typeName: TypeName): "int" | "int64" | "float64" | undefined {
+    if (typeName.namespace === "_builtins" && typeName.name === "number") {
+      return "int";
+    }
+    if (typeName.namespace !== "_types") return undefined;
+    const n = typeName.name;
+    if (n === "float" || n === "double") return "float64";
+    if (n === "long" || n === "ulong") return "int64";
+    if (NUMERIC_TYPES.has(n)) return "int";
+    return undefined;
+  }
+
   isStringType(typeName: TypeName): boolean {
     if (typeName.namespace === "_builtins" && typeName.name === "string") {
       return true;
@@ -153,6 +165,49 @@ export class TypeResolver {
 
     if (union.items.length > 1) return "any";
     return null;
+  }
+
+  resolveEnum(
+    typeName: TypeName,
+  ): { enum: Enum; typeName: TypeName } | undefined {
+    const direct = this.isEnumType(typeName);
+    if (direct) return { enum: direct, typeName };
+    const type = this.getType(typeName.name, typeName.namespace);
+    if (type?.kind === "type_alias") {
+      const alias = (type as TypeAlias).type;
+      if (alias.kind === "instance_of") {
+        return this.resolveEnum((alias as InstanceOf).type);
+      }
+      if (alias.kind === "union_of") {
+        for (const item of (alias as UnionOf).items) {
+          if (item.kind === "instance_of") {
+            const r = this.resolveEnum((item as InstanceOf).type);
+            if (r) return r;
+          }
+          if (
+            item.kind === "array_of" &&
+            (item as ArrayOf).value.kind === "instance_of"
+          ) {
+            const r = this.resolveEnum(
+              ((item as ArrayOf).value as InstanceOf).type,
+            );
+            if (r) return r;
+          }
+        }
+      }
+    }
+    return undefined;
+  }
+
+  getPathParamOrder(api: string): string[] {
+    const endpoint = this.schema.endpoints.find((e) => e.name === api);
+    if (!endpoint) return [];
+    let best: string[] = [];
+    for (const url of endpoint.urls) {
+      const params = [...url.path.matchAll(/\{([^}]+)\}/g)].map((m) => m[1]);
+      if (params.length > best.length) best = params;
+    }
+    return best;
   }
 
   getBehaviorProperties(behaviorNames: string[]): Property[] {
