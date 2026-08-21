@@ -21,7 +21,8 @@ function App() {
   const [source, setSource] = useState<string>('GET /_search');
   const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState<string>('Loading...');
-  const [language, setLanguage] = useState<string>(formats[0]);
+  // Pinned rather than derived from formats[0]: the browser demo can't load the optional .NET bundle, so C# must not become the initial selection.
+  const [language, setLanguage] = useState<string>('JavaScript');
   const [showClipboardMsg, setShowClipboardMsg] = useState(false);
 
   useEffect(() => {

@@ -7,6 +7,7 @@ import { JavaScriptExporter } from "./exporters/javascript";
 import { PHPExporter } from "./exporters/php";
 import { RubyExporter } from "./exporters/ruby";
 import { GoExporter } from "./exporters/go";
+import { CSharpExporter } from "./exporters/csharp";
 import util from "util";
 
 const isBrowser = typeof window !== "undefined";
@@ -40,6 +41,7 @@ export interface FormatExporter {
   convert(requests: ParsedRequest[], options: ConvertOptions): Promise<string>;
 }
 
+const csharpExporter = new CSharpExporter();
 const EXPORTERS: Record<string, FormatExporter> = {
   javascript: new JavaScriptExporter(),
   php: new PHPExporter(),
@@ -47,8 +49,10 @@ const EXPORTERS: Record<string, FormatExporter> = {
   ruby: new RubyExporter(),
   curl: new CurlExporter(),
   go: new GoExporter(),
+  "c#": csharpExporter,
+  csharp: csharpExporter,
 };
-const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl", "Go"];
+const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl", "Go", "C#"];
 
 /**
  * Return the list of available export formats.

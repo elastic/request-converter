@@ -1,4 +1,4 @@
-name: Daily integration testing
+name: Integration testing
 on:
   workflow_dispatch:
   schedule:

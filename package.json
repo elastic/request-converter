@@ -1,6 +1,6 @@
 {
   "name": "@elastic/request-converter",
-  "version": "9.4.0",
+  "version": "9.5.0",
   "description": "Elasticsearch request converter",
   "author": "Miguel Grinberg",
   "license": "Apache-2.0",
@@ -23,7 +23,7 @@
     "docs": "typedoc src/index.ts",
     "lint": "eslint src tests --ignore-pattern tests/wasm/",
     "prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --list-different",
-    "test": "npm run compile-templates && npm run expand-schema && jest --test-path-ignore-patterns integration --coverage",
+    "test": "npm run compile-templates && npm run expand-schema && node --experimental-vm-modules node_modules/jest/bin/jest.js --test-path-ignore-patterns integration --coverage",
     "test:setup": "./tests/integration/run-python.sh && ./tests/integration/run-javascript.sh && ./tests/integration/run-ruby.sh && ./tests/integration/run-php.sh && ./tests/integration/run-go.sh",
     "test:setup-curl": "echo \"Nothing to do!\"",
     "test:setup-python": "./tests/integration/run-python.sh",
@@ -43,7 +43,7 @@
     "fix:lint": "eslint src tests --fix --ignore-pattern tests/wasm/",
     "fix:prettier": "prettier \"src/**/*.ts\" \"tests/**/*.ts\" --write",
     "fix:precommit": "./scripts/precommit.sh",
-    "watch:test": "npm run compile-templates && npm run expand-schema && jest --test-path-ignore-patterns integration --coverage --watch",
+    "watch:test": "npm run compile-templates && npm run expand-schema && node --experimental-vm-modules node_modules/jest/bin/jest.js --test-path-ignore-patterns integration --coverage --watch",
     "parser": "peggy --plugin ./node_modules/ts-pegjs/dist/tspegjs -o src/es_parser.ts ./src/es_parser.pegjs",
     "prepare": "husky install"
   },
@@ -80,6 +80,14 @@
     "find-my-way-ts": "^0.1.2",
     "handlebars": "^4.7.8",
     "prettier": "^2.8.8"
+  },
+  "peerDependencies": {
+    "@elastic/request-converter-dotnet": "latest"
+  },
+  "peerDependenciesMeta": {
+    "@elastic/request-converter-dotnet": {
+      "optional": true
+    }
   },
   "directories": {
     "test": "tests"

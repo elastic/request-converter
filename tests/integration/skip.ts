@@ -44,6 +44,14 @@ const skip: Record<string, SkippedTest> = {
     reason: "client does not have this endpoint yet",
     formats: ["python"],
   },
+  PostChatCompletionRequestExample4: {
+    reason: "client does not have this endpoint yet",
+    formats: ["python"],
+  },
+  PostChatCompletionRequestExample5: {
+    reason: "client does not have this endpoint yet",
+    formats: ["python"],
+  },
   StreamInferenceRequestExample1: {
     reason: "client does not implement streaming endpoints",
     formats: ["python"],
@@ -52,20 +60,12 @@ const skip: Record<string, SkippedTest> = {
     reason: "client converts string to a number",
     formats: ["javascript"],
   },
-  MlGetInfluencersExample1: {
-    reason: "client passes query properties in the body",
-    formats: ["python", "javascript"],
-  },
   MlGetModelSnapshotsExample1: {
     reason: "client converts string to a number",
     formats: ["javascript"],
   },
   MlGetOverallBucketsExample1: {
     reason: "client converts string to a number",
-    formats: ["javascript"],
-  },
-  MlPutJobRequestExample1: {
-    reason: "client passes job id both in the URL and the body",
     formats: ["javascript"],
   },
   MlGetRecordsExample1: {
@@ -80,21 +80,9 @@ const skip: Record<string, SkippedTest> = {
     reason: "example passes boolean in string format",
     formats: ["python"],
   },
-  SecurityPutUserRequestExample1: {
-    reason: "client passes user id both in the URL and the body",
-    formats: ["javascript"],
-  },
   SnapshotRestoreRequestExample2: {
     reason: "example passes invalid `indices` field in the body",
     formats: ["python"],
-  },
-  MlStartDataFrameAnalyticsExample1: {
-    reason: "client passes argument in URL and in body",
-    formats: ["javascript"],
-  },
-  MlStopDataFrameAnalyticsExample1: {
-    reason: "client passes argument in URL and in body",
-    formats: ["javascript"],
   },
   IndicesDeleteSampleConfigurationRequest1: {
     reason: "removed endpoint",
@@ -442,6 +430,34 @@ const skip: Record<string, SkippedTest> = {
     reason:
       "typed client canonicalizes request body (query shorthand, string/array coercion)",
     formats: ["go"],
+  },
+  CancelReindexRequestExample1: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  CancelReindexRequestExample2: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  GetReindexRequestExample1: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  GetReindexRequestExample2: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  ListReindexRequestExample1: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  ListReindexRequestExample2: {
+    reason: "PHP does not currently include reindex endpoints",
+    formats: ["php"],
+  },
+  MlGetInfluencersExample1: {
+    reason: "example includes quotes in query argument",
+    formats: ["curl"],
   },
 };
 

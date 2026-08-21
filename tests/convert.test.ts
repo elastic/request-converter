@@ -1463,6 +1463,28 @@ response1 = client.search(
     ).rejects.toThrowError("Cannot perform conversion");
   });
 
+  it("converts each language independently of conversion order", async () => {
+    // Every template exporter defines helpers under the same names ("alias",
+    // "supportedApi", "hasArgs", ...) but with language specific behavior, so
+    // converting one language must not affect the output of any other.
+    const formats = ["python", "javascript", "php", "ruby"];
+    const expected: Record<string, string> = {};
+    for (const format of formats) {
+      expected[format] = (await convertRequests(
+        devConsoleScript,
+        format,
+        {},
+      )) as string;
+    }
+
+    // convert again, now that every exporter has been initialized
+    for (const format of formats) {
+      expect(await convertRequests(devConsoleScript, format, {})).toEqual(
+        expected[format],
+      );
+    }
+  });
+
   it("supports a custom exporter", async () => {
     class MyExporter implements FormatExporter {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1570,6 +1592,107 @@ response1 = client.search(
         {},
       ),
     ).toEqual("search,info");
+  });
+
+  describe("csharp exporter", () => {
+    const fixture = "tests/fixtures/csharp-bundle/main.mjs";
+
+    it("applies typed-document descriptor defaults", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        {},
+      );
+      expect(code).toContain('"syntax_mode":"descriptor"');
+      expect(code).toContain('"use_strongly_typed_document":true');
+      expect(code).toContain('"document_type_name":"MyDocument"');
+    });
+
+    it("lets callers override the defaults", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      const code = await convertRequests(
+        "GET /my-index/_search\n{}",
+        new CSharpExporter(fixture),
+        { syntax_mode: "object_initializer" },
+      );
+      expect(code).toContain('"syntax_mode":"object_initializer"');
+    });
+
+    it("is listed as a format", () => {
+      expect(listFormats()).toContain("C#");
+    });
+
+    it("does not build the dynamic-import shim until a conversion loads the bundle", async () => {
+      const originalFunction = global.Function;
+      // Fails only the exact construction the shim performs, so unrelated
+      // Function/eval usage elsewhere in the module graph is unaffected.
+      global.Function = new Proxy(originalFunction, {
+        construct(target, args) {
+          if (
+            args[0] === "specifier" &&
+            args[1] === "return import(specifier)"
+          ) {
+            throw new Error("new Function must not run at import time");
+          }
+          return Reflect.construct(target, args);
+        },
+      });
+      try {
+        // isolateModulesAsync gives this import its own registry, so loading
+        // src/convert.ts (which eagerly imports csharp.ts) here re-runs
+        // module-scope code under the patched Function above.
+        await jest.isolateModulesAsync(async () => {
+          const freshConvert: typeof import("../src/convert") = await import(
+            "../src/convert"
+          );
+          const { CSharpExporter }: typeof import("../src/exporters/csharp") =
+            await import("../src/exporters/csharp");
+          global.Function = originalFunction;
+          const code = await freshConvert.convertRequests(
+            "GET /my-index/_search\n{}",
+            new CSharpExporter(fixture),
+            {},
+          );
+          expect(code).toContain('"syntax_mode":"descriptor"');
+        });
+      } finally {
+        global.Function = originalFunction;
+      }
+    });
+
+    it("fails with a helpful error when the bundle is missing", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      await expect(
+        convertRequests(
+          "GET /_search\n{}",
+          new CSharpExporter("./does-not-exist.mjs"),
+          {},
+        ),
+      ).rejects.toThrow(/request-converter-dotnet/);
+    });
+
+    it("errors when converting Kibana to C#", async () => {
+      const { CSharpExporter } = await import("../src/exporters/csharp");
+      await expect(
+        convertRequests(kibanaScript, new CSharpExporter(fixture), {}),
+      ).rejects.toThrowError("Cannot perform conversion");
+    });
+
+    const realBundle = process.env.CSHARP_REQUEST_CONVERTER_BUNDLE;
+    (realBundle ? it : it.skip)(
+      "converts a search request with the real bundle",
+      async () => {
+        const code = await convertRequests(
+          'GET /my-index-000001/_search?from=40&size=20\n{"query":{"term":{"user.id":{"value":"kimchy"}}}}',
+          "csharp",
+          {},
+        );
+        expect(code).toContain("new SearchRequestDescriptor<MyDocument>()");
+        expect(code).toContain(".Field(x => x.User.Id)");
+      },
+      30_000,
+    );
   });
 
   describe("web external exporter tests", () => {
