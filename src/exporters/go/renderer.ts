@@ -664,12 +664,16 @@ export class GoValueRenderer {
         m.aliases?.includes(strValue) ||
         m.name.toLowerCase() === strValue.toLowerCase(),
     );
+    ctx.imports.addEnumPackage(typeName);
+    const enumPkg = typeName.name.toLowerCase();
+    const prefix = prop && !prop.required ? "&" : "";
     if (member) {
-      ctx.imports.addEnumPackage(typeName);
-      const enumPkg = typeName.name.toLowerCase();
-      const prefix = prop && !prop.required ? "&" : "";
       return `${prefix}${enumPkg}.${enumMemberName(member.name)}`;
     }
-    return `"${this.escapeGoString(strValue)}"`;
+    // Open-enum custom value: go-es enums are structs, so an unknown value is
+    // built as pkg.EnumType{"value"} rather than a bare string.
+    return `${prefix}${enumPkg}.${toPascalCase(
+      typeName.name,
+    )}{"${this.escapeGoString(strValue)}"}`;
   }
 }
