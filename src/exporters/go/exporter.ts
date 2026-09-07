@@ -1,7 +1,7 @@
 import { FormatExporter, ConvertOptions } from "../../convert";
 import { ParsedRequest } from "../../parse";
 import { InstanceOf, Property } from "../../metamodel";
-import { UNSUPPORTED_APIS } from "./constants";
+import { UNSUPPORTED_APIS, STRING_QUERY_PARAMS } from "./constants";
 import { toPascalCase, apiToGoMethod, indent, enumMemberName } from "./naming";
 import { TypeResolver } from "./schema";
 import { ImportTracker } from "./imports";
@@ -199,7 +199,7 @@ func main() {
         specParam = behaviorProps.find((p) => p.name === name);
       }
       const methodName = toPascalCase(name);
-      if (specParam) {
+      if (specParam && !STRING_QUERY_PARAMS.has(name)) {
         const typeInfo = specParam.type;
         if (typeInfo.kind === "instance_of") {
           const inst = typeInfo as InstanceOf;
