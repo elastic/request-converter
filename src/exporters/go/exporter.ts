@@ -1,6 +1,13 @@
 import { FormatExporter, ConvertOptions } from "../../convert";
 import { ParsedRequest } from "../../parse";
-import { InstanceOf, Property } from "../../metamodel";
+import {
+  InstanceOf,
+  Property,
+  ValueOf,
+  UnionOf,
+  ArrayOf,
+  TypeName,
+} from "../../metamodel";
 import { UNSUPPORTED_APIS, STRING_QUERY_PARAMS } from "./constants";
 import { toPascalCase, apiToGoMethod, indent, enumMemberName } from "./naming";
 import { TypeResolver } from "./schema";
@@ -184,6 +191,23 @@ func main() {
     }
   }
 
+  // The enum type name for a query param, whose type may be `T` or `T | T[]`.
+  private queryParamEnumType(typeInfo: ValueOf): TypeName | undefined {
+    if (typeInfo.kind === "instance_of") return (typeInfo as InstanceOf).type;
+    if (typeInfo.kind === "union_of") {
+      for (const item of (typeInfo as UnionOf).items) {
+        if (item.kind === "instance_of") return (item as InstanceOf).type;
+        if (
+          item.kind === "array_of" &&
+          (item as ArrayOf).value.kind === "instance_of"
+        ) {
+          return ((item as ArrayOf).value as InstanceOf).type;
+        }
+      }
+    }
+    return undefined;
+  }
+
   private renderQueryParams(
     req: ParsedRequest,
     parts: string[],
@@ -211,23 +235,27 @@ func main() {
             parts.push(`${indent(1)}${methodName}(${value === "true"}).`);
             continue;
           }
-          const resolvedEnum = ctx.resolver.resolveEnum(inst.type);
-          if (resolvedEnum) {
-            const enumPkg = resolvedEnum.typeName.name.toLowerCase();
-            const members = value.split(",").map((v) => {
-              const m = resolvedEnum.enum.members.find(
-                (mm) =>
-                  mm.name === v ||
-                  mm.aliases?.includes(v) ||
-                  mm.name.toLowerCase() === v.toLowerCase(),
-              );
-              return m ? `${enumPkg}.${enumMemberName(m.name)}` : undefined;
-            });
-            if (members.every((m) => m !== undefined)) {
-              ctx.imports.addEnumPackage(resolvedEnum.typeName);
-              parts.push(`${indent(1)}${methodName}(${members.join(", ")}).`);
-              continue;
-            }
+        }
+        // Resolve the enum from the param type, which may be `T` or `T | T[]`.
+        const enumName = this.queryParamEnumType(typeInfo);
+        const resolvedEnum = enumName
+          ? ctx.resolver.resolveEnum(enumName)
+          : undefined;
+        if (resolvedEnum) {
+          const enumPkg = resolvedEnum.typeName.name.toLowerCase();
+          const members = value.split(",").map((v) => {
+            const m = resolvedEnum.enum.members.find(
+              (mm) =>
+                mm.name === v ||
+                mm.aliases?.includes(v) ||
+                mm.name.toLowerCase() === v.toLowerCase(),
+            );
+            return m ? `${enumPkg}.${enumMemberName(m.name)}` : undefined;
+          });
+          if (members.every((m) => m !== undefined)) {
+            ctx.imports.addEnumPackage(resolvedEnum.typeName);
+            parts.push(`${indent(1)}${methodName}(${members.join(", ")}).`);
+            continue;
           }
         }
       }
