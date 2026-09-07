@@ -391,6 +391,7 @@ export class GoValueRenderer {
               value,
               shortcutProp.type,
               nested,
+              shortcutProp,
             );
             ctx.imports.addTypes();
             const prefix = prop && !prop.required ? "&" : "";
@@ -610,23 +611,45 @@ export class GoValueRenderer {
       }
     }
 
+    // A nullable scalar (e.g. `string | null`) maps to a pointer field in
+    // go-es, so `prop` is passed through to keep optionality (some.*). Unions
+    // with an object member map to an interface, where a bare value is wanted.
+    const nonNull = typeInfo.items.filter(
+      (it) =>
+        !(
+          it.kind === "instance_of" &&
+          (it as InstanceOf).type.namespace === "_builtins" &&
+          (it as InstanceOf).type.name === "null"
+        ),
+    );
+    const scalarNullable =
+      nonNull.length > 0 &&
+      nonNull.every(
+        (it) =>
+          it.kind === "instance_of" &&
+          (ctx.resolver.isStringType((it as InstanceOf).type) ||
+            ctx.resolver.isNumericType((it as InstanceOf).type) ||
+            ctx.resolver.isBooleanType((it as InstanceOf).type)),
+      );
+    const scalarProp = scalarNullable ? prop : undefined;
+
     for (const item of typeInfo.items) {
       if (item.kind === "instance_of") {
         const inst = item as InstanceOf;
         if (typeof value === "string" && ctx.resolver.isStringType(inst.type)) {
-          return this.renderGoValue(value, item, ctx);
+          return this.renderGoValue(value, item, ctx, scalarProp);
         }
         if (
           typeof value === "number" &&
           ctx.resolver.isNumericType(inst.type)
         ) {
-          return this.renderGoValue(value, item, ctx);
+          return this.renderGoValue(value, item, ctx, scalarProp);
         }
         if (
           typeof value === "boolean" &&
           ctx.resolver.isBooleanType(inst.type)
         ) {
-          return this.renderGoValue(value, item, ctx);
+          return this.renderGoValue(value, item, ctx, scalarProp);
         }
         if (
           typeof value === "object" &&
