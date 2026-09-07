@@ -5,6 +5,7 @@ import {
   TypeDefinition,
   Interface,
   Request,
+  Response,
   Property,
   ValueOf,
   InstanceOf,
@@ -49,6 +50,14 @@ export class TypeResolver {
   getRequest(name: string, namespace: string): Request | undefined {
     const type = this.getType(name, namespace);
     return type?.kind === "request" ? (type as Request) : undefined;
+  }
+
+  // True when the API response has no body; go-es then exposes only Perform, not Do.
+  responseHasNoBody(namespace: string): boolean {
+    const resp = this.getType("Response", namespace);
+    return (
+      resp?.kind === "response" && (resp as Response).body.kind === "no_body"
+    );
   }
 
   getInterfaceProperties(name: string, namespace: string): Property[] {
