@@ -328,6 +328,9 @@ export class GoValueRenderer {
           }
           return `"${this.escapeGoString(strValue)}"`;
         }
+        // A named union alias is an `any` interface in go-es, so render its
+        // natural form rather than collapsing a single value into a slice.
+        return this.renderUnionOf(value, resolved as UnionOf, ctx, prop, true);
       }
       return this.renderGoValue(value, resolved, ctx, prop);
     }
@@ -576,6 +579,7 @@ export class GoValueRenderer {
     typeInfo: UnionOf,
     ctx: RenderContext,
     prop?: Property,
+    fromAlias = false,
   ): string {
     const classification = ctx.resolver.classifyUnion(typeInfo);
     if (classification === "integer_string") {
@@ -606,6 +610,23 @@ export class GoValueRenderer {
         instItem &&
         arrayItem.value.kind === "instance_of" &&
         (arrayItem.value as InstanceOf).type.name === instItem.type.name
+      ) {
+        return this.renderArrayOf(value, arrayItem, ctx);
+      }
+      // An inline `Dict | Dict[]` union collapses to `[]map[...]` in go-es; a
+      // single dict value is wrapped in a slice by renderArrayOf. Named alias
+      // unions are `any` interfaces, so their natural form is kept.
+      const dictItem =
+        a.kind === "dictionary_of"
+          ? a
+          : b.kind === "dictionary_of"
+          ? b
+          : undefined;
+      if (
+        !fromAlias &&
+        arrayItem &&
+        dictItem &&
+        arrayItem.value.kind === "dictionary_of"
       ) {
         return this.renderArrayOf(value, arrayItem, ctx);
       }
