@@ -47,11 +47,39 @@ export class GoValueRenderer {
     }
   }
 
+  // Expand a flattened key (`index.number_of_replicas`) into a nested object when its head is a property; leave literal-property keys untouched.
+  private expandDottedKeys(
+    obj: Record<string, unknown>,
+    properties: Property[],
+  ): Record<string, unknown> {
+    const isProp = (name: string): boolean =>
+      properties.some((p) => p.name === name || p.aliases?.includes(name));
+    const out: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(obj)) {
+      const dot = key.indexOf(".");
+      if (dot > 0 && !isProp(key) && isProp(key.slice(0, dot))) {
+        const head = key.slice(0, dot);
+        const tail = key.slice(dot + 1);
+        const existing =
+          typeof out[head] === "object" &&
+          out[head] !== null &&
+          !Array.isArray(out[head])
+            ? (out[head] as Record<string, unknown>)
+            : {};
+        out[head] = { ...existing, [tail]: value };
+      } else {
+        out[key] = value;
+      }
+    }
+    return out;
+  }
+
   renderStructFields(
     obj: Record<string, unknown>,
     properties: Property[],
     ctx: RenderContext,
   ): string {
+    obj = this.expandDottedKeys(obj, properties);
     const lines: string[] = [];
     for (const [key, value] of Object.entries(obj)) {
       const prop = properties.find(
