@@ -260,15 +260,23 @@ func main() {
     const body = req.body as Record<string, unknown>;
     if (Object.keys(body).length === 0) return;
 
-    const bodyDef = req.request.body;
+    // Use the expanded schema so top-level generics resolve to json.RawMessage.
+    const expandedReq = ctx.resolver.getRequest(
+      req.request.name.name,
+      req.request.name.namespace,
+    );
+    const bodyDef = expandedReq?.body ?? req.request.body;
+    const inherits = expandedReq?.inherits ?? req.request.inherits;
 
+    // Whole-body user_defined_value (e.g. index/create) renders as an untyped map.
     if (
       bodyDef.kind === "value" &&
-      bodyDef.value.kind === "instance_of" &&
-      ctx.resolver.isUserDefinedValueBody(
-        req.request.name.name,
-        req.request.name.namespace,
-      )
+      (bodyDef.value.kind === "user_defined_value" ||
+        (bodyDef.value.kind === "instance_of" &&
+          ctx.resolver.isUserDefinedValueBody(
+            req.request.name.name,
+            req.request.name.namespace,
+          )))
     ) {
       this.renderUntypedBody(body, parts, ctx, renderer);
       return;
@@ -290,10 +298,10 @@ func main() {
       return;
     }
 
-    if (req.request.inherits) {
+    if (inherits) {
       const parentProps = ctx.resolver.getInterfaceProperties(
-        req.request.inherits.type.name,
-        req.request.inherits.type.namespace,
+        inherits.type.name,
+        inherits.type.namespace,
       );
       properties = [...properties, ...parentProps];
     }
