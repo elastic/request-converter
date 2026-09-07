@@ -107,7 +107,13 @@ func main() {
       this.renderQueryParams(req, parts, ctx);
       this.renderBody(req, parts, ctx, renderer, imports);
 
-      parts.push(`${indent(1)}Do(context.Background())`);
+      // go-es only generates Do when the response has a body; otherwise use Perform.
+      const terminal = ctx.resolver.responseHasNoBody(
+        req.request.name.namespace,
+      )
+        ? "Perform"
+        : "Do";
+      parts.push(`${indent(1)}${terminal}(context.Background())`);
       statement = parts.join("\n");
     }
 
