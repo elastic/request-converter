@@ -45,6 +45,12 @@ export class TypeResolver {
     return undefined;
   }
 
+  // Return the request from the expanded (generics-free) schema.
+  getRequest(name: string, namespace: string): Request | undefined {
+    const type = this.getType(name, namespace);
+    return type?.kind === "request" ? (type as Request) : undefined;
+  }
+
   getInterfaceProperties(name: string, namespace: string): Property[] {
     let props: Property[] = [];
     const type = this.getType(name, namespace);
