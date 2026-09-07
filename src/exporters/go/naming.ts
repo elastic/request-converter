@@ -2,8 +2,9 @@ import { Property, TypeName } from "../../metamodel";
 import { GO_TYPE_RENAMES } from "./constants";
 
 export function toPascalCase(name: string): string {
+  // Split on `_`, `-` and `.` so dotted/hyphenated keys map to one Go identifier.
   return name
-    .split("_")
+    .split(/[._-]/)
     .map((part) => {
       if (part.length === 0) return "";
       return part.charAt(0).toUpperCase() + part.slice(1);
