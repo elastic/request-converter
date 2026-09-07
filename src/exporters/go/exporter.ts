@@ -173,7 +173,7 @@ func main() {
     for (const param of ordered) {
       const value = req.params[param.name];
       if (value !== undefined) {
-        args.push(`"${value}"`);
+        args.push(`"${this.escapeGoString(value)}"`);
       }
     }
     return args.join(", ");
@@ -187,7 +187,7 @@ func main() {
     for (const [name, value] of Object.entries(req.params)) {
       if (value === undefined || required.has(name)) continue;
       const methodName = toPascalCase(name);
-      parts.push(`${indent(1)}${methodName}("${value}").`);
+      parts.push(`${indent(1)}${methodName}("${this.escapeGoString(value)}").`);
     }
   }
 
@@ -259,8 +259,17 @@ func main() {
           }
         }
       }
-      parts.push(`${indent(1)}${methodName}("${value}").`);
+      parts.push(`${indent(1)}${methodName}("${this.escapeGoString(value)}").`);
     }
+  }
+
+  // Escape a string for use inside a Go double-quoted literal.
+  private escapeGoString(s: string): string {
+    return s
+      .replace(/\\/g, "\\\\")
+      .replace(/"/g, '\\"')
+      .replace(/\n/g, "\\n")
+      .replace(/\t/g, "\\t");
   }
 
   private renderBody(
