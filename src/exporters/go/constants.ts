@@ -2,6 +2,9 @@ export const GO_BASE_IMPORT = "github.com/elastic/go-elasticsearch/v9";
 
 export const UNSUPPORTED_APIS = new RegExp("^_internal.*$");
 
+// Numeric-typed query params that go-elasticsearch serializes as strings.
+export const STRING_QUERY_PARAMS = new Set(["requests_per_second"]);
+
 export const NUMERIC_TYPES = new Set([
   "integer",
   "long",
