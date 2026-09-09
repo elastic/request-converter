@@ -22,7 +22,6 @@ export const STRING_ALIAS_TYPES = new Set([
   "IndexName",
   "Name",
   "Field",
-  "Routing",
   "NodeId",
   "ScrollId",
   "IndexAlias",
