@@ -117,21 +117,20 @@ describe("convert", () => {
 
   it("converts to go", async () => {
     expect(await convertRequests(devConsoleScript, "go", {})).toEqual(
-      `res, err := es.Info().
-    Do(context.Background())
+      `res, err := es.Info().Do(context.Background())
 
 res1, err := es.Search().
-    Index("my-index").
-    From(40).
-    Size(20).
-    Request(&search.Request{
-        Query: &types.Query{
-            Term: map[string]types.TermQuery{
-                "user.id": types.TermQuery{Value: "kimchy's"},
-            },
-        },
-    }).
-    Do(context.Background())
+	Index("my-index").
+	From(40).
+	Size(20).
+	Request(&search.Request{
+		Query: &types.Query{
+			Term: map[string]types.TermQuery{
+				"user.id": types.TermQuery{Value: "kimchy's"},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -146,46 +145,45 @@ res1, err := es.Search().
       `package main
 
 import (
-    "context"
-    "log"
+	"context"
+	"log"
 
-    "github.com/elastic/go-elasticsearch/v9"
-    "github.com/elastic/go-elasticsearch/v9/typedapi/core/search"
-    "github.com/elastic/go-elasticsearch/v9/typedapi/types"
+	"github.com/elastic/go-elasticsearch/v9"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/core/search"
+	"github.com/elastic/go-elasticsearch/v9/typedapi/types"
 )
 
 func main() {
-    cfg := elasticsearch.Config{
-        Addresses: []string{"https://localhost:9999"},
-    }
-    es, err := elasticsearch.NewTypedClient(cfg)
-    if err != nil {
-        log.Fatalf("Error creating client: %s", err)
-    }
+	cfg := elasticsearch.Config{
+		Addresses: []string{"https://localhost:9999"},
+	}
+	es, err := elasticsearch.NewTypedClient(cfg)
+	if err != nil {
+		log.Fatalf("Error creating client: %s", err)
+	}
 
-    res, err := es.Info().
-        Do(context.Background())
-    if err != nil {
-        log.Fatalf("Error: %s", err)
-    }
-    _ = res
+	res, err := es.Info().Do(context.Background())
+	if err != nil {
+		log.Fatalf("Error: %s", err)
+	}
+	_ = res
 
-    res1, err := es.Search().
-        Index("my-index").
-        From(40).
-        Size(20).
-        Request(&search.Request{
-            Query: &types.Query{
-                Term: map[string]types.TermQuery{
-                    "user.id": types.TermQuery{Value: "kimchy's"},
-                },
-            },
-        }).
-        Do(context.Background())
-    if err != nil {
-        log.Fatalf("Error: %s", err)
-    }
-    _ = res1
+	res1, err := es.Search().
+		Index("my-index").
+		From(40).
+		Size(20).
+		Request(&search.Request{
+			Query: &types.Query{
+				Term: map[string]types.TermQuery{
+					"user.id": types.TermQuery{Value: "kimchy's"},
+				},
+			},
+		}).
+		Do(context.Background())
+	if err != nil {
+		log.Fatalf("Error: %s", err)
+	}
+	_ = res1
 }
 `,
     );
@@ -199,9 +197,9 @@ func main() {
       }),
     ).toEqual(
       `res, err := es.Transport.Perform(&http.Request{
-    Method: "GET",
-    URL:    &url.URL{Path: "/_internal/desired_balance"},
-    Body:   nil,
+	Method: "GET",
+	URL:    &url.URL{Path: "/_internal/desired_balance"},
+	Body:   nil,
 })
 `,
     );
@@ -226,9 +224,9 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Indices.GetSettings().
-    ExpandWildcards(expandwildcard.All).
-    FilterPath("*.settings.index.*.slowlog").
-    Do(context.Background())
+	ExpandWildcards(expandwildcard.All).
+	FilterPath("*.settings.index.*.slowlog").
+	Do(context.Background())
 `,
     );
   });
@@ -243,27 +241,27 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Cluster.Reroute().
-    Metric("none").
-    Request(&reroute.Request{
-        Commands: []types.Command{
-            types.Command{
-                Move: &types.CommandMoveAction{
-                    Index: "test",
-                    Shard: 0,
-                    FromNode: "node1",
-                    ToNode: "node2",
-                },
-            },
-            types.Command{
-                AllocateReplica: &types.CommandAllocateReplicaAction{
-                    Index: "test",
-                    Shard: 1,
-                    Node: "node3",
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Metric("none").
+	Request(&reroute.Request{
+		Commands: []types.Command{
+			types.Command{
+				Move: &types.CommandMoveAction{
+					Index:    "test",
+					Shard:    0,
+					FromNode: "node1",
+					ToNode:   "node2",
+				},
+			},
+			types.Command{
+				AllocateReplica: &types.CommandAllocateReplicaAction{
+					Index: "test",
+					Shard: 1,
+					Node:  "node3",
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -278,12 +276,12 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Ml.PutTrainedModelDefinitionPart("elastic__distilbert-base-uncased-finetuned-conll03-english", "0").
-    Request(&puttrainedmodeldefinitionpart.Request{
-        Definition: "...",
-        TotalDefinitionLength: 265632637,
-        TotalParts: 64,
-    }).
-    Do(context.Background())
+	Request(&puttrainedmodeldefinitionpart.Request{
+		Definition:            "...",
+		TotalDefinitionLength: 265632637,
+		TotalParts:            64,
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -298,14 +296,14 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Ml.InferTrainedModel("test").
-    Request(&infertrainedmodel.Request{
-        Docs: []map[string]json.RawMessage{
-            map[string]json.RawMessage{
-                "text": json.RawMessage("\\"The fool doth think he is wise, but the wise man knows himself to be a fool.\\""),
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&infertrainedmodel.Request{
+		Docs: []map[string]json.RawMessage{
+			map[string]json.RawMessage{
+				"text": json.RawMessage("\\"The fool doth think he is wise, but the wise man knows himself to be a fool.\\""),
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -320,46 +318,46 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Security.PutRoleMapping("mapping8").
-    Request(&putrolemapping.Request{
-        Roles: []string{
-            "superuser",
-        },
-        Enabled: some.Bool(true),
-        Rules: &types.RoleMappingRule{
-            All: []types.RoleMappingRule{
-                types.RoleMappingRule{
-                    Any: []types.RoleMappingRule{
-                        types.RoleMappingRule{
-                            Field: map[string][]types.FieldValue{
-                                "dn": []types.FieldValue{"*,ou=admin,dc=example,dc=com"},
-                            },
-                        },
-                        types.RoleMappingRule{
-                            Field: map[string][]types.FieldValue{
-                                "username": []types.FieldValue{
-                                    "es-admin",
-                                    "es-system",
-                                },
-                            },
-                        },
-                    },
-                },
-                types.RoleMappingRule{
-                    Field: map[string][]types.FieldValue{
-                        "groups": []types.FieldValue{"cn=people,dc=example,dc=com"},
-                    },
-                },
-                types.RoleMappingRule{
-                    Except: &types.RoleMappingRule{
-                        Field: map[string][]types.FieldValue{
-                            "metadata.terminated_date": nil,
-                        },
-                    },
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&putrolemapping.Request{
+		Roles: []string{
+			"superuser",
+		},
+		Enabled: some.Bool(true),
+		Rules: &types.RoleMappingRule{
+			All: []types.RoleMappingRule{
+				types.RoleMappingRule{
+					Any: []types.RoleMappingRule{
+						types.RoleMappingRule{
+							Field: map[string][]types.FieldValue{
+								"dn": []types.FieldValue{"*,ou=admin,dc=example,dc=com"},
+							},
+						},
+						types.RoleMappingRule{
+							Field: map[string][]types.FieldValue{
+								"username": []types.FieldValue{
+									"es-admin",
+									"es-system",
+								},
+							},
+						},
+					},
+				},
+				types.RoleMappingRule{
+					Field: map[string][]types.FieldValue{
+						"groups": []types.FieldValue{"cn=people,dc=example,dc=com"},
+					},
+				},
+				types.RoleMappingRule{
+					Except: &types.RoleMappingRule{
+						Field: map[string][]types.FieldValue{
+							"metadata.terminated_date": nil,
+						},
+					},
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -374,16 +372,16 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Index("my-index-000001,my-index-000002").
-    From(40).
-    Size(20).
-    DefaultOperator(operator.And).
-    Request(&search.Request{
-        Query: &types.Query{
-            MatchAll: &types.MatchAllQuery{},
-        },
-    }).
-    Do(context.Background())
+	Index("my-index-000001,my-index-000002").
+	From(40).
+	Size(20).
+	DefaultOperator(operator.And).
+	Request(&search.Request{
+		Query: &types.Query{
+			MatchAll: &types.MatchAllQuery{},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -398,27 +396,27 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Index("my-index-000001").
-    From(40).
-    Size(20).
-    Request(&search.Request{
-        Query: &types.Query{
-            Range: map[string]types.RangeQuery{
-                "@timestamp": types.UntypedRangeQuery{
-                    Gte: json.RawMessage("\\"now-1d/d\\""),
-                    Lt: json.RawMessage("\\"now/d\\""),
-                },
-            },
-        },
-        Aggregations: map[string]types.Aggregations{
-            "my-agg-name": types.Aggregations{
-                Terms: &types.TermsAggregation{
-                    Field: some.String("my-field"),
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Index("my-index-000001").
+	From(40).
+	Size(20).
+	Request(&search.Request{
+		Query: &types.Query{
+			Range: map[string]types.RangeQuery{
+				"@timestamp": types.UntypedRangeQuery{
+					Gte: json.RawMessage("\\"now-1d/d\\""),
+					Lt:  json.RawMessage("\\"now/d\\""),
+				},
+			},
+		},
+		Aggregations: map[string]types.Aggregations{
+			"my-agg-name": types.Aggregations{
+				Terms: &types.TermsAggregation{
+					Field: some.String("my-field"),
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -433,23 +431,23 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Request(&search.Request{
-        Aggregations: map[string]types.Aggregations{
-            "my-agg-name": types.Aggregations{
-                Terms: &types.TermsAggregation{
-                    Field: some.String("my-field"),
-                },
-                Aggregations: map[string]types.Aggregations{
-                    "my-sub-agg-name": types.Aggregations{
-                        Avg: &types.AverageAggregation{
-                            Field: some.String("my-other-field"),
-                        },
-                    },
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&search.Request{
+		Aggregations: map[string]types.Aggregations{
+			"my-agg-name": types.Aggregations{
+				Terms: &types.TermsAggregation{
+					Field: some.String("my-field"),
+				},
+				Aggregations: map[string]types.Aggregations{
+					"my-sub-agg-name": types.Aggregations{
+						Avg: &types.AverageAggregation{
+							Field: some.String("my-other-field"),
+						},
+					},
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -464,19 +462,19 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Request(&search.Request{
-        Aggregations: map[string]types.Aggregations{
-            "my-agg-name": types.Aggregations{
-                Terms: &types.TermsAggregation{
-                    Field: some.String("my-field"),
-                },
-                Meta: map[string]json.RawMessage{
-                    "my-metadata-field": json.RawMessage("\\"foo\\""),
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&search.Request{
+		Aggregations: map[string]types.Aggregations{
+			"my-agg-name": types.Aggregations{
+				Terms: &types.TermsAggregation{
+					Field: some.String("my-field"),
+				},
+				Meta: map[string]json.RawMessage{
+					"my-metadata-field": json.RawMessage("\\"foo\\""),
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -491,23 +489,23 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Request(&search.Request{
-        RuntimeMappings: map[string]types.RuntimeField{
-            "message.length": types.RuntimeField{
-                Type: runtimefieldtype.Long,
-                Script: &types.Script{Source: "emit(doc['message.keyword'].value.length())"},
-            },
-        },
-        Aggregations: map[string]types.Aggregations{
-            "message_length": types.Aggregations{
-                Histogram: &types.HistogramAggregation{
-                    Interval: some.Float64(10),
-                    Field: some.String("message.length"),
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&search.Request{
+		RuntimeMappings: map[string]types.RuntimeField{
+			"message.length": types.RuntimeField{
+				Type:   runtimefieldtype.Long,
+				Script: &types.Script{Source: "emit(doc['message.keyword'].value.length())"},
+			},
+		},
+		Aggregations: map[string]types.Aggregations{
+			"message_length": types.Aggregations{
+				Histogram: &types.HistogramAggregation{
+					Interval: some.Float64(10),
+					Field:    some.String("message.length"),
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -522,44 +520,44 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Request(&search.Request{
-        Size: some.Int(10),
-        Query: &types.Query{
-            FunctionScore: &types.FunctionScoreQuery{
-                Query: &types.Query{
-                    Bool: &types.BoolQuery{
-                        Filter: []types.Query{
-                            types.Query{
-                                Terms: &types.TermsQuery{
-                                    TermsQuery: map[string]types.TermsQueryField{
-                                        "tags.keyword": []types.FieldValue{
-                                            "Monkey",
-                                            "Lion",
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-                Functions: []types.FunctionScore{
-                    types.FunctionScore{
-                        Filter: &types.Query{
-                            Term: map[string]types.TermQuery{
-                                "mustHaveTags.keyword": types.TermQuery{
-                                    Value: "Monkey",
-                                },
-                            },
-                        },
-                        Weight: some.Float64(1),
-                    },
-                },
-                ScoreMode: &functionscoremode.Sum,
-                BoostMode: &functionboostmode.Sum,
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&search.Request{
+		Size: some.Int(10),
+		Query: &types.Query{
+			FunctionScore: &types.FunctionScoreQuery{
+				Query: &types.Query{
+					Bool: &types.BoolQuery{
+						Filter: []types.Query{
+							types.Query{
+								Terms: &types.TermsQuery{
+									TermsQuery: map[string]types.TermsQueryField{
+										"tags.keyword": []types.FieldValue{
+											"Monkey",
+											"Lion",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+				Functions: []types.FunctionScore{
+					types.FunctionScore{
+						Filter: &types.Query{
+							Term: map[string]types.TermQuery{
+								"mustHaveTags.keyword": types.TermQuery{
+									Value: "Monkey",
+								},
+							},
+						},
+						Weight: some.Float64(1),
+					},
+				},
+				ScoreMode: &functionscoremode.Sum,
+				BoostMode: &functionboostmode.Sum,
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -574,31 +572,31 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Ingest.PutPipeline("my-pipeline").
-    Request(&putpipeline.Request{
-        Description: some.String("My optional pipeline description"),
-        Processors: []types.ProcessorContainer{
-            types.ProcessorContainer{
-                Set: &types.SetProcessor{
-                    Description: some.String("My optional processor description"),
-                    Field: "my-long-field",
-                    Value: json.RawMessage("10"),
-                },
-            },
-            types.ProcessorContainer{
-                Set: &types.SetProcessor{
-                    Description: some.String("Set 'my-boolean-field' to true"),
-                    Field: "my-boolean-field",
-                    Value: json.RawMessage("true"),
-                },
-            },
-            types.ProcessorContainer{
-                Lowercase: &types.LowercaseProcessor{
-                    Field: "my-keyword-field",
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&putpipeline.Request{
+		Description: some.String("My optional pipeline description"),
+		Processors: []types.ProcessorContainer{
+			types.ProcessorContainer{
+				Set: &types.SetProcessor{
+					Description: some.String("My optional processor description"),
+					Field:       "my-long-field",
+					Value:       json.RawMessage("10"),
+				},
+			},
+			types.ProcessorContainer{
+				Set: &types.SetProcessor{
+					Description: some.String("Set 'my-boolean-field' to true"),
+					Field:       "my-boolean-field",
+					Value:       json.RawMessage("true"),
+				},
+			},
+			types.ProcessorContainer{
+				Lowercase: &types.LowercaseProcessor{
+					Field: "my-keyword-field",
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -613,23 +611,23 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Ingest.Simulate().
-    Id("my-pipeline").
-    Verbose(true).
-    Request(&simulate.Request{
-        Docs: []types.Document{
-            types.Document{
-                Index_: some.String("index"),
-                Id_: some.String("id"),
-                Source_: json.RawMessage("{\\"my-keyword-field\\":\\"bar\\"}"),
-            },
-            types.Document{
-                Index_: some.String("index"),
-                Id_: some.String("id"),
-                Source_: json.RawMessage("{\\"my-long-field\\":10}"),
-            },
-        },
-    }).
-    Do(context.Background())
+	Id("my-pipeline").
+	Verbose(true).
+	Request(&simulate.Request{
+		Docs: []types.Document{
+			types.Document{
+				Index_:  some.String("index"),
+				Id_:     some.String("id"),
+				Source_: json.RawMessage("{\\"my-keyword-field\\":\\"bar\\"}"),
+			},
+			types.Document{
+				Index_:  some.String("index"),
+				Id_:     some.String("id"),
+				Source_: json.RawMessage("{\\"my-long-field\\":10}"),
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -644,42 +642,42 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Indices.Create("arabic_example").
-    Request(&create.Request{
-        Settings: &types.IndexSettings{
-            Analysis: &types.IndexSettingsAnalysis{
-                Filter: map[string]types.TokenFilter{
-                    "arabic_stop": map[string]interface{}{
-                        "type": "stop",
-                        "stopwords": "_arabic_",
-                    },
-                    "arabic_keywords": map[string]interface{}{
-                        "type": "keyword_marker",
-                        "keywords": []interface{}{
-                            "مثال",
-                        },
-                    },
-                    "arabic_stemmer": map[string]interface{}{
-                        "type": "stemmer",
-                        "language": "arabic",
-                    },
-                },
-                Analyzer: map[string]types.Analyzer{
-                    "rebuilt_arabic": types.CustomAnalyzer{
-                        Tokenizer: "standard",
-                        Filter: []string{
-                            "lowercase",
-                            "decimal_digit",
-                            "arabic_stop",
-                            "arabic_normalization",
-                            "arabic_keywords",
-                            "arabic_stemmer",
-                        },
-                    },
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&create.Request{
+		Settings: &types.IndexSettings{
+			Analysis: &types.IndexSettingsAnalysis{
+				Filter: map[string]types.TokenFilter{
+					"arabic_stop": map[string]interface{}{
+						"type":      "stop",
+						"stopwords": "_arabic_",
+					},
+					"arabic_keywords": map[string]interface{}{
+						"type": "keyword_marker",
+						"keywords": []interface{}{
+							"مثال",
+						},
+					},
+					"arabic_stemmer": map[string]interface{}{
+						"type":     "stemmer",
+						"language": "arabic",
+					},
+				},
+				Analyzer: map[string]types.Analyzer{
+					"rebuilt_arabic": types.CustomAnalyzer{
+						Tokenizer: "standard",
+						Filter: []string{
+							"lowercase",
+							"decimal_digit",
+							"arabic_stop",
+							"arabic_normalization",
+							"arabic_keywords",
+							"arabic_stemmer",
+						},
+					},
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -694,24 +692,24 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Index("my-index-000001").
-    From(40).
-    Size(20).
-    Request(&search.Request{
-        Aggregations: map[string]types.Aggregations{
-            "my-first-agg-name": types.Aggregations{
-                Terms: &types.TermsAggregation{
-                    Field: some.String("my-field"),
-                },
-            },
-            "my-second-agg-name": types.Aggregations{
-                Avg: &types.AverageAggregation{
-                    Field: some.String("my-other-field"),
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Index("my-index-000001").
+	From(40).
+	Size(20).
+	Request(&search.Request{
+		Aggregations: map[string]types.Aggregations{
+			"my-first-agg-name": types.Aggregations{
+				Terms: &types.TermsAggregation{
+					Field: some.String("my-field"),
+				},
+			},
+			"my-second-agg-name": types.Aggregations{
+				Avg: &types.AverageAggregation{
+					Field: some.String("my-other-field"),
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -726,42 +724,42 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Index("my-index-000001").
-    From(40).
-    Size(20).
-    Request(&search.Request{
-        Knn: []types.KnnSearch{types.KnnSearch{
-            Field: "image-vector",
-            QueryVector: []types.Float64{
-                0.1,
-                -2,
-            },
-            K: some.Int(15),
-            NumCandidates: some.Int(100),
-        }},
-        Fields: []types.FieldAndFormat{
-            types.FieldAndFormat{Field: "title"},
-        },
-        Rescore: []types.Rescore{types.Rescore{
-            WindowSize: some.Int(10),
-            Query: &types.RescoreQuery{
-                Query: types.Query{
-                    ScriptScore: &types.ScriptScoreQuery{
-                        Query: types.Query{
-                            MatchAll: &types.MatchAllQuery{},
-                        },
-                        Script: types.Script{
-                            Source: "cosineSimilarity(params.query_vector, 'image-vector') + 1.0",
-                            Params: map[string]json.RawMessage{
-                                "query_vector": json.RawMessage("[0.1,-2]"),
-                            },
-                        },
-                    },
-                },
-            },
-        }},
-    }).
-    Do(context.Background())
+	Index("my-index-000001").
+	From(40).
+	Size(20).
+	Request(&search.Request{
+		Knn: []types.KnnSearch{types.KnnSearch{
+			Field: "image-vector",
+			QueryVector: []types.Float64{
+				0.1,
+				-2,
+			},
+			K:             some.Int(15),
+			NumCandidates: some.Int(100),
+		}},
+		Fields: []types.FieldAndFormat{
+			types.FieldAndFormat{Field: "title"},
+		},
+		Rescore: []types.Rescore{types.Rescore{
+			WindowSize: some.Int(10),
+			Query: &types.RescoreQuery{
+				Query: types.Query{
+					ScriptScore: &types.ScriptScoreQuery{
+						Query: types.Query{
+							MatchAll: &types.MatchAllQuery{},
+						},
+						Script: types.Script{
+							Source: "cosineSimilarity(params.query_vector, 'image-vector') + 1.0",
+							Params: map[string]json.RawMessage{
+								"query_vector": json.RawMessage("[0.1,-2]"),
+							},
+						},
+					},
+				},
+			},
+		}},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -776,45 +774,45 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Index("my-index-000001").
-    From(40).
-    Size(20).
-    Request(&search.Request{
-        Query: &types.Query{
-            Nested: &types.NestedQuery{
-                Path: "driver",
-                Query: types.Query{
-                    Nested: &types.NestedQuery{
-                        Path: "driver.vehicle",
-                        Query: types.Query{
-                            Nested: &types.NestedQuery{
-                                Path: "driver.vehicle.wheel",
-                                Query: types.Query{
-                                    Nested: &types.NestedQuery{
-                                        Path: "driver.vehicle.wheel.nut",
-                                        Query: types.Query{
-                                            Nested: &types.NestedQuery{
-                                                Path: "driver.vehicle.wheel.nut.metal",
-                                                Query: types.Query{
-                                                    Nested: &types.NestedQuery{
-                                                        Path: "driver.vehicle.wheel.nut.metal.atom",
-                                                        Query: types.Query{
-                                                            MatchAll: &types.MatchAllQuery{},
-                                                        },
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Index("my-index-000001").
+	From(40).
+	Size(20).
+	Request(&search.Request{
+		Query: &types.Query{
+			Nested: &types.NestedQuery{
+				Path: "driver",
+				Query: types.Query{
+					Nested: &types.NestedQuery{
+						Path: "driver.vehicle",
+						Query: types.Query{
+							Nested: &types.NestedQuery{
+								Path: "driver.vehicle.wheel",
+								Query: types.Query{
+									Nested: &types.NestedQuery{
+										Path: "driver.vehicle.wheel.nut",
+										Query: types.Query{
+											Nested: &types.NestedQuery{
+												Path: "driver.vehicle.wheel.nut.metal",
+												Query: types.Query{
+													Nested: &types.NestedQuery{
+														Path: "driver.vehicle.wheel.nut.metal.atom",
+														Query: types.Query{
+															MatchAll: &types.MatchAllQuery{},
+														},
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -829,28 +827,28 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Index("my-index-000001").
-    From(40).
-    Size(20).
-    Request(&search.Request{
-        Query: &types.Query{
-            Bool: &types.BoolQuery{
-                Must: []types.Query{types.Query{
-                    Match: map[string]types.MatchQuery{
-                        "name": types.MatchQuery{Query: "chocolate"},
-                    },
-                }},
-                Should: []types.Query{types.Query{
-                    DistanceFeature: types.UntypedDistanceFeatureQuery{
-                        Field: "location",
-                        Pivot: json.RawMessage("\\"1000m\\""),
-                        Origin: json.RawMessage("[-71.3,41.15]"),
-                    },
-                }},
-            },
-        },
-    }).
-    Do(context.Background())
+	Index("my-index-000001").
+	From(40).
+	Size(20).
+	Request(&search.Request{
+		Query: &types.Query{
+			Bool: &types.BoolQuery{
+				Must: []types.Query{types.Query{
+					Match: map[string]types.MatchQuery{
+						"name": types.MatchQuery{Query: "chocolate"},
+					},
+				}},
+				Should: []types.Query{types.Query{
+					DistanceFeature: types.UntypedDistanceFeatureQuery{
+						Field:  "location",
+						Pivot:  json.RawMessage("\\"1000m\\""),
+						Origin: json.RawMessage("[-71.3,41.15]"),
+					},
+				}},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -865,63 +863,63 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Search().
-    Request(&search.Request{
-        Size: some.Int(0),
-        Query: &types.Query{
-            Bool: &types.BoolQuery{
-                Filter: []types.Query{
-                    types.Query{
-                        Term: map[string]types.TermQuery{
-                            "is_sold": types.TermQuery{Value: true},
-                        },
-                    },
-                    types.Query{
-                        Term: map[string]types.TermQuery{
-                            "lender_id": types.TermQuery{Value: 4477943},
-                        },
-                    },
-                },
-            },
-        },
-        Aggregations: map[string]types.Aggregations{
-            "group_by_summaryGroup": types.Aggregations{
-                Terms: &types.TermsAggregation{
-                    Field: some.String("group.keyword"),
-                    Order: map[string]interface{}{
-                        "_key": "desc",
-                    },
-                },
-                Aggregations: map[string]types.Aggregations{
-                    "note_count": types.Aggregations{
-                        ValueCount: &types.ValueCountAggregation{
-                            Field: some.String("id"),
-                        },
-                    },
-                    "invested_sum": types.Aggregations{
-                        Sum: &types.SumAggregation{
-                            Field: some.String("amount_participation"),
-                        },
-                    },
-                    "outstanding_principal_sum": types.Aggregations{
-                        Sum: &types.SumAggregation{
-                            Field: some.String("principal_balance"),
-                        },
-                    },
-                    "principal_repaid_sum": types.Aggregations{
-                        Sum: &types.SumAggregation{
-                            Field: some.String("principal_repaid"),
-                        },
-                    },
-                    "interest_paid_sum": types.Aggregations{
-                        Sum: &types.SumAggregation{
-                            Field: some.String("interest_paid"),
-                        },
-                    },
-                },
-            },
-        },
-    }).
-    Do(context.Background())
+	Request(&search.Request{
+		Size: some.Int(0),
+		Query: &types.Query{
+			Bool: &types.BoolQuery{
+				Filter: []types.Query{
+					types.Query{
+						Term: map[string]types.TermQuery{
+							"is_sold": types.TermQuery{Value: true},
+						},
+					},
+					types.Query{
+						Term: map[string]types.TermQuery{
+							"lender_id": types.TermQuery{Value: 4477943},
+						},
+					},
+				},
+			},
+		},
+		Aggregations: map[string]types.Aggregations{
+			"group_by_summaryGroup": types.Aggregations{
+				Terms: &types.TermsAggregation{
+					Field: some.String("group.keyword"),
+					Order: map[string]interface{}{
+						"_key": "desc",
+					},
+				},
+				Aggregations: map[string]types.Aggregations{
+					"note_count": types.Aggregations{
+						ValueCount: &types.ValueCountAggregation{
+							Field: some.String("id"),
+						},
+					},
+					"invested_sum": types.Aggregations{
+						Sum: &types.SumAggregation{
+							Field: some.String("amount_participation"),
+						},
+					},
+					"outstanding_principal_sum": types.Aggregations{
+						Sum: &types.SumAggregation{
+							Field: some.String("principal_balance"),
+						},
+					},
+					"principal_repaid_sum": types.Aggregations{
+						Sum: &types.SumAggregation{
+							Field: some.String("principal_repaid"),
+						},
+					},
+					"interest_paid_sum": types.Aggregations{
+						Sum: &types.SumAggregation{
+							Field: some.String("interest_paid"),
+						},
+					},
+				},
+			},
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
@@ -929,8 +927,8 @@ func main() {
   it("converts cat health with boolean query param from behavior to go", async () => {
     expect(await convertRequests(`GET /_cat/health?v`, "go", {})).toEqual(
       `res, err := es.Cat.Health().
-    V(true).
-    Do(context.Background())
+	V(true).
+	Do(context.Background())
 `,
     );
   });
@@ -945,19 +943,19 @@ func main() {
       ),
     ).toEqual(
       `res, err := es.Index("my-index").
-    Id("1").
-    Request(map[string]interface{}{
-        "title": "Hello World",
-        "tags": []interface{}{
-            "intro",
-            "welcome",
-        },
-        "metadata": map[string]interface{}{
-            "author": "test",
-            "version": 2,
-        },
-    }).
-    Do(context.Background())
+	Id("1").
+	Request(map[string]interface{}{
+		"title": "Hello World",
+		"tags": []interface{}{
+			"intro",
+			"welcome",
+		},
+		"metadata": map[string]interface{}{
+			"author":  "test",
+			"version": 2,
+		},
+	}).
+	Do(context.Background())
 `,
     );
   });
