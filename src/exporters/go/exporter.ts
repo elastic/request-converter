@@ -1,3 +1,4 @@
+import { spawnSync } from "child_process";
 import { FormatExporter, ConvertOptions } from "../../convert";
 import { ParsedRequest } from "../../parse";
 import {
@@ -78,7 +79,51 @@ func main() {
         footer;
     }
 
-    return output;
+    return this.formatGo(output, options.complete === true);
+  }
+
+  // Best-effort gofmt so output matches the Go toolchain; falls back to the
+  // unformatted output when gofmt is unavailable (e.g. Go isn't installed).
+  private formatGo(output: string, complete: boolean): string {
+    if (complete) {
+      return this.runGofmt(output) ?? output;
+    }
+    // Snippets aren't a full file, so wrap them for gofmt, then unwrap.
+    const formatted = this.runGofmt(`package p\nfunc _() {\n${output}\n}\n`);
+    if (formatted === null) {
+      return output;
+    }
+    const lines = formatted.split("\n");
+    const start = lines.indexOf("func _() {");
+    const end = lines.lastIndexOf("}");
+    if (start === -1 || end === -1 || end <= start) {
+      return output;
+    }
+    const body = lines
+      .slice(start + 1, end)
+      .map((line) => (line.startsWith("\t") ? line.slice(1) : line));
+    // Drop trailing blank lines from the func wrapper so snippets keep a single
+    // trailing newline, matching the pre-gofmt output.
+    while (body.length > 0 && body[body.length - 1] === "") {
+      body.pop();
+    }
+    return body.join("\n") + "\n";
+  }
+
+  private runGofmt(code: string): string | null {
+    try {
+      const res = spawnSync("gofmt", {
+        input: code,
+        encoding: "utf8",
+        maxBuffer: 32 * 1024 * 1024,
+      });
+      if (res.status === 0 && typeof res.stdout === "string") {
+        return res.stdout;
+      }
+    } catch {
+      // gofmt not available; caller falls back to unformatted output.
+    }
+    return null;
   }
 
   private renderRequest(
@@ -113,7 +158,12 @@ func main() {
       )
         ? "Perform"
         : "Do";
-      parts.push(`${indent(1)}${terminal}(context.Background())`);
+      if (parts.length === 1) {
+        // No builder calls: keep the terminal on the same line as the caller.
+        parts[0] += `${terminal}(context.Background())`;
+      } else {
+        parts.push(`${indent(1)}${terminal}(context.Background())`);
+      }
       statement = parts.join("\n");
     }
 
