@@ -339,11 +339,14 @@ func main() {
       return;
     }
     if (Array.isArray(req.body)) {
+      // NDJSON body: use an escaped literal ending in \n so the required trailing
+      // newline survives as real bytes (a raw string's final newline is lost to
+      // gofmt re-indentation of the complete-script wrapper).
       const lines = (req.body as unknown[])
-        .map((item) => JSON.stringify(item))
-        .join("\n");
+        .map((item) => this.escapeGoString(JSON.stringify(item)))
+        .join("\\n");
       imports.add("strings");
-      parts.push(`${indent(1)}Raw(strings.NewReader(\`${lines}\`)).`);
+      parts.push(`${indent(1)}Raw(strings.NewReader("${lines}\\n")).`);
       return;
     }
     if (!req.request?.body || req.request.body.kind === "no_body") {

@@ -205,6 +205,23 @@ func main() {
     );
   });
 
+  it("converts a bulk request to go with a trailing newline", async () => {
+    expect(
+      await convertRequests(
+        `POST _bulk
+{"index":{"_index":"test","_id":"1"}}
+{"field1":"value1"}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Bulk().
+	Raw(strings.NewReader("{\\"index\\":{\\"_index\\":\\"test\\",\\"_id\\":\\"1\\"}}\\n{\\"field1\\":\\"value1\\"}\\n")).
+	Do(context.Background())
+`,
+    );
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>
