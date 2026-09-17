@@ -222,6 +222,24 @@ func main() {
     );
   });
 
+  it("aliases go API packages that share a name", async () => {
+    const out = await convertRequests(
+      `PUT _ingest/pipeline/my-pipeline-id
+{"description":"ingest"}
+
+PUT _logstash/pipeline/my-logstash-id
+{"description":"ls"}`,
+      "go",
+      { complete: true },
+    );
+    // ingest keeps the plain package name; logstash gets an aliased import.
+    expect(out).toContain(
+      `logstashputpipeline "github.com/elastic/go-elasticsearch/v9/typedapi/logstash/putpipeline"`,
+    );
+    expect(out).toContain("&putpipeline.Request{");
+    expect(out).toContain("&logstashputpipeline.Request{");
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>

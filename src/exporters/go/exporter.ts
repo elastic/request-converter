@@ -410,8 +410,7 @@ func main() {
       return;
     }
 
-    const apiPkg = this.getApiPackageName(req.api!);
-    imports.addApiPackage(req.api!);
+    const apiPkg = imports.addApiPackage(req.api!);
 
     const bodyLines = renderer.renderStructFields(body, properties, ctx);
     parts.push(`${indent(1)}Request(&${apiPkg}.Request{`);
@@ -436,10 +435,5 @@ func main() {
     parts.push(`${indent(1)}Request(map[string]interface{}{`);
     parts.push(lines.join("\n"));
     parts.push(`${indent(1)}}).`);
-  }
-
-  private getApiPackageName(api: string): string {
-    const parts = api.split(".");
-    return parts[parts.length - 1].replace(/_/g, "");
   }
 }
