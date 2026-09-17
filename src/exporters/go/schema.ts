@@ -1,5 +1,3 @@
-import { readFile } from "fs/promises";
-import path from "path";
 import {
   Model,
   TypeDefinition,
@@ -15,25 +13,34 @@ import {
   Enum,
   TypeName,
 } from "../../metamodel";
+import { spec } from "../../parse";
+import { expandGenerics } from "./expand-generics";
 import { NUMERIC_TYPES, STRING_ALIAS_TYPES } from "./constants";
 
-const isBrowser = typeof window !== "undefined";
-
 let cachedResolver: TypeResolver | undefined;
+// The schema the cached resolver was expanded from, so a later loadSchema()
+// (e.g. switching versions in the browser demo) triggers a re-expansion.
+let cachedFrom: Model | undefined;
 
 export class TypeResolver {
   constructor(private readonly schema: Model) {}
 
   static async load(): Promise<TypeResolver> {
-    if (cachedResolver) return cachedResolver;
-    if (isBrowser) {
-      throw new Error("Go expanded specification is not available in browser");
+    if (spec === undefined) {
+      throw new Error(
+        "Specification is not loaded; call loadSchema() or parse a request first",
+      );
     }
-    const schemaPath = path.join(__dirname, "../../schema-no-generics.json");
-    const schema = JSON.parse(
-      await readFile(schemaPath, { encoding: "utf-8" }),
-    ) as Model;
+    if (cachedResolver && cachedFrom === spec) {
+      return cachedResolver;
+    }
+    // The go-elasticsearch typed API is generated from the generics-free spec,
+    // so expand the currently-loaded schema at runtime (works in the browser).
+    const schema = expandGenerics(spec, {
+      inlinedTypes: ["_spec_utils:WithNullValue"],
+    });
     cachedResolver = new TypeResolver(schema);
+    cachedFrom = spec;
     return cachedResolver;
   }
 

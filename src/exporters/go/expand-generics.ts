@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 /**
  * Ported from elasticsearch-specification/compiler/src/transform/expand-generics.ts
  *
@@ -8,34 +9,37 @@
  *
  * The Go exporter needs this expanded schema because the go-elasticsearch typed
  * API is generated from the post-expansion spec via elastic-client-generator-go.
+ *
+ * This runs at runtime (Node and browser) on whatever schema was loaded via
+ * `loadSchema()`, so it must stay filesystem-free.
  */
+import { Model } from "../../metamodel";
 
-import { readFile, writeFile } from "fs/promises";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
+export interface ExpandGenericsConfig {
+  unwrappedTypes?: (string | { namespace: string; name: string })[];
+  inlinedTypes?: (string | { namespace: string; name: string })[];
+}
 
 // ---------------------------------------------------------------------------
 // Helper functions
 // ---------------------------------------------------------------------------
 
-function nameKey(t) {
+function nameKey(t: any): string {
   if (t.kind !== undefined) {
     return nameKey(t.name);
   }
   return t.namespace + ":" + t.name;
 }
 
-function genericParamMapping(generics, params) {
-  const mapping = new Map();
-  (generics ?? []).forEach((name, i) => {
+function genericParamMapping(generics: any, params: any): Map<string, any> {
+  const mapping = new Map<string, any>();
+  (generics ?? []).forEach((name: any, i: number) => {
     mapping.set(nameKey(name), params[i]);
   });
   return mapping;
 }
 
-function valueTypeName(value) {
+function valueTypeName(value: any): string {
   switch (value.kind) {
     case "literal_value":
       return value.value.toString();
@@ -46,13 +50,14 @@ function valueTypeName(value) {
     case "dictionary_of":
       return "Dict" + valueTypeName(value.value);
     case "union_of":
-      return "Union" + value.items.map((v) => valueTypeName(v)).join();
+      return "Union" + value.items.map((v: any) => valueTypeName(v)).join();
     case "instance_of":
       return value.type.name;
   }
+  return "";
 }
 
-function sortTypeDefinitions(types) {
+function sortTypeDefinitions(types: any[]): void {
   types.sort((a, b) => {
     if (a.name.namespace === b.name.namespace) {
       if (a.name.name > b.name.name) return 1;
@@ -69,9 +74,12 @@ function sortTypeDefinitions(types) {
 // Core expansion
 // ---------------------------------------------------------------------------
 
-function expandGenerics(inputModel, config) {
-  const typesToUnwrap = new Set();
-  const typesToInline = new Set();
+export function expandGenerics(
+  inputModel: Model,
+  config?: ExpandGenericsConfig,
+): Model {
+  const typesToUnwrap = new Set<string>();
+  const typesToInline = new Set<string>();
 
   for (const name of config?.unwrappedTypes ?? []) {
     typesToUnwrap.add(typeof name === "string" ? name : nameKey(name));
@@ -80,15 +88,15 @@ function expandGenerics(inputModel, config) {
     typesToInline.add(typeof name === "string" ? name : nameKey(name));
   }
 
-  const typesSeen = new Set();
-  const types = [];
-  const inputTypeByName = new Map();
+  const typesSeen = new Set<string>();
+  const types: any[] = [];
+  const inputTypeByName = new Map<string, any>();
 
   for (const type of inputModel.types) {
     inputTypeByName.set(nameKey(type), type);
   }
 
-  function addIfNotSeen(name, build) {
+  function addIfNotSeen(name: any, build: () => any): any {
     const key = nameKey(name);
     if (!typesSeen.has(key)) {
       typesSeen.add(key);
@@ -99,7 +107,7 @@ function expandGenerics(inputModel, config) {
     return name;
   }
 
-  function getType(name) {
+  function getType(name: any): any {
     const result = inputTypeByName.get(nameKey(name));
     if (result === undefined) {
       throw Error(`Type ${nameKey(name)} does not exist.`);
@@ -107,7 +115,7 @@ function expandGenerics(inputModel, config) {
     return result;
   }
 
-  function expandRootType(name) {
+  function expandRootType(name: any): void {
     if (name == null) return;
     const type = getType(name);
     if (type.kind !== "request" && type.kind !== "response") {
@@ -118,7 +126,7 @@ function expandGenerics(inputModel, config) {
     expandType(type.name, typeParams);
   }
 
-  function expandType(name, params) {
+  function expandType(name: any, params: any): any {
     if (name.namespace === "_builtins") return name;
     const type = getType(name);
     switch (type.kind) {
@@ -135,7 +143,7 @@ function expandGenerics(inputModel, config) {
     }
   }
 
-  function addDanglingTypeIfNotSeen(type) {
+  function addDanglingTypeIfNotSeen(type: any): void {
     switch (type.kind) {
       case "type_alias":
         if (type.generics !== undefined && type.generics.length > 0) return;
@@ -147,22 +155,24 @@ function expandGenerics(inputModel, config) {
     addIfNotSeen(type.name, () => type);
   }
 
-  function expandInterface(type, params) {
+  function expandInterface(type: any, params: any): any {
     return addIfNotSeen(expandedName(type, params), () => {
       const result = { ...type };
       const mappings = genericParamMapping(type.generics, params);
       result.inherits = expandInherits(result.inherits, mappings);
 
       if (result.behaviors != null) {
-        result.behaviors.forEach((b) => {
+        result.behaviors.forEach((b: any) => {
           if (b.generics == null) {
             const type = getType(b.type);
             addIfNotSeen(b.type, () => type);
           }
         });
-        result.behaviors = result.behaviors.map((b) => ({
+        result.behaviors = result.behaviors.map((b: any) => ({
           type: b.type,
-          generics: (b.generics ?? []).map((g) => expandValueOf(g, mappings)),
+          generics: (b.generics ?? []).map((g: any) =>
+            expandValueOf(g, mappings),
+          ),
         }));
       }
 
@@ -172,7 +182,7 @@ function expandGenerics(inputModel, config) {
     });
   }
 
-  function expandInherits(inherits, mappings) {
+  function expandInherits(inherits: any, mappings: any): any {
     if (inherits == null) return undefined;
     const expanded = expandValueOf(
       {
@@ -185,7 +195,7 @@ function expandGenerics(inputModel, config) {
     return { type: expanded.type, generics: undefined };
   }
 
-  function expandTypeAlias(alias, params) {
+  function expandTypeAlias(alias: any, params: any): any {
     return addIfNotSeen(expandedName(alias, params), () => {
       const result = { ...alias };
       result.type = expandValueOf(
@@ -197,7 +207,7 @@ function expandGenerics(inputModel, config) {
     });
   }
 
-  function expandRequest(req, params) {
+  function expandRequest(req: any, params: any): any {
     return addIfNotSeen(req.name, () => {
       const mappings = genericParamMapping(req.generics, params);
       const result = { ...req };
@@ -213,7 +223,7 @@ function expandGenerics(inputModel, config) {
     });
   }
 
-  function expandResponse(resp, params) {
+  function expandResponse(resp: any, params: any): any {
     return addIfNotSeen(resp.name, () => {
       const result = { ...resp };
       result.body = expandBody(
@@ -221,7 +231,7 @@ function expandGenerics(inputModel, config) {
         genericParamMapping(resp.generics, params),
       );
       if (resp.exceptions != null) {
-        result.exceptions = resp.exceptions.map((exception) => ({
+        result.exceptions = resp.exceptions.map((exception: any) => ({
           description: exception.description,
           statusCodes: exception.statusCodes,
           body: expandBody(
@@ -235,14 +245,14 @@ function expandGenerics(inputModel, config) {
     });
   }
 
-  function expandProperties(properties, mappings) {
-    return properties.map((prop) => ({
+  function expandProperties(properties: any, mappings: any): any {
+    return properties.map((prop: any) => ({
       ...prop,
       type: expandValueOf(prop.type, mappings),
     }));
   }
 
-  function expandBody(body, mappings) {
+  function expandBody(body: any, mappings: any): any {
     switch (body.kind) {
       case "no_body":
         return body;
@@ -260,7 +270,7 @@ function expandGenerics(inputModel, config) {
     }
   }
 
-  function expandValueOf(value, mappings) {
+  function expandValueOf(value: any, mappings: any): any {
     switch (value.kind) {
       case "array_of":
         return {
@@ -290,7 +300,7 @@ function expandGenerics(inputModel, config) {
               `Inlined type ${valueOfType} should be an alias definition`,
             );
           }
-          const inlineMappings = new Map();
+          const inlineMappings = new Map<string, any>();
           for (let i = 0; i < (inlinedTypeDef.generics?.length ?? 0); i++) {
             inlineMappings.set(
               nameKey(inlinedTypeDef.generics[i]),
@@ -303,7 +313,7 @@ function expandGenerics(inputModel, config) {
         const mapping = mappings.get(nameKey(value.type));
         if (mapping !== undefined) return mapping;
 
-        const params = (value.generics ?? []).map((g) =>
+        const params = (value.generics ?? []).map((g: any) =>
           expandValueOf(g, mappings),
         );
         return {
@@ -319,7 +329,7 @@ function expandGenerics(inputModel, config) {
       case "union_of":
         return {
           kind: "union_of",
-          items: value.items.map((item) => expandValueOf(item, mappings)),
+          items: value.items.map((item: any) => expandValueOf(item, mappings)),
         };
 
       case "user_defined_value":
@@ -327,9 +337,9 @@ function expandGenerics(inputModel, config) {
     }
   }
 
-  function expandedName(type, params) {
+  function expandedName(type: any, params: any): any {
     let localName = type.name.name;
-    type.generics?.forEach((_paramName, i) => {
+    type.generics?.forEach((_paramName: any, i: number) => {
       const param = params[i];
       if (param.kind === "user_defined_value") return;
       localName = localName + valueTypeName(params[i]);
@@ -354,23 +364,5 @@ function expandGenerics(inputModel, config) {
     _info: inputModel._info,
     endpoints: inputModel.endpoints,
     types: types,
-  };
+  } as Model;
 }
-
-// ---------------------------------------------------------------------------
-// CLI: read schema.json -> write schema-no-generics.json
-// ---------------------------------------------------------------------------
-
-const inputPath = join(__dirname, "..", "src", "schema.json");
-const outputPath = join(__dirname, "..", "src", "schema-no-generics.json");
-
-const inputText = await readFile(inputPath, { encoding: "utf8" });
-const inputModel = JSON.parse(inputText);
-
-const outputModel = expandGenerics(inputModel, {
-  inlinedTypes: ["_spec_utils:WithNullValue"],
-});
-
-await writeFile(outputPath, JSON.stringify(outputModel, null, 2), "utf8");
-
-console.log(`Expanded schema written to ${outputPath}`);
