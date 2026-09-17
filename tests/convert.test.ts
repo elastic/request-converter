@@ -240,6 +240,23 @@ PUT _logstash/pipeline/my-logstash-id
     expect(out).toContain("&logstashputpipeline.Request{");
   });
 
+  it("preserves query params in an unsupported go request", async () => {
+    expect(
+      await convertRequests(
+        "GET /_internal/desired_balance?pretty=true&filter_path=nodes.%2A",
+        "go",
+        { complete: false, elasticsearchUrl: "https://localhost:9999" },
+      ),
+    ).toEqual(
+      `res, err := es.Transport.Perform(&http.Request{
+	Method: "GET",
+	URL:    &url.URL{Path: "/_internal/desired_balance", RawQuery: "pretty=true&filter_path=nodes.%2A"},
+	Body:   nil,
+})
+`,
+    );
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>

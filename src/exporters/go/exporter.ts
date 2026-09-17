@@ -204,9 +204,17 @@ func main() {
       body = `strings.NewReader(\`${JSON.stringify(req.body)}\`)`;
       imports.add("strings");
     }
+    // Preserve the (already encoded) query string in RawQuery so fallback
+    // requests keep their parameters.
+    const qIndex = req.url.indexOf("?");
+    const rawQuery = qIndex >= 0 ? req.url.slice(qIndex + 1) : "";
+    const urlFields = [`Path: "${this.escapeGoString(req.path)}"`];
+    if (rawQuery) {
+      urlFields.push(`RawQuery: "${this.escapeGoString(rawQuery)}"`);
+    }
     return `${varName}, err := es.Transport.Perform(&http.Request{
     Method: "${req.method}",
-    URL:    &url.URL{Path: "${req.path}"},
+    URL:    &url.URL{${urlFields.join(", ")}},
     Body:   ${body},
 })`;
   }
