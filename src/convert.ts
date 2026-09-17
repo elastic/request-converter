@@ -6,6 +6,7 @@ import { CurlExporter } from "./exporters/curl";
 import { JavaScriptExporter } from "./exporters/javascript";
 import { PHPExporter } from "./exporters/php";
 import { RubyExporter } from "./exporters/ruby";
+import { GoExporter } from "./exporters/go";
 import { CSharpExporter } from "./exporters/csharp";
 import util from "util";
 
@@ -47,10 +48,11 @@ const EXPORTERS: Record<string, FormatExporter> = {
   python: new PythonExporter(),
   ruby: new RubyExporter(),
   curl: new CurlExporter(),
+  go: new GoExporter(),
   "c#": csharpExporter,
   csharp: csharpExporter,
 };
-const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl", "C#"];
+const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl", "Go", "C#"];
 
 /**
  * Return the list of available export formats.
