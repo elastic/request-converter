@@ -10,6 +10,7 @@ import {
   TypeName,
 } from "../../metamodel";
 import { UNSUPPORTED_APIS, STRING_QUERY_PARAMS } from "./constants";
+import { escapeGoString as goEscape } from "./escape";
 import { toPascalCase, apiToGoMethod, indent, enumMemberName } from "./naming";
 import { TypeResolver } from "./schema";
 import { ImportTracker } from "./imports";
@@ -32,7 +33,6 @@ export class GoExporter implements FormatExporter {
     }
     const resolver = await TypeResolver.load();
     const imports = new ImportTracker();
-    imports.addContext();
     const renderer = new GoValueRenderer();
 
     const snippets: string[] = [];
@@ -49,7 +49,7 @@ export class GoExporter implements FormatExporter {
       imports.addElasticsearch();
       imports.addLog();
       const esUrl = options.elasticsearchUrl
-        ? `"${options.elasticsearchUrl}"`
+        ? `"${goEscape(options.elasticsearchUrl)}"`
         : `os.Getenv("ELASTICSEARCH_URL")`;
       if (!options.elasticsearchUrl) {
         imports.add("os");
@@ -158,6 +158,7 @@ func main() {
       )
         ? "Perform"
         : "Do";
+      imports.addContext();
       if (parts.length === 1) {
         // No builder calls: keep the terminal on the same line as the caller.
         parts[0] += `${terminal}(context.Background())`;
@@ -199,24 +200,69 @@ func main() {
   ): string {
     imports.add("net/http");
     imports.add("net/url");
-    let body = "nil";
-    if (req.body) {
-      body = `strings.NewReader(\`${JSON.stringify(req.body)}\`)`;
-      imports.add("strings");
-    }
+
     // Preserve the (already encoded) query string in RawQuery so fallback
     // requests keep their parameters.
     const qIndex = req.url.indexOf("?");
     const rawQuery = qIndex >= 0 ? req.url.slice(qIndex + 1) : "";
-    const urlFields = [`Path: "${this.escapeGoString(req.path)}"`];
+    const urlFields = [`Path: "${goEscape(req.path)}"`];
     if (rawQuery) {
-      urlFields.push(`RawQuery: "${this.escapeGoString(rawQuery)}"`);
+      urlFields.push(`RawQuery: "${goEscape(rawQuery)}"`);
     }
-    return `${varName}, err := es.Transport.Perform(&http.Request{
-    Method: "${req.method}",
-    URL:    &url.URL{${urlFields.join(", ")}},
-    Body:   ${body},
-})`;
+
+    const lines = [
+      `${varName}, err := es.Transport.Perform(&http.Request{`,
+      `${indent(1)}Method: "${goEscape(req.method)}",`,
+      `${indent(1)}URL:    &url.URL{${urlFields.join(", ")}},`,
+    ];
+
+    if (req.body !== undefined && req.body !== "") {
+      // http.Request.Body is an io.ReadCloser, so wrap the reader in NopCloser.
+      const { literal, contentType } = this.unsupportedBodyLiteral(req.body);
+      imports.add("io");
+      imports.add("strings");
+      lines.push(
+        `${indent(
+          1,
+        )}Header: http.Header{"Content-Type": []string{"${contentType}"}},`,
+      );
+      lines.push(
+        `${indent(1)}Body:   io.NopCloser(strings.NewReader(${literal})),`,
+      );
+    } else {
+      // Header must be non-nil or elastictransport panics setting the user agent.
+      lines.push(`${indent(1)}Header: make(http.Header),`);
+    }
+
+    lines.push(`})`);
+    return lines.join("\n");
+  }
+
+  // Build a Go string literal and content type for a raw fallback body, which may
+  // be a plain string, an NDJSON array, or a JSON object.
+  private unsupportedBodyLiteral(body: unknown): {
+    literal: string;
+    contentType: string;
+  } {
+    if (typeof body === "string") {
+      return {
+        literal: `"${goEscape(body)}"`,
+        contentType: "application/json",
+      };
+    }
+    if (Array.isArray(body)) {
+      const ndjson = body
+        .map((item) => goEscape(JSON.stringify(item)))
+        .join("\\n");
+      return {
+        literal: `"${ndjson}\\n"`,
+        contentType: "application/x-ndjson",
+      };
+    }
+    return {
+      literal: `"${goEscape(JSON.stringify(body))}"`,
+      contentType: "application/json",
+    };
   }
 
   private getRequiredPathArgs(req: ParsedRequest, ctx: RenderContext): string {
@@ -329,11 +375,7 @@ func main() {
 
   // Escape a string for use inside a Go double-quoted literal.
   private escapeGoString(s: string): string {
-    return s
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, "\\n")
-      .replace(/\t/g, "\\t");
+    return goEscape(s);
   }
 
   private renderBody(
@@ -413,7 +455,9 @@ func main() {
     if (properties.length === 0) {
       imports.add("strings");
       parts.push(
-        `${indent(1)}Raw(strings.NewReader(\`${JSON.stringify(body)}\`)).`,
+        `${indent(1)}Raw(strings.NewReader("${goEscape(
+          JSON.stringify(body),
+        )}")).`,
       );
       return;
     }

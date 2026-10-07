@@ -11,6 +11,7 @@ import {
   TypeName,
 } from "../../metamodel";
 import { RenderContext } from "./context";
+import { escapeGoString as goEscape } from "./escape";
 import {
   toPascalCase,
   resolveGoFieldName,
@@ -257,11 +258,7 @@ export class GoValueRenderer {
   }
 
   escapeGoString(s: string): string {
-    return s
-      .replace(/\\/g, "\\\\")
-      .replace(/"/g, '\\"')
-      .replace(/\n/g, "\\n")
-      .replace(/\t/g, "\\t");
+    return goEscape(s);
   }
 
   private renderInstanceOf(

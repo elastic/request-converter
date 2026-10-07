@@ -199,7 +199,26 @@ func main() {
       `res, err := es.Transport.Perform(&http.Request{
 	Method: "GET",
 	URL:    &url.URL{Path: "/_internal/desired_balance"},
-	Body:   nil,
+	Header: make(http.Header),
+})
+`,
+    );
+  });
+
+  it("converts an unsupported API with a body to go", async () => {
+    expect(
+      await convertRequests(
+        `PUT /_internal/desired_nodes/my_history/1
+{"nodes":[]}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Transport.Perform(&http.Request{
+	Method: "PUT",
+	URL:    &url.URL{Path: "/_internal/desired_nodes/my_history/1"},
+	Header: http.Header{"Content-Type": []string{"application/json"}},
+	Body:   io.NopCloser(strings.NewReader("{\\"nodes\\":[]}")),
 })
 `,
     );
@@ -251,10 +270,36 @@ PUT _logstash/pipeline/my-logstash-id
       `res, err := es.Transport.Perform(&http.Request{
 	Method: "GET",
 	URL:    &url.URL{Path: "/_internal/desired_balance", RawQuery: "pretty=true&filter_path=nodes.%2A"},
-	Body:   nil,
+	Header: make(http.Header),
 })
 `,
     );
+  });
+
+  it("escapes control characters in go string values", async () => {
+    expect(
+      await convertRequests(
+        `PUT _ingest/pipeline/p
+{"description":"a\\rb\\tc"}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Ingest.PutPipeline("p").
+	Request(&putpipeline.Request{
+		Description: some.String("a\\rb\\tc"),
+	}).
+	Do(context.Background())
+`,
+    );
+  });
+
+  it("escapes the elasticsearch URL in generated go", async () => {
+    const out = await convertRequests("GET /_internal/desired_balance", "go", {
+      complete: true,
+      elasticsearchUrl: 'http://a"b\\c',
+    });
+    expect(out).toContain(`Addresses: []string{"http://a\\"b\\\\c"}`);
   });
 
   it("errors when converting Kibana to go", async () => {
