@@ -59,6 +59,46 @@ export class TypeResolver {
     return type?.kind === "request" ? (type as Request) : undefined;
   }
 
+  // True when the request body declares a property with this name. go-elasticsearch
+  // gives a query param a typed (numeric) setter only when it is also a body
+  // field; query-only params get a string setter.
+  requestBodyHasProperty(
+    name: string,
+    namespace: string,
+    propName: string,
+  ): boolean {
+    const req = this.getRequest(name, namespace);
+    if (!req) return false;
+    const matches = (props: Property[]): boolean =>
+      props.some((p) => p.name === propName || p.aliases?.includes(propName));
+    const body = req.body;
+    if (body.kind === "properties" && matches(body.properties)) {
+      return true;
+    }
+    if (body.kind === "value" && body.value.kind === "instance_of") {
+      const inst = body.value as InstanceOf;
+      if (
+        matches(
+          this.getInterfaceProperties(inst.type.name, inst.type.namespace),
+        )
+      ) {
+        return true;
+      }
+    }
+    if (
+      req.inherits &&
+      matches(
+        this.getInterfaceProperties(
+          req.inherits.type.name,
+          req.inherits.type.namespace,
+        ),
+      )
+    ) {
+      return true;
+    }
+    return false;
+  }
+
   // True when the API response has no body; go-es then exposes only Perform, not Do.
   responseHasNoBody(namespace: string): boolean {
     const resp = this.getType("Response", namespace);

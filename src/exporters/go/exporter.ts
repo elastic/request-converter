@@ -9,7 +9,7 @@ import {
   ArrayOf,
   TypeName,
 } from "../../metamodel";
-import { UNSUPPORTED_APIS, STRING_QUERY_PARAMS } from "./constants";
+import { UNSUPPORTED_APIS } from "./constants";
 import { escapeGoString as goEscape } from "./escape";
 import { toPascalCase, apiToGoMethod, indent, enumMemberName } from "./naming";
 import { TypeResolver } from "./schema";
@@ -333,16 +333,26 @@ func main() {
         specParam = behaviorProps.find((p) => p.name === name);
       }
       const methodName = toPascalCase(name);
-      if (specParam && !STRING_QUERY_PARAMS.has(name)) {
+      if (specParam) {
         const typeInfo = specParam.type;
         if (typeInfo.kind === "instance_of") {
           const inst = typeInfo as InstanceOf;
-          if (ctx.resolver.isNumericType(inst.type)) {
-            parts.push(`${indent(1)}${methodName}(${parseInt(value, 10)}).`);
-            continue;
-          }
           if (ctx.resolver.isBooleanType(inst.type)) {
             parts.push(`${indent(1)}${methodName}(${value === "true"}).`);
+            continue;
+          }
+          // go-es types a numeric query param only when it is also a body field;
+          // query-only numerics take a string, so those fall through below.
+          if (
+            ctx.resolver.isNumericType(inst.type) &&
+            req.request &&
+            ctx.resolver.requestBodyHasProperty(
+              req.request.name.name,
+              req.request.name.namespace,
+              name,
+            )
+          ) {
+            parts.push(`${indent(1)}${methodName}(${Number(value)}).`);
             continue;
           }
         }

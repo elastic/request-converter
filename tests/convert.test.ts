@@ -302,6 +302,36 @@ PUT _logstash/pipeline/my-logstash-id
     expect(out).toContain(`Addresses: []string{"http://a\\"b\\\\c"}`);
   });
 
+  it("renders query-only numeric params as strings in go", async () => {
+    // go-elasticsearch types a numeric query param only when it is also a body
+    // field; forcemerge has no body, so max_num_segments is a string setter.
+    expect(
+      await convertRequests(
+        "POST /my-index/_forcemerge?max_num_segments=1",
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Indices.Forcemerge().
+	Index("my-index").
+	MaxNumSegments("1").
+	Do(context.Background())
+`,
+    );
+  });
+
+  it("keeps float precision for query-only numeric params in go", async () => {
+    expect(
+      await convertRequests("POST /my-index/_count?min_score=0.5", "go", {}),
+    ).toEqual(
+      `res, err := es.Count().
+	Index("my-index").
+	MinScore("0.5").
+	Do(context.Background())
+`,
+    );
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>
