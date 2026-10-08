@@ -332,6 +332,22 @@ PUT _logstash/pipeline/my-logstash-id
     );
   });
 
+  it("adds a trailing underscore to leading-underscore query params in go", async () => {
+    // go-elasticsearch names `_source_includes` as `SourceIncludes_`.
+    expect(
+      await convertRequests(
+        "GET /my-index/_doc/1?_source_includes=a",
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Get("my-index", "1").
+	SourceIncludes_("a").
+	Do(context.Background())
+`,
+    );
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>

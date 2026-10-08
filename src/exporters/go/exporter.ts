@@ -11,7 +11,12 @@ import {
 } from "../../metamodel";
 import { UNSUPPORTED_APIS } from "./constants";
 import { escapeGoString as goEscape } from "./escape";
-import { toPascalCase, apiToGoMethod, indent, enumMemberName } from "./naming";
+import {
+  apiToGoMethod,
+  indent,
+  enumMemberName,
+  paramSetterName,
+} from "./naming";
 import { TypeResolver } from "./schema";
 import { ImportTracker } from "./imports";
 import { RenderContext } from "./context";
@@ -296,7 +301,7 @@ func main() {
     );
     for (const [name, value] of Object.entries(req.params)) {
       if (value === undefined || required.has(name)) continue;
-      const methodName = toPascalCase(name);
+      const methodName = paramSetterName(name);
       parts.push(`${indent(1)}${methodName}("${this.escapeGoString(value)}").`);
     }
   }
@@ -332,7 +337,7 @@ func main() {
         );
         specParam = behaviorProps.find((p) => p.name === name);
       }
-      const methodName = toPascalCase(name);
+      const methodName = paramSetterName(name);
       if (specParam) {
         const typeInfo = specParam.type;
         if (typeInfo.kind === "instance_of") {

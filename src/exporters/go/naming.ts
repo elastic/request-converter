@@ -12,6 +12,16 @@ export function toPascalCase(name: string): string {
     .join("");
 }
 
+// Builder method name for a query/path parameter. go-elasticsearch appends a
+// trailing underscore to params whose spec name starts with `_`
+// (e.g. `_source_includes` -> `SourceIncludes_`).
+export function paramSetterName(name: string): string {
+  if (name.startsWith("_")) {
+    return toPascalCase(name.slice(1)) + "_";
+  }
+  return toPascalCase(name);
+}
+
 export function enumMemberName(name: string): string {
   const joined = name.replace(/_/g, "");
   if (joined.length === 0) return "";
