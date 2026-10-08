@@ -348,6 +348,35 @@ PUT _logstash/pipeline/my-logstash-id
     );
   });
 
+  it("renders a union-alias enum array in a go body field", async () => {
+    // expand_wildcards is `ExpandWildcard | ExpandWildcard[]`, so an array must
+    // render as []expandwildcard.ExpandWildcard, not a stringified enum.
+    expect(
+      await convertRequests(
+        `PUT _ml/datafeeds/my-feed
+{"indices":["x"],"job_id":"j","indices_options":{"expand_wildcards":["open","closed"]}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Ml.PutDatafeed("my-feed").
+	Request(&putdatafeed.Request{
+		Indices: []string{
+			"x",
+		},
+		JobId: some.String("j"),
+		IndicesOptions: &types.IndicesOptions{
+			ExpandWildcards: []expandwildcard.ExpandWildcard{
+				expandwildcard.Open,
+				expandwildcard.Closed,
+			},
+		},
+	}).
+	Do(context.Background())
+`,
+    );
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>

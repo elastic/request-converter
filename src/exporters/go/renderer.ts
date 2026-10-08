@@ -302,6 +302,25 @@ export class GoValueRenderer {
       return `"${str}"`;
     }
 
+    // Resolve any alias first so a union alias (e.g. ExpandWildcards =
+    // ExpandWildcard | ExpandWildcard[]) is handled as a union rather than being
+    // stringified by the enum path, which mishandles arrays and `any` unions.
+    const resolved = ctx.resolver.resolveTypeAlias(typeInfo);
+    if (resolved !== typeInfo && resolved.kind === "union_of") {
+      const classification = ctx.resolver.classifyUnion(resolved as UnionOf);
+      if (classification === "integer_string") {
+        const strValue = String(value);
+        if (prop && !prop.required) {
+          ctx.imports.addSome();
+          return `some.String("${this.escapeGoString(strValue)}")`;
+        }
+        return `"${this.escapeGoString(strValue)}"`;
+      }
+      // A named union alias is an `any` interface in go-es, so render its
+      // natural form rather than collapsing a single value into a slice.
+      return this.renderUnionOf(value, resolved as UnionOf, ctx, prop, true);
+    }
+
     const resolvedEnum = ctx.resolver.resolveEnum(typeInfo.type);
     if (resolvedEnum) {
       return this.renderEnumValue(
@@ -313,22 +332,7 @@ export class GoValueRenderer {
       );
     }
 
-    const resolved = ctx.resolver.resolveTypeAlias(typeInfo);
     if (resolved !== typeInfo) {
-      if (resolved.kind === "union_of") {
-        const classification = ctx.resolver.classifyUnion(resolved as UnionOf);
-        if (classification === "integer_string") {
-          const strValue = String(value);
-          if (prop && !prop.required) {
-            ctx.imports.addSome();
-            return `some.String("${this.escapeGoString(strValue)}")`;
-          }
-          return `"${this.escapeGoString(strValue)}"`;
-        }
-        // A named union alias is an `any` interface in go-es, so render its
-        // natural form rather than collapsing a single value into a slice.
-        return this.renderUnionOf(value, resolved as UnionOf, ctx, prop, true);
-      }
       return this.renderGoValue(value, resolved, ctx, prop);
     }
 
