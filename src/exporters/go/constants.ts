@@ -14,6 +14,14 @@ export const NUMERIC_TYPES = new Set([
   "ulong",
 ]);
 
+// Spec aliases that go-elasticsearch renders as a plain Go string. Only aliases
+// that are genuinely string-backed belong here. Per review feedback on #104,
+// numeric/enum/union aliases must NOT be listed: `isStringType` checks this set
+// before alias resolution, so forcing a string for e.g. GeoTilePrecision (int),
+// SequenceNumber (long) or TimeUnit (enum) fails to compile, and for unions like
+// Fuzziness/MinimumShouldMatch/ByteSize/Percentage/WaitForActiveShards it sends
+// the wrong JSON type. Those are omitted here so alias resolution picks the real
+// Go type instead.
 export const STRING_ALIAS_TYPES = new Set([
   "Id",
   "IndexName",
@@ -25,15 +33,12 @@ export const STRING_ALIAS_TYPES = new Set([
   "TaskId",
   "Namespace",
   "NodeName",
-  "Percentage",
   "Duration",
   "DurationLarge",
-  "TimeUnit",
   "EpochTime",
   "DateTime",
   "DateString",
   "DateMath",
-  "MinimumShouldMatch",
   "VersionString",
   "PipelineName",
   "DataStreamName",
@@ -43,14 +48,9 @@ export const STRING_ALIAS_TYPES = new Set([
   "Username",
   "Uri",
   "Uuid",
-  "SequenceNumber",
-  "ByteSize",
   "HumanReadableByteCount",
-  "WaitForActiveShards",
-  "Fuzziness",
   "MultiTermQueryRewrite",
   "GeoHash",
-  "GeoTilePrecision",
 ]);
 
 /**

@@ -377,6 +377,34 @@ PUT _logstash/pipeline/my-logstash-id
     );
   });
 
+  it("renders a non-string alias field with its real go type", async () => {
+    // GeoTilePrecision is an integer, not a string alias, so it must render as
+    // some.Int, not some.String (which would not compile against *int).
+    expect(
+      await convertRequests(
+        `POST /my-index/_search
+{"aggregations":{"g":{"geotile_grid":{"field":"loc","precision":8}}}}`,
+        "go",
+        {},
+      ),
+    ).toEqual(
+      `res, err := es.Search().
+	Index("my-index").
+	Request(&search.Request{
+		Aggregations: map[string]types.Aggregations{
+			"g": types.Aggregations{
+				GeotileGrid: &types.GeoTileGridAggregation{
+					Field:     some.String("loc"),
+					Precision: some.Int(8),
+				},
+			},
+		},
+	}).
+	Do(context.Background())
+`,
+    );
+  });
+
   it("errors when converting Kibana to go", async () => {
     expect(
       async () =>
