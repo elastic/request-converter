@@ -112,3 +112,27 @@ jobs:
       - name: Integration tests
         run: |
           npm run test:integration-ruby
+  integration-tests-go:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: "main"
+      - name: Setup node.js
+        uses: actions/setup-node@v4
+      - name: Install
+        run: |
+          npm install
+      - name: Build
+        run: |
+          npm run build
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.23"
+      - name: Prepare for testing
+        run: |
+          npm run test:setup-go
+      - name: Integration tests
+        run: |
+          npm run test:integration-go
