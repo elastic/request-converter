@@ -302,6 +302,20 @@ PUT _logstash/pipeline/my-logstash-id
     expect(out).toContain(`Addresses: []string{"http://a\\"b\\\\c"}`);
   });
 
+  it("renders query-only integer params as ints in go", async () => {
+    // from/size are plain `integer` query params; go-elasticsearch types these
+    // as int even on APIs without a body, so they must not become strings.
+    expect(
+      await convertRequests("GET /_query_rules?from=0&size=10", "go", {}),
+    ).toEqual(
+      `res, err := es.QueryRules.ListRulesets().
+	From(0).
+	Size(10).
+	Do(context.Background())
+`,
+    );
+  });
+
   it("renders query-only numeric params as strings in go", async () => {
     // go-elasticsearch types a numeric query param only when it is also a body
     // field; forcemerge has no body, so max_num_segments is a string setter.

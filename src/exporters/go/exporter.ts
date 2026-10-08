@@ -346,19 +346,25 @@ func main() {
             parts.push(`${indent(1)}${methodName}(${value === "true"}).`);
             continue;
           }
-          // go-es types a numeric query param only when it is also a body field;
-          // query-only numerics take a string, so those fall through below.
-          if (
-            ctx.resolver.isNumericType(inst.type) &&
-            req.request &&
-            ctx.resolver.requestBodyHasProperty(
-              req.request.name.name,
-              req.request.name.namespace,
-              name,
-            )
-          ) {
-            parts.push(`${indent(1)}${methodName}(${Number(value)}).`);
-            continue;
+          // go-es gives a numeric query param a typed setter when it is also a
+          // body field (delegating to the body field's Go type) or when it is a
+          // plain `integer` (strconv.Itoa on an int). Other query-only numerics
+          // (long, double, float, ...) take a string setter, so they fall
+          // through to the string rendering below.
+          if (ctx.resolver.isNumericType(inst.type)) {
+            const isInteger =
+              inst.type.namespace === "_types" && inst.type.name === "integer";
+            const isBodyField =
+              req.request !== undefined &&
+              ctx.resolver.requestBodyHasProperty(
+                req.request.name.name,
+                req.request.name.namespace,
+                name,
+              );
+            if (isInteger || isBodyField) {
+              parts.push(`${indent(1)}${methodName}(${Number(value)}).`);
+              continue;
+            }
           }
         }
         // Resolve the enum from the param type, which may be `T` or `T | T[]`.
