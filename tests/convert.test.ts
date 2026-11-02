@@ -1365,6 +1365,19 @@ resp1 = client.watcher.update_settings(
     );
   });
 
+  it("does not HTML-escape the path of an unsupported API in python", async () => {
+    expect(
+      await convertRequests(
+        "PUT /_internal/desired_nodes/<history>&x/1",
+        "python",
+        {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        },
+      ),
+    ).toContain(`"/_internal/desired_nodes/<history>&x/1"`);
+  });
+
   it("errors when converting Kibana to Python", async () => {
     expect(
       async () =>
@@ -1557,6 +1570,19 @@ $resp = $client->sendRequest($request);
     );
   });
 
+  it("does not HTML-escape the path of an unsupported API in javascript", async () => {
+    expect(
+      await convertRequests(
+        "PUT /_internal/desired_nodes/<history>&x/1",
+        "javascript",
+        {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        },
+      ),
+    ).toContain(`path: "/_internal/desired_nodes/<history>&x/1"`);
+  });
+
   it("errors when converting Kibana to php", async () => {
     expect(
       async () =>
@@ -1663,6 +1689,19 @@ response1 = client.search(
 
 `,
     );
+  });
+
+  it("does not HTML-escape the path of an unsupported API in ruby", async () => {
+    expect(
+      await convertRequests(
+        "PUT /_internal/desired_nodes/<history>&x/1",
+        "ruby",
+        {
+          complete: false,
+          elasticsearchUrl: "https://localhost:9999",
+        },
+      ),
+    ).toContain(`"/_internal/desired_nodes/<history>&x/1"`);
   });
 
   it("errors when converting Kibana to ruby", async () => {
