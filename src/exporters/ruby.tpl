@@ -53,7 +53,7 @@ response{{#if @index}}{{@index}}{{/if}} = client.perform_request(
 )
 {{/supportedApi}}
 {{#if ../printResponse}}
-print(resp{{#if @index}}{{@index}}{{/if}})
+print(response{{#if @index}}{{@index}}{{/if}})
 {{/if}}
 
 {{/each}}
