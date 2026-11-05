@@ -40,7 +40,7 @@ response{{#if @index}}{{@index}}{{/if}} = client.{{this.api}}
 {{else}}
 response{{#if @index}}{{@index}}{{/if}} = client.perform_request(
   "{{this.method}}",
-  "{{this.path}}",
+  "{{{this.path}}}",
   {{#if this.query}}
   {{{rubyprint this.query}}},
   {{else}}

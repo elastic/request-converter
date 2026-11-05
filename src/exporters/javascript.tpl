@@ -35,7 +35,7 @@ const response{{#if @index}}{{@index}}{{/if}} = await client.{{camelCase this.ap
 {{else}}
 const response{{#if @index}}{{@index}}{{/if}} = await client.transport.request({
   method: "{{this.method}}",
-  path: "{{this.path}}",
+  path: "{{{this.path}}}",
   {{#if this.query}}
   querystring: {{{json this.query}}},
   {{/if}}
