@@ -1,5 +1,13 @@
 # request-converter change log
 
+## 9.6.0 (2026-08-28)
+* Pass helpers to templates at render time instead of registering them globally ([#120](https://github.com/elastic/request-converter/pull/120))
+* Automate elasticsearch-specification bumps on converter publish ([#116](https://github.com/elastic/request-converter/pull/116))
+* Publish older-branch releases with a per-branch dist-tag ([#112](https://github.com/elastic/request-converter/pull/112))
+* Pin the C# bundle peer dependency to the latest dist-tag ([#111](https://github.com/elastic/request-converter/pull/111))
+* Add C# exporter backed by the .NET WASM converter ([#107](https://github.com/elastic/request-converter/pull/107))
+* Update schema for 9.6
+
 ## 9.2.1 (2025-11-12)
 * Write correctly formatted ndjson bodies in the curl exporter ([#99](https://github.com/elastic/request-converter/pull/99))
 * Fix CLI's `--elasticsearch-url` option ([#98](https://github.com/elastic/request-converter/pull/98))
