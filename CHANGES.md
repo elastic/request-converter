@@ -1,5 +1,9 @@
 # request-converter change log
 
+## 9.6.1 (2026-11-05)
+* Pin the C# bundle peer dependency to 9.6
+* Update schema for 9.6
+
 ## 9.6.0 (2026-08-28)
 * Pass helpers to templates at render time instead of registering them globally ([#120](https://github.com/elastic/request-converter/pull/120))
 * Automate elasticsearch-specification bumps on converter publish ([#116](https://github.com/elastic/request-converter/pull/116))
