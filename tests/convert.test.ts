@@ -1595,7 +1595,7 @@ response1 = client.search(
       }),
     ).toEqual(
       `response = client.info
-print(resp)
+print(response)
 
 response1 = client.search(
   index: "my-index",
@@ -1609,7 +1609,7 @@ response1 = client.search(
     }
   }
 )
-print(resp1)
+print(response1)
 
 `,
     );
