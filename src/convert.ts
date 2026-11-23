@@ -8,6 +8,7 @@ import { PHPExporter } from "./exporters/php";
 import { RubyExporter } from "./exporters/ruby";
 import { GoExporter } from "./exporters/go";
 import { CSharpExporter } from "./exporters/csharp";
+import { CliExporter } from "./exporters/cli";
 import util from "util";
 
 const isBrowser = typeof window !== "undefined";
@@ -49,10 +50,20 @@ const EXPORTERS: Record<string, FormatExporter> = {
   ruby: new RubyExporter(),
   curl: new CurlExporter(),
   go: new GoExporter(),
+  cli: new CliExporter(),
   "c#": csharpExporter,
   csharp: csharpExporter,
 };
-const LANGUAGES = ["JavaScript", "PHP", "Python", "Ruby", "curl", "Go", "C#"];
+const LANGUAGES = [
+  "JavaScript",
+  "PHP",
+  "Python",
+  "Ruby",
+  "curl",
+  "Go",
+  "CLI",
+  "C#",
+];
 
 /**
  * Return the list of available export formats.

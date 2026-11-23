@@ -143,6 +143,14 @@ Supported options:
 | `complete` | `boolean` | no | If `true`, generate a complete script. If `false`, only generate the request code. The default is `false`. |
 | `elasticsearchUrl` | `string` | no | The Elasticsearch endpoint to use. The default is `http://localhost:9200`. |
 
+### cli
+
+Prints an `elastic` command. Flag names come from `@elastic/schemas` through the optional `@elastic/request-converter-cli` package.
+
+```bash
+npm install @elastic/request-converter-cli
+```
+
 ### csharp
 
 The C# exporter generates code for the Elasticsearch .NET client. Unlike the

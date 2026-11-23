@@ -1907,6 +1907,49 @@ response1 = client.search(
     );
   });
 
+  describe("cli exporter", () => {
+    const fixture = path.join(__dirname, "fixtures/cli-exporter.mjs");
+
+    it("is listed as a format", () => {
+      expect(listFormats()).toContain("CLI");
+    });
+
+    it("rejects Kibana before loading the package", async () => {
+      expect(
+        await convertRequests(kibanaScript, "cli", { checkOnly: true }),
+      ).toBeFalsy();
+      await expect(convertRequests(kibanaScript, "cli", {})).rejects.toThrow(
+        "Cannot perform conversion",
+      );
+    });
+
+    it("names the package when it is not installed", async () => {
+      const { CliExporter } = await import("../src/exporters/cli");
+      await expect(
+        convertRequests("GET /", new CliExporter("not-a-real-package"), {}),
+      ).rejects.toThrow(/@elastic\/request-converter-cli/);
+    });
+
+    it("rejects a module that does not export convert", async () => {
+      const { CliExporter } = await import("../src/exporters/cli");
+      const empty = path.join(__dirname, "fixtures/cli-exporter-empty.mjs");
+      await expect(
+        convertRequests("GET /", new CliExporter(empty), {}),
+      ).rejects.toThrow(/does not export convert/);
+    });
+
+    it("passes each parsed request to convert", async () => {
+      const { CliExporter } = await import("../src/exporters/cli");
+      expect(
+        await convertRequests(
+          "GET _cluster/health?level=indices\nGET /\n",
+          new CliExporter(fixture),
+          {},
+        ),
+      ).toBe("cluster.health:indices\ninfo");
+    });
+  });
+
   describe("web external exporter tests", () => {
     const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
     const baseUrl = "http://127.0.0.1:5000";
