@@ -81,10 +81,14 @@
     "prettier": "^2.8.8"
   },
   "peerDependencies": {
-    "@elastic/request-converter-dotnet": "latest"
+    "@elastic/request-converter-dotnet": "latest",
+    "@elastic/request-converter-cli": "0.1.0"
   },
   "peerDependenciesMeta": {
     "@elastic/request-converter-dotnet": {
+      "optional": true
+    },
+    "@elastic/request-converter-cli": {
       "optional": true
     }
   },
